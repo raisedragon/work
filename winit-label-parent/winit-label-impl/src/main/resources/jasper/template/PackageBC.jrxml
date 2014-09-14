@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PackageBC" language="groovy" pageWidth="255" pageHeight="354" columnWidth="199" leftMargin="28" rightMargin="28" topMargin="28" bottomMargin="28" uuid="9078bfe9-2e23-4eb9-a607-3baec0fe97cc">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT I.BINARYDATA,
+       sp.SERNO,
+       sp.PASSWORDNO,
+       substr(sp.SERNO, 0, 1) F,
+       o.documentno
+  FROM WT_STORAGEPACKAGE SP, AD_CLIENTINFO CI, AD_IMAGE I, c_Order o
+ WHERE SP.AD_CLIENT_ID = CI.AD_CLIENT_ID
+   AND CI.LOGOREPORT_ID = I.AD_IMAGE_ID
+   AND CI.AD_CLIENT_ID = 11
+   AND o.c_order_id = sp.c_order_id
+   AND SP.WT_STORAGEPACKAGE_ID = $P{RECORD_ID}]]>
+	</queryString>
+	<field name="BINARYDATA" class="java.io.InputStream"/>
+	<field name="SERNO" class="java.lang.String"/>
+	<field name="PASSWORDNO" class="java.lang.String"/>
+	<field name="F" class="java.lang.String"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="289" splitType="Stretch">
+			<image hAlign="Center">
+				<reportElement uuid="a526e1a2-105c-4d86-9217-ff2d065824f2" x="14" y="43" width="171" height="50"/>
+				<imageExpression><![CDATA[$F{BINARYDATA}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="e0a70a1b-42c1-4122-90fa-8eaa0c44afc4" x="0" y="85" width="199" height="15"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[http://www.winit.com.cn]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="6e26715c-1a3b-4c54-8723-2626a0cc82c0" x="-17" y="110" width="30" height="80"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle" rotation="None">
+					<font size="52" isBold="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{F}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement uuid="268a5744-d8a5-4dd0-b135-73a485ee10b4" x="16" y="109" width="183" height="80"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="1" barHeight="80">
+					<jr:codeExpression><![CDATA[$F{SERNO}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<componentElement>
+				<reportElement uuid="c2f9003e-18b4-4971-b8a3-0d0bedcdc539" x="16" y="208" width="183" height="71"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="2" barHeight="30">
+					<jr:codeExpression><![CDATA[$F{PASSWORDNO}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField>
+				<reportElement uuid="6834e9c8-665f-43f3-86cf-07872f2961d1" x="16" y="189" width="183" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{SERNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="fa87ce49-ad1c-43d5-ba16-74f7b3559988" x="16" y="233" width="183" height="20"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{PASSWORDNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="b2602c68-73f7-49ad-901d-ecda066a9772" x="16" y="253" width="183" height="26"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

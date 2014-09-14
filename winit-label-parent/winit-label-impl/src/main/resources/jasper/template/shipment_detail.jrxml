@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="1692" pageHeight="842" columnWidth="1672" leftMargin="0" rightMargin="20" topMargin="20" bottomMargin="20" uuid="55de68f7-c31f-4d7c-9f77-c552541093f1">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Created1" class="java.util.Date"/>
+	<parameter name="Created2" class="java.util.Date"/>
+	<parameter name="warehouse" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT SM.CREATED,--Winit物流单号生成日期
+       LT.NAME AS TRANSMODE, --运输方式
+       WH.NAME AS WAREHOUSE,--仓库名(发货城市)
+       SM.DOCUMENTNO, --Winit物流单号
+       SM.TRACKSHIPPER AS TRACKSHIPPER,--空/海运单号
+       (SELECT Max(L.CREATED)
+                  FROM WT_CONTAINERLINE CL
+                  LEFT JOIN WT_STORAGEPACKAGE SP
+                    ON SP.WT_CONTAINERLINE_ID = CL.WT_CONTAINERLINE_ID
+                  LEFT JOIN C_ORDER OD
+                    ON OD.C_ORDER_ID = SP.C_ORDER_ID
+                  JOIN AD_CHANGELOG_V L
+                    ON L.RECORD_ID = OD.C_ORDER_ID
+                   AND L.COLUMNNAME = 'Status'
+                   AND L.TABLENAME = 'C_Order'
+                   AND L.OLDVALUE = 'SC'
+                   AND L.NEWVALUE = 'DIC'
+         WHERE CL.WT_SHIPMENT_ID = SM.WT_SHIPMENT_ID) AS DEMOSTICINBOUNDTIME,--国内仓入库完成时间
+       SM.TIMEOUTBOUND,--国内仓发货时间
+       (SELECT MAX(SEA.ETD)
+                  FROM WT_CONTAINERLINE CL
+                  LEFT JOIN WT_STORAGEPACKAGE SP
+                    ON SP.WT_CONTAINERLINE_ID = CL.WT_CONTAINERLINE_ID
+                  LEFT JOIN C_ORDER CO
+                    ON CO.C_ORDER_ID = SP.C_ORDER_ID
+                  LEFT JOIN WT_SEAVOYAGE SEA
+                    ON SEA.WT_SEAVOYAGE_ID = CO.WT_SEAVOYAGE_ID
+         WHERE CL.WT_SHIPMENT_ID = SM.WT_SHIPMENT_ID) AS ETD,--预计发运时间
+       SM.TIMELADING,--货物离港时间
+       SM.TIMEDISCHARGE,--货物到港时间
+       (SELECT max(L.CREATED)
+          FROM AD_CHANGELOG_V L
+         WHERE L.COLUMNNAME = 'Status'
+           AND L.TABLENAME = 'WT_Shipment'
+           AND L.OLDVALUE IN ('BLC', 'AWA')
+           AND L.NEWVALUE = 'FPT'
+           AND L.RECORD_ID = SM.WT_SHIPMENT_ID) AS FPT,--清关完成时间
+       (SELECT max(L.CREATED)
+          FROM AD_CHANGELOG_V L
+         WHERE L.COLUMNNAME = 'Status'
+           AND L.TABLENAME = 'WT_Shipment'
+           AND L.OLDVALUE = 'FWI'
+           AND L.NEWVALUE = 'FIC'
+           AND L.RECORD_ID = SM.WT_SHIPMENT_ID) AS FIC,--货物到仓时间
+       (SELECT max(L.CREATED)
+          FROM AD_CHANGELOG_V L
+         WHERE L.COLUMNNAME = 'Status'
+           AND L.TABLENAME = 'WT_Shipment'
+           AND L.OLDVALUE = 'FIC'
+           AND L.NEWVALUE = 'FSC'
+           AND L.RECORD_ID = SM.WT_SHIPMENT_ID) AS FSC --海外仓上架完成时间
+  FROM WT_SHIPMENT SM
+  LEFT JOIN WT_TRANSPORTMODE TM
+    ON TM.WT_TRANSPORTMODE_ID = SM.WT_TRANSPORTMODE_ID
+  LEFT JOIN WT_LOGISTICSMODE LM
+    ON LM.WT_LOGISTICSMODE_ID = TM.WT_LOGISTICSMODE_ID
+  LEFT JOIN WT_LOGISTICSTYPE LT
+    ON LT.WT_LOGISTICSTYPE_ID = LM.WT_LOGISTICSTYPE_ID
+  LEFT JOIN M_WAREHOUSE WH
+    ON WH.M_WAREHOUSE_ID = SM.M_WAREHOUSESOURCE_ID
+ WHERE SM.STATUS = 'FSC' AND SM.CREATED >= $P{Created1} AND SM.CREATED < $P{Created2} + 1
+   AND ((SM.m_Warehouse_Id  = $P{warehouse} and nvl($P{warehouse},0) > 0) or nvl($P{warehouse},0) <= 0)]]>
+	</queryString>
+	<field name="CREATED" class="java.sql.Timestamp"/>
+	<field name="TRANSMODE" class="java.lang.String"/>
+	<field name="WAREHOUSE" class="java.lang.String"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<field name="TRACKSHIPPER" class="java.lang.String"/>
+	<field name="DEMOSTICINBOUNDTIME" class="java.sql.Timestamp"/>
+	<field name="TIMEOUTBOUND" class="java.sql.Timestamp"/>
+	<field name="ETD" class="java.sql.Timestamp"/>
+	<field name="TIMELADING" class="java.sql.Timestamp"/>
+	<field name="TIMEDISCHARGE" class="java.sql.Timestamp"/>
+	<field name="FPT" class="java.sql.Timestamp"/>
+	<field name="FIC" class="java.sql.Timestamp"/>
+	<field name="FSC" class="java.sql.Timestamp"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="37" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="8566b5d0-953f-4655-a8d4-dfaa044f419f" x="0" y="0" width="145" height="17"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[开始时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8566b5d0-953f-4655-a8d4-dfaa044f419f" x="265" y="0" width="100" height="17"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[结束时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a72bef76-2841-4643-8517-8ceb977e47c2" x="0" y="17" width="145" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Winit物流单号生成日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="dda346f2-8133-4688-b3d8-765d409a3878" x="145" y="17" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[运输方式]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="bb55c365-67e2-4957-94ab-7dff1bb52da3" x="265" y="17" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[发货城市]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a21216ce-23e4-4e03-99ca-816c1664e3c0" x="365" y="17" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Winit物流单号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="06b02271-a946-451d-8313-9acf2c0f0fff" x="465" y="17" width="139" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[空/海运单号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f04f5843-1437-4639-bb9f-027d018e3ea5" x="604" y="17" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内仓入库完成时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="dba8ad28-3e89-4eb8-9f6f-2f9d9dab0eab" x="737" y="17" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内仓发货时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="af305b78-a4cf-4ddd-94da-07a249f3db5a" x="870" y="17" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[预计发运时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2d79b984-24f4-447c-82e6-94d8a61c37bf" x="1003" y="17" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[货物离港时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ace749fd-0700-4f3e-8878-2bd8525e416e" x="1136" y="17" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[货物到港时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e8e3f84c-ef0c-4447-a993-47f5ccd25bd0" x="1269" y="17" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[清关完成时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4777358e-ee7b-4786-aeba-5af5aeee2336" x="1402" y="17" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[货物到仓时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ec52f2ca-0f94-4f91-b8ad-fc3677540bfd" x="1535" y="17" width="137" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓上架完成时间]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="6b2ab59c-5c43-4f4f-b2f9-e3d778cf91b6" x="145" y="0" width="120" height="17"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Created1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="66506df0-0545-4a04-98fe-1a5ceb4d1d12" x="365" y="0" width="239" height="17"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Created2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="6c217e93-92a1-43e0-aa37-8456df70ae77" x="0" y="0" width="145" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CREATED}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ed8f5827-80db-494e-9658-ac5b99fd0428" x="145" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRANSMODE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2cf8c3f5-f9d1-45c9-bd61-970f85d1fe3f" x="265" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WAREHOUSE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="31e24176-7eee-49e0-9ec0-b30d7f141967" x="365" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e6cb117a-5ca6-41fe-a243-2b3a3ae63c36" x="465" y="0" width="139" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRACKSHIPPER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="8f0ba044-b918-4886-99ad-d5a7df2ec924" x="604" y="0" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DEMOSTICINBOUNDTIME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="e2df9163-697c-494a-be48-8ec1014ef04d" x="737" y="0" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TIMEOUTBOUND}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="703fa7f0-4ce1-450d-8dc6-1eecab1869b3" x="870" y="0" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ETD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="3409afc0-d59a-4842-95ab-268f929c8624" x="1003" y="0" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TIMELADING}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="0458b6f7-d483-458c-b26b-e409907f0d2a" x="1136" y="0" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TIMEDISCHARGE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="77aced8b-ab0a-41ec-96d8-509a1e27fed5" x="1269" y="0" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FPT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="9b0b9839-4a69-49a1-823c-0e8aa294829e" x="1402" y="0" width="133" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FIC}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="366cb856-10e0-4676-830f-2645c128c701" x="1535" y="0" width="137" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FSC}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

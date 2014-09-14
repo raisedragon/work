@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="uk_yodel_lable" pageWidth="360" pageHeight="526" columnWidth="360" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.layers" value="##Fri Aug 15 12:21:24 CST 2014\nlayer.1.name=Layer 1\nlayer.1.visible=true\nlayer.1.id=1\nlayer.0.name=Background\nlayer.0.visible=true\nlayer.0.id=0"/>
+	<property name="ireport.zoom" value="1.464100000000009"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<import value="org.apache.commons.codec.binary.Base64"/>
+	<parameter name="productLine1" class="java.lang.String"/>
+	<parameter name="productLine2" class="java.lang.String"/>
+	<parameter name="meter" class="java.lang.String"/>
+	<parameter name="from" class="java.lang.String"/>
+	<parameter name="orgName" class="java.lang.String"/>
+	<parameter name="departmentName" class="java.lang.String"/>
+	<parameter name="orgTel" class="java.lang.String"/>
+	<parameter name="addressLine1" class="java.lang.String"/>
+	<parameter name="addressLine2" class="java.lang.String"/>
+	<parameter name="city" class="java.lang.String"/>
+	<parameter name="country" class="java.lang.String"/>
+	<parameter name="postcode" class="java.lang.String"/>
+	<parameter name="documentNo" class="java.lang.String"/>
+	<parameter name="serviceCode" class="java.lang.String"/>
+	<parameter name="locationName" class="java.lang.String"/>
+	<parameter name="version" class="java.lang.String"/>
+	<parameter name="routingBarcode" class="java.lang.String"/>
+	<parameter name="licencePlateBarcode" class="java.lang.String"/>
+	<parameter name="eyeReadableLicencePlate" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select '1' from dual]]>
+	</queryString>
+	<field name="&apos;1&apos;" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="525" splitType="Stretch">
+			<textField>
+				<reportElement x="18" y="7" width="208" height="27"/>
+				<textElement markup="none">
+					<font fontName="SansSerif" size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{productLine1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="18" y="28" width="208" height="22"/>
+				<textElement markup="none">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{productLine2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="295" y="43" width="33" height="14"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[METER:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="328" y="43" width="27" height="14"/>
+				<textElement markup="none">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{meter}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="11" y="52" width="29" height="14"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[  From: ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="42" y="52" width="304" height="14"/>
+				<textElement verticalAlignment="Middle" markup="none">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{from}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement mode="Opaque" x="317" y="71" width="30" height="19" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Opaque" x="14" y="71" width="30" height="19" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Opaque" x="14" y="156" width="30" height="19" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement mode="Opaque" x="317" y="156" width="30" height="19" backcolor="#000000"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="18" y="75" width="326" height="96"/>
+				<graphicElement>
+					<pen lineWidth="0.0"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement mode="Transparent" x="18" y="75" width="26" height="96"/>
+				<textElement textAlignment="Center">
+					<font size="10"/>
+				</textElement>
+				<text><![CDATA[ To:]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Transparent" x="44" y="75" width="187" height="14"/>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$P{orgName}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="231" y="75" width="18" height="14"/>
+				<textElement verticalAlignment="Top" markup="none"/>
+				<text><![CDATA[Tel:]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Transparent" x="249" y="75" width="93" height="14"/>
+				<textElement verticalAlignment="Top"/>
+				<textFieldExpression><![CDATA[$P{orgTel}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="44" y="86" width="302" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{departmentName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="44" y="97" width="302" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{addressLine1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="44" y="109" width="302" height="14"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{addressLine2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="44" y="121" width="302" height="18"/>
+				<textElement>
+					<font size="13" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{city}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="44" y="153" width="298" height="18"/>
+				<textElement>
+					<font size="13" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{postcode}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="44" y="137" width="302" height="18"/>
+				<textElement>
+					<font size="13" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{country}]]></textFieldExpression>
+			</textField>
+			<rectangle>
+				<reportElement x="14" y="177" width="67" height="35" backcolor="#000000"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="16" y="177" width="67" height="13" forecolor="#FFFFFF"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Handling:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="13" y="186" width="67" height="35" forecolor="#FFFFFF"/>
+				<textElement textAlignment="Center" markup="none">
+					<font size="20" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{serviceCode}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="270" y="177" width="45" height="35"/>
+				<textElement textAlignment="Center" markup="none">
+					<font size="18"/>
+				</textElement>
+				<text><![CDATA[1 / 1]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="13" y="230" width="63" height="13"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Consignor Ref. ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="81" y="230" width="261" height="13"/>
+				<textElement markup="none">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{documentNo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="76" y="230" width="5" height="13"/>
+				<textElement textAlignment="Center">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="22" y="242" width="174" height="30"/>
+				<textElement>
+					<font size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{locationName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="241" width="110" height="30"/>
+				<textElement>
+					<font size="20"/>
+				</textElement>
+				<textFieldExpression><![CDATA["YODEL "+$P{version}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement x="11" y="268" width="336" height="87"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="2" barHeight="120">
+					<jr:codeExpression><![CDATA[$P{routingBarcode}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<componentElement>
+				<reportElement x="44" y="377" width="275" height="84"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="2" barHeight="105">
+					<jr:codeExpression><![CDATA[$P{licencePlateBarcode}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField>
+				<reportElement x="13" y="457" width="333" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{eyeReadableLicencePlate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="12" y="357" width="335" height="18"/>
+				<textElement textAlignment="Center">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{routingBarcode}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="226" y="7" width="126" height="41"/>
+				<imageExpression><![CDATA[new ByteArrayInputStream(new Base64().decodeBase64("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".getBytes("UTF-8")))]]></imageExpression>
+			</image>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

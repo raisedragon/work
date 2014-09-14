@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="DHLDE_manifest" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.6500000000000126"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="752"/>
+	<import value="org.apache.commons.codec.binary.Base64"/>
+	<style name="no_right_border" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="1.0" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="no_bottom_border" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="1.0" lineColor="#000000"/>
+			<leftPen lineWidth="1.0" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="no_left_border" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<topPen lineWidth="1.0" lineColor="#000000"/>
+			<bottomPen lineWidth="1.0" lineColor="#000000"/>
+			<rightPen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="PackingList">
+		<field name="item" class="java.lang.String"/>
+		<field name="colli" class="java.lang.String"/>
+		<field name="packageCode" class="java.lang.String"/>
+		<field name="content" class="java.lang.String"/>
+		<field name="weight" class="java.lang.String"/>
+		<field name="length" class="java.lang.String"/>
+		<field name="width" class="java.lang.String"/>
+		<field name="height" class="java.lang.String"/>
+		<field name="volume" class="java.lang.String"/>
+	</subDataset>
+	<subDataset name="ExWarehouseList">
+		<field name="packings" class="java.util.List"/>
+		<field name="exWarehouseID" class="java.lang.String"/>
+		<field name="consignee" class="java.lang.String"/>
+		<field name="productOrService" class="java.lang.String"/>
+		<field name="deliveryDate" class="java.lang.String"/>
+		<field name="packingsSize" class="java.lang.String"/>
+		<field name="packingsWeight" class="java.lang.String"/>
+		<field name="franking" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="exWareHouses" class="java.util.List"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["D:\\work\\MyWork\\DHL DE\\Manifest\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="consignor" class="java.lang.String"/>
+	<parameter name="deliveryOrderId" class="java.lang.String"/>
+	<parameter name="date" class="java.lang.String"/>
+	<parameter name="shipping" class="java.lang.String"/>
+	<parameter name="shipperNumber" class="java.lang.String"/>
+	<parameter name="totalexWarehourseSize" class="java.lang.String"/>
+	<parameter name="totalPackingsSize" class="java.lang.String"/>
+	<parameter name="totalWeight" class="java.lang.String"/>
+	<parameter name="davonFP1" class="java.lang.String"/>
+	<parameter name="davonGP1" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select 1 from dual]]>
+	</queryString>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="787" splitType="Stretch">
+			<staticText>
+				<reportElement x="16" y="16" width="223" height="31"/>
+				<textElement>
+					<font size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ladeliste]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="412" y="18" width="38" height="13"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Nummer:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="412" y="30" width="38" height="13"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Datum:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="454" y="18" width="101" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{deliveryOrderId}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="454" y="30" width="101" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{date}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="16" y="46" width="223" height="14"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Versender]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="16" y="59" width="223" height="50"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{consignor}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="16" y="108" width="223" height="13"/>
+				<textElement>
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Versendernummer]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="16" y="120" width="223" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{shipperNumber}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="412" y="49" width="129" height="13"/>
+				<textElement>
+					<font size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Spedition]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="412" y="62" width="129" height="47"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{shipping}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="242" y="53" width="167" height="55"/>
+				<imageExpression><![CDATA[new ByteArrayInputStream(new Base64().decodeBase64("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".getBytes("UTF-8")))]]></imageExpression>
+			</image>
+			<rectangle>
+				<reportElement positionType="FixRelativeToBottom" x="16" y="444" width="525" height="50"/>
+			</rectangle>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="17" y="444" width="136" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Anzahl Aufträge:]]></text>
+			</staticText>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" mode="Transparent" x="152" y="444" width="59" height="13" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalexWarehourseSize}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="357" y="444" width="109" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Gewicht gesamt:]]></text>
+			</staticText>
+			<textField>
+				<reportElement positionType="FixRelativeToBottom" x="466" y="444" width="75" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalWeight}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="17" y="456" width="136" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Collis gesamt:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" x="152" y="456" width="59" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalPackingsSize}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="210" y="456" width="87" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[davon EFP]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" mode="Transparent" x="296" y="456" width="61" height="13" backcolor="#FFFFFF"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{davonFP1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="357" y="456" width="109" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[davon HP]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" x="466" y="456" width="75" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{davonGP1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="210" y="468" width="87" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[davon EFP]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" x="296" y="468" width="61" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="357" y="468" width="109" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[davon HP]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" x="466" y="468" width="75" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="210" y="480" width="87" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Gesamt EFP]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" x="296" y="480" width="61" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{davonFP1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="357" y="480" width="109" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Gesamt HP]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement positionType="FixRelativeToBottom" x="466" y="480" width="75" height="13"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{davonGP1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="17" y="512" width="523" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Sendungen in einwandfreiem Zustand und vollzählig übernommen.]]></text>
+			</staticText>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="17" y="568" width="114" height="1"/>
+			</line>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="147" y="568" width="114" height="1"/>
+			</line>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="280" y="568" width="114" height="1"/>
+			</line>
+			<line>
+				<reportElement positionType="FixRelativeToBottom" x="408" y="568" width="114" height="1"/>
+			</line>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="17" y="570" width="113" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Datum]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="408" y="571" width="113" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[LKW Kennzeichen]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="280" y="571" width="113" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Unterschrift Fahrer]]></text>
+			</staticText>
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="147" y="571" width="113" height="13"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Unterschrift Versender]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement x="17" y="171" width="525" height="246"/>
+				<jr:list xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" printOrder="Vertical">
+					<datasetRun subDataset="ExWarehouseList">
+						<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($P{exWareHouses})]]></dataSourceExpression>
+					</datasetRun>
+					<jr:listContents height="246" width="525">
+						<staticText>
+							<reportElement style="table" mode="Opaque" x="0" y="1" width="106" height="50" backcolor="#CCCCCC"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="9" isBold="true"/>
+							</textElement>
+							<text><![CDATA[Empfänger]]></text>
+						</staticText>
+						<textField isBlankWhenNull="true">
+							<reportElement style="table" x="106" y="1" width="419" height="50"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement markup="none">
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{consignee}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="table" mode="Opaque" x="0" y="51" width="525" height="13" forecolor="#FFFFFF" backcolor="#666666"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8" isBold="true"/>
+							</textElement>
+							<text><![CDATA[Sendungsreferenz]]></text>
+						</staticText>
+						<textField isBlankWhenNull="true">
+							<reportElement style="table" x="0" y="64" width="525" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{exWarehouseID}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="table" mode="Opaque" x="0" y="77" width="212" height="26" forecolor="#FFFFFF" backcolor="#666666"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8" isBold="true"/>
+							</textElement>
+							<text><![CDATA[Produkt / Service
+Frankatur]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="table" mode="Opaque" x="211" y="77" width="146" height="26" forecolor="#FFFFFF" backcolor="#666666"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8" isBold="true"/>
+							</textElement>
+							<text><![CDATA[Zustelldatum
+Zollgut]]></text>
+						</staticText>
+						<staticText>
+							<reportElement style="table" mode="Opaque" x="357" y="77" width="168" height="26" forecolor="#FFFFFF" backcolor="#666666"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8" isBold="true"/>
+							</textElement>
+							<text><![CDATA[Avis Telefonnummer]]></text>
+						</staticText>
+						<textField isBlankWhenNull="true">
+							<reportElement style="no_bottom_border" x="0" y="103" width="212" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{productOrService}]]></textFieldExpression>
+						</textField>
+						<textField isBlankWhenNull="true">
+							<reportElement style="table" x="0" y="116" width="211" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{franking}]]></textFieldExpression>
+						</textField>
+						<textField isBlankWhenNull="true">
+							<reportElement style="no_bottom_border" x="211" y="103" width="146" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{deliveryDate}]]></textFieldExpression>
+						</textField>
+						<textField isBlankWhenNull="true">
+							<reportElement style="table" x="211" y="116" width="146" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+						</textField>
+						<textField isBlankWhenNull="true">
+							<reportElement style="no_bottom_border" x="357" y="103" width="168" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+						</textField>
+						<textField isBlankWhenNull="true">
+							<reportElement style="table" x="357" y="116" width="168" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+						</textField>
+						<componentElement>
+							<reportElement key="table" style="table" positionType="Float" stretchType="RelativeToTallestObject" x="0" y="129" width="524" height="52" backcolor="#CCCCCC"/>
+							<jr:table>
+								<datasetRun subDataset="PackingList">
+									<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{packings})]]></dataSourceExpression>
+								</datasetRun>
+								<jr:column width="45">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="45" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Pos.]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="45" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+											<textFieldExpression><![CDATA[$F{item}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="45">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="45" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Colli]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="45" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+											<textFieldExpression><![CDATA[$F{colli}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="105">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="105" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Verpackungsart]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="105" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+											<textFieldExpression><![CDATA[$F{packageCode}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="55">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="55" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Inhalt]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="55" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+											<textFieldExpression><![CDATA[$F{content}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="55">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="55" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Gewicht
+(kg)]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="55" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+											<textFieldExpression><![CDATA[$F{weight}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="55">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="55" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Länge
+(cm)]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="55" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="55">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="55" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Breite
+(cm)]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="55" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="55">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="55" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Höhen
+(cm)]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="55" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+								<jr:column width="55">
+									<jr:columnHeader style="table" height="26" rowSpan="1">
+										<staticText>
+											<reportElement mode="Opaque" x="0" y="0" width="55" height="26" forecolor="#000000" backcolor="#CCCCCC"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement>
+												<font size="8" isBold="true"/>
+											</textElement>
+											<text><![CDATA[Volumen]]></text>
+										</staticText>
+									</jr:columnHeader>
+									<jr:detailCell style="table" height="27" rowSpan="1">
+										<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+											<reportElement stretchType="RelativeToTallestObject" x="0" y="0" width="55" height="26"/>
+											<box topPadding="1" leftPadding="3"/>
+											<textElement/>
+											<textFieldExpression><![CDATA[$F{volume}]]></textFieldExpression>
+										</textField>
+									</jr:detailCell>
+								</jr:column>
+							</jr:table>
+						</componentElement>
+						<staticText>
+							<reportElement style="no_right_border" positionType="Float" x="250" y="181" width="145" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement textAlignment="Right">
+								<font size="8" isBold="true"/>
+							</textElement>
+							<text><![CDATA[Gewicht gesamt:]]></text>
+						</staticText>
+						<textField isBlankWhenNull="true">
+							<reportElement style="no_left_border" positionType="Float" x="395" y="181" width="130" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{packingsWeight}]]></textFieldExpression>
+						</textField>
+						<textField isBlankWhenNull="true">
+							<reportElement style="no_left_border" positionType="Float" x="136" y="181" width="114" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement>
+								<font size="8"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$F{packingsSize}]]></textFieldExpression>
+						</textField>
+						<staticText>
+							<reportElement style="no_right_border" positionType="Float" x="0" y="181" width="137" height="13"/>
+							<box topPadding="1" leftPadding="3"/>
+							<textElement textAlignment="Right">
+								<font size="8" isBold="true"/>
+							</textElement>
+							<text><![CDATA[Colli gesamt:]]></text>
+						</staticText>
+					</jr:listContents>
+				</jr:list>
+			</componentElement>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="15" splitType="Stretch">
+			<staticText>
+				<reportElement positionType="FixRelativeToBottom" x="406" y="1" width="5" height="13"/>
+				<textElement textAlignment="Center" markup="none">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[/]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement positionType="FixRelativeToBottom" x="411" y="1" width="25" height="13"/>
+				<textElement textAlignment="Left" markup="none">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement positionType="FixRelativeToBottom" x="132" y="1" width="264" height="13"/>
+				<textElement textAlignment="Center" markup="none">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["FCM Ladeliste Nummer "+$P{deliveryOrderId}+" - Datum "+$P{date}+" Seite/en "]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement positionType="FixRelativeToBottom" x="396" y="1" width="10" height="13"/>
+				<textElement textAlignment="Right" markup="none">
+					<font size="8" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

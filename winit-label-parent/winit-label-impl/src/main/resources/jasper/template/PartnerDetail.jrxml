@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Order" language="groovy" pageWidth="1584" pageHeight="595" orientation="Landscape" columnWidth="1584" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9028621-e9b8-428b-b604-e61314a0c4cf">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Created1" class="java.util.Date"/>
+	<parameter name="Created2" class="java.util.Date"/>
+	<queryString>
+		<![CDATA[SELECT
+      A.count,
+       BP.VALUE AS CLIENTCODE,
+       BP.NAME AS CLIENTNAME,
+       BP.CREATED,
+       ACC.TOTALOPENBALANCE,
+       ACC.FROZENBALANCE,
+       ACC.USABLEBALANCE,
+       ACL.WT_BP_CUSTOMER_ACCOUNTLINE_ID,
+       re.name as TRANSTYPE,
+       ACL.TRXAMT,
+       ACL.TRXFRZAMT,
+       ACL.DATEINVOICED,
+       ACL.INVOICEAMT,
+       (CASE
+          WHEN T.TABLENAME = 'C_Order' THEN
+            (SELECT  co.documentno FROM c_order co WHERE co.c_order_id = ACL.RECORD_ID)
+          ELSE
+          NULL
+        END) AS corder,
+       (CASE
+         WHEN T.TABLENAME = 'WT_ExWarehouse' THEN
+           (SELECT  ex.documentno FROM wt_exwarehouse ex WHERE ex.wt_exwarehouse_id = ACL.RECORD_ID)
+         ELSE
+         NULL
+       END) AS exwarehouse
+  FROM C_BPARTNER BP
+  LEFT JOIN WT_BP_CUSTOMER_ACCOUNT ACC
+    ON ACC.C_BPARTNER_ID = BP.C_BPARTNER_ID
+  LEFT JOIN WT_BP_CUSTOMER_ACCOUNTLINE ACL
+    ON ACL.WT_BP_CUSTOMER_ACCOUNT_ID = ACC.WT_BP_CUSTOMER_ACCOUNT_ID
+left join wv_reference re on re.value =  ACL.TRANSTYPE and re.ReferenceName='_ChargeTypes' and re.Ad_Language='zh_CN'
+   LEFT JOIN AD_TABLE T
+    ON T.AD_TABLE_ID = ACL.AD_TABLE_ID
+    LEFT JOIN (
+    SELECT COUNT(1) AS COUNT
+     FROM C_BPARTNER BP1
+  LEFT JOIN WT_BP_CUSTOMER_ACCOUNT ACC
+    ON ACC.C_BPARTNER_ID = BP1.C_BPARTNER_ID
+  LEFT JOIN WT_BP_CUSTOMER_ACCOUNTLINE ACL
+    ON ACL.WT_BP_CUSTOMER_ACCOUNT_ID = ACC.WT_BP_CUSTOMER_ACCOUNT_ID
+   LEFT JOIN AD_TABLE T
+    ON T.AD_TABLE_ID = ACL.AD_TABLE_ID
+      WHERE TRUNC(BP1.Created) >= $P{Created1}
+   AND TRUNC(BP1.Created) < ($P{Created2} + 1)
+    )A ON 1=1
+      WHERE TRUNC(bp.Created) >= $P{Created1}
+   AND TRUNC(bp.Created) < ($P{Created2} + 1)
+   AND ROWNUM < 65000
+order by BP.NAME]]>
+	</queryString>
+	<field name="COUNT" class="java.math.BigDecimal"/>
+	<field name="CLIENTCODE" class="java.lang.String"/>
+	<field name="CLIENTNAME" class="java.lang.String"/>
+	<field name="CREATED" class="java.sql.Timestamp"/>
+	<field name="TOTALOPENBALANCE" class="java.math.BigDecimal"/>
+	<field name="FROZENBALANCE" class="java.math.BigDecimal"/>
+	<field name="USABLEBALANCE" class="java.math.BigDecimal"/>
+	<field name="WT_BP_CUSTOMER_ACCOUNTLINE_ID" class="java.math.BigDecimal"/>
+	<field name="TRANSTYPE" class="java.lang.String"/>
+	<field name="TRXAMT" class="java.math.BigDecimal"/>
+	<field name="TRXFRZAMT" class="java.math.BigDecimal"/>
+	<field name="DATEINVOICED" class="java.sql.Timestamp"/>
+	<field name="INVOICEAMT" class="java.math.BigDecimal"/>
+	<field name="CORDER" class="java.lang.String"/>
+	<field name="EXWAREHOUSE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="40" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="9b01aef8-97a8-4cba-af28-49fed1580f34" x="0" y="0" width="1584" height="20"/>
+				<textElement textAlignment="Center">
+					<font size="14" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNT}.intValue()>65000?"您处理的数据量太大,Excel无法全部显示,请缩小时间范围 ！" : " "]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="e484350d-65d8-46fd-a65b-ec58a2cba5b0" x="0" y="20" width="81" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户编码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="000b1ab8-44a2-4be2-9b62-4420f89a2de9" x="81" y="20" width="182" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户名称]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c0b682cb-d5d7-456f-b0dc-1521e3ad4153" x="263" y="20" width="137" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户创建时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5700caa5-c044-42aa-9838-6d2910515d77" x="400" y="20" width="87" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[记账余额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1513f9b1-5233-4b5f-959a-f0db96fc8f68" x="487" y="20" width="90" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[冻结金额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e72f8d80-387e-4637-8cd0-583fcf2cd7d1" x="577" y="20" width="89" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[可用余额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="24a70070-0310-42d4-ad13-28502b0b5746" x="666" y="20" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[交易ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1b9bfd66-de4a-4e39-a5de-987925378bc2" x="766" y="20" width="139" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[交易名称]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="823d51b8-4026-40b5-9cf7-5977eddb0333" x="1044" y="20" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[交易额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4236e3c8-72c3-4a32-b58f-57fb445998e6" x="905" y="20" width="139" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[交易日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a07fcce1-f603-4cbd-9912-b25c39d37b0b" x="1144" y="20" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[交易冻结]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ce576bb0-f048-473c-9df5-573b0bb6a922" x="1244" y="20" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[记账额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="55947ee6-0876-4b71-b417-5677d46d87c0" x="1344" y="20" width="124" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓入库单]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="422dbecc-c9e1-4cd6-ae95-a8a6007a5aa4" x="1468" y="20" width="116" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓出库单]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="20">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="070468d9-1d3e-44d4-b96a-32338fc1f2d2" x="0" y="0" width="81" height="20"/>
+				<box>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLIENTCODE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0034f904-4898-4eb4-929c-bb69a507d48a" x="81" y="0" width="182" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLIENTNAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="cbad95fc-e54d-4a7e-b86b-10a3281fc499" x="263" y="0" width="137" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CREATED}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="045e4573-8aff-4962-ac94-eead31c58a38" x="400" y="0" width="87" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTALOPENBALANCE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="1052d625-75cb-4543-843a-d7697b460cfb" x="487" y="0" width="90" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FROZENBALANCE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="39e5f611-8928-4efb-8011-05d38f8fa7cc" x="577" y="0" width="89" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{USABLEBALANCE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0dfbda1c-935a-42e0-a97a-6567cfa68c4f" x="666" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WT_BP_CUSTOMER_ACCOUNTLINE_ID}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="c3e74939-8702-4ced-b4c1-00f122e4bd40" x="766" y="0" width="139" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRANSTYPE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="3097a40d-35ee-4f52-ac69-f472336753fd" x="1144" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRXFRZAMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="580c76bb-2b6b-4d0a-97cc-89c65b03fd8a" x="1044" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRXAMT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy/MM/dd" isBlankWhenNull="true">
+				<reportElement uuid="53db3ca3-d9e1-437d-bb11-ec95dfd1322a" x="905" y="0" width="139" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEINVOICED}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="0ef39c3d-f650-49fc-87fb-13752227e702" x="1244" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{INVOICEAMT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="64f278ab-0008-4642-a564-e5e25093a2ef" x="1344" y="0" width="124" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CORDER}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="1eda07fb-07ae-46a2-9da9-77f256ac7c65" x="1468" y="0" width="116" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EXWAREHOUSE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

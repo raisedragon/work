@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ItemBC" language="groovy" pageWidth="283" pageHeight="198" columnWidth="227" leftMargin="28" rightMargin="28" topMargin="28" bottomMargin="28" uuid="80480481-4cfb-4111-9f3a-79a3d720007c">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT I.SERNO,SUBSTR(I.SERNO,0,1) FSERNO,P.SKU,SUBSTR(P.SKU,0,1) FSKU,SUBSTR(P.VALUE||' '||P.SPECIFICATION,0,20) VALUE,
+SUBSTR(P.ENAME,0,20) NAME FROM WT_ITEMINFO I,M_PRODUCT P,WT_ReturnMaterialDetail RMD
+WHERE RMD.WT_RETURNMATERIALDETAIL_ID=$P{RECORD_ID} AND I.M_PRODUCT_ID=P.M_PRODUCT_ID
+AND RMD.ITEMSERNO=I.SERNO]]>
+	</queryString>
+	<field name="SERNO" class="java.lang.String"/>
+	<field name="FSERNO" class="java.lang.String"/>
+	<field name="SKU" class="java.lang.String"/>
+	<field name="FSKU" class="java.lang.String"/>
+	<field name="VALUE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="141" splitType="Stretch">
+			<textField>
+				<reportElement uuid="a333c154-b908-4127-8794-5f1e42d007a5" x="27" y="60" width="191" height="15"/>
+				<textElement>
+					<font pdfFontName="/home/oracle/app/Adempiere/reports/wqy-zenhei.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VALUE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="5c499b29-0b7b-4ee5-b81e-5330e81b28f5" x="27" y="73" width="191" height="15"/>
+				<textElement>
+					<font pdfFontName="/home/oracle/app/Adempiere/reports/wqy-zenhei.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement uuid="5028b9bf-55bf-4cb3-892d-14fdcc55a443" x="18" y="1" width="200" height="50"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="2" barHeight="80">
+					<jr:codeExpression><![CDATA[$F{SERNO}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<componentElement>
+				<reportElement uuid="d0e9a476-fb4a-4d01-8363-90a4a373ffcc" x="18" y="86" width="200" height="50"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="2" barHeight="50">
+					<jr:codeExpression><![CDATA[$F{SKU}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField>
+				<reportElement uuid="45f49ffc-b655-42b0-8410-b39539540e92" x="4" y="8" width="18" height="50"/>
+				<textElement verticalAlignment="Top">
+					<font size="24"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FSERNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="f9baf739-564b-42b7-8813-a1ec015c5617" x="0" y="83" width="18" height="50"/>
+				<textElement verticalAlignment="Top">
+					<font size="24"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FSKU}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="a1b0f3d6-20e4-40db-8399-5f1b11a5f070" x="18" y="47" width="200" height="15"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{SERNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="bf80ee3b-e279-4341-8560-27b42fc7dac2" x="18" y="115" width="200" height="15"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{SKU}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="f0caeab0-6459-4ac4-9999-41903cdae84a" x="27" y="126" width="191" height="15"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[Please save this label]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

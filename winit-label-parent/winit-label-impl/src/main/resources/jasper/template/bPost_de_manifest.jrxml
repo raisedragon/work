@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bPost_de_manifest" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="62dd3339-8a2f-420f-8962-c5c8c1ff7654">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="q1" class="java.lang.String"/>
+	<parameter name="q2" class="java.lang.String"/>
+	<parameter name="q3" class="java.lang.String"/>
+	<parameter name="q4" class="java.lang.String"/>
+	<parameter name="q5" class="java.lang.String"/>
+	<parameter name="total" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select 1 from dual]]>
+	</queryString>
+	<field name="1" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="555" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="c24f405f-747a-4694-9aaa-767892640709" x="38" y="203" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="15"/>
+				</textElement>
+				<text><![CDATA[ Kompaktbrief bis 50g bis 1 cm Höhe]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="4fd5fc7b-bfda-4db3-aef7-9b049fbfcbba" x="388" y="403" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{total}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c24f405f-747a-4694-9aaa-767892640709" x="38" y="103" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ Produkt]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c24f405f-747a-4694-9aaa-767892640709" x="388" y="103" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Anzahl]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c24f405f-747a-4694-9aaa-767892640709" x="38" y="253" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="15"/>
+				</textElement>
+				<text><![CDATA[ Großbrief bis 500g bis 2 cm Höhe]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="cb5dd333-34c4-4c22-81b8-33c7ebb47e92" x="388" y="253" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{q3}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c24f405f-747a-4694-9aaa-767892640709" x="38" y="403" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Gesamt ]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="2fe7c462-4362-4941-afd6-2b9542ae4246" x="388" y="203" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{q2}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="02cf0d12-1578-42cd-9b9e-94d2f1e0608d" x="388" y="153" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{q1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c24f405f-747a-4694-9aaa-767892640709" x="38" y="153" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="15"/>
+				</textElement>
+				<text><![CDATA[ Standardbrief bis 20g bis 0.5 cm Höhe]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c24f405f-747a-4694-9aaa-767892640709" x="38" y="303" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="15"/>
+				</textElement>
+				<text><![CDATA[ Maxibrief bis 1,000g bis 5 cm Höhe]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c24f405f-747a-4694-9aaa-767892640709" x="38" y="353" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font size="15"/>
+				</textElement>
+				<text><![CDATA[ Überschwerer Maxibrief bis 2,000g bis 5 cm Höhe]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="cb5dd333-34c4-4c22-81b8-33c7ebb47e92" x="388" y="303" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{q4}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="cb5dd333-34c4-4c22-81b8-33c7ebb47e92" x="388" y="353" width="350" height="50"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{q5}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

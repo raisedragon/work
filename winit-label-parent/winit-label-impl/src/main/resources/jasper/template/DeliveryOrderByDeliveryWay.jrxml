@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="DeliveryOrderByDeliveryWay" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a7f16be9-cf2b-40ef-8055-e5a227041713">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="list" uuid="77e69b93-8194-48ab-a793-88df96742e2c">
+		<parameter name="WT_Warehouse_DeliveryWay_ID" class="java.lang.Integer">
+			<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+		</parameter>
+		<queryString>
+			<![CDATA[select
+  to_char(t.dateordered, 'dd')||'-'||to_char(t.dateordered, 'Mon', 'nls_date_language = ENGLISH') dateOrdered,
+  t.documentNo,
+  t.trackingNo,
+  (select a.name from wt_owms_deliveryway a where a.wt_owms_deliveryway_id = t.wt_owms_deliveryway_id) deliveryWay,
+  t.name,
+  t.postal,
+  t.regionname,
+  t.city,
+  replace(to_char(t.weight, '999999999999.00'),' ','') weight,
+  replace(to_char(t.expressFee, '999999999999.00'),' ','') expressFee
+from  wt_owms_exwarehouse t
+where t.WT_OWMS_DeliveryWay_ID = $P{WT_Warehouse_DeliveryWay_ID}
+and t.status = 'PAC'
+order by t.wt_owms_exwarehouse_id]]>
+		</queryString>
+		<field name="DATEORDERED" class="java.lang.String"/>
+		<field name="DOCUMENTNO" class="java.lang.String"/>
+		<field name="TRACKINGNO" class="java.lang.String"/>
+		<field name="DELIVERYWAY" class="java.lang.String"/>
+		<field name="NAME" class="java.lang.String"/>
+		<field name="POSTAL" class="java.lang.String"/>
+		<field name="REGIONNAME" class="java.lang.String"/>
+		<field name="CITY" class="java.lang.String"/>
+		<field name="WEIGHT" class="java.lang.String"/>
+		<field name="EXPRESSFEE" class="java.lang.String"/>
+	</subDataset>
+	<subDataset name="empty list" uuid="2cdddaf8-d726-4f5d-bf03-059cd6c19f6f"/>
+	<parameter name="WT_Warehouse_DeliveryWay_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select replace(to_char(sum(t.expressFee), '999999999999.00'),' ','') totalExpressFee
+from  wt_owms_exwarehouse t
+where t.WT_OWMS_DeliveryWay_ID = $P{WT_Warehouse_DeliveryWay_ID}
+and t.status = 'PAC'
+order by t.wt_owms_exwarehouse_id]]>
+	</queryString>
+	<field name="TOTALEXPRESSFEE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<componentElement>
+				<reportElement uuid="c73f61ae-92b6-439c-9524-76a958682975" key="table 1" style="table_TD" x="0" y="0" width="802" height="20"/>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="empty list" uuid="f4ed0be2-2a84-43b8-8f76-b28004481242">
+						<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource(1)]]></dataSourceExpression>
+					</datasetRun>
+					<jr:column uuid="80014414-e0b2-46e8-b26d-f5631c99ace3" width="50">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="228145b2-9575-4cc6-b220-ab8b140b219b" style="table_TD" x="0" y="0" width="50" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[Date]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="4b7887af-95c3-4c0e-b8e0-361a23ea5c0b" width="80">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c378746c-dd33-48af-b68b-af2510cafd39" style="table_TD" x="0" y="0" width="80" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[Winit No.]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="d4695d2b-f7bd-4047-a74d-79f8291220fe" width="95">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="818ed7bd-1885-4514-94e0-4c9d680d4fd3" style="table_TD" x="0" y="0" width="95" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[ConsgmtNo./tracking no]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="b48fef84-f754-46bd-8ec7-b166ac1d25b1" width="90">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="2bfa24c6-173f-45d5-869f-026049ab5da1" style="table_TD" x="0" y="0" width="90" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[Carrier name]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="ef46dfc3-3db0-4534-8a31-09bad50ae60d" width="90">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="1d26fcb6-b590-41f4-9b3e-32969a38f7aa" style="table_TD" x="0" y="0" width="90" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[Deliver To]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="4b33de0d-a1e1-4562-8666-e234ee1eb38c" width="90">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="3b312026-d839-4843-87d9-b97095c21f68" style="table_TD" x="0" y="0" width="90" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[Postcode]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="141b5b1c-805b-4bbd-bb51-597a18480093" width="90">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="50a91eff-ff03-4e5a-a296-b8b624894e6c" style="table_TD" x="0" y="0" width="90" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[Zone]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="2acac8e3-7994-44d2-89a9-5ae98c0f5190" width="90">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="415a2ab1-d0a3-4dd3-bd9a-7bac50e4ca95" style="table_TD" x="0" y="0" width="90" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[City]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="7d5d1024-eb45-4305-be1e-d6ac81692bb1" width="65">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="86a97f7b-67f9-4a4c-8246-6988514fcc26" style="table_TD" x="0" y="0" width="65" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[Weight
+(kg)]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="93ee985c-3308-44a7-a21f-a9da908106e1" width="65">
+						<jr:detailCell height="50" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c059068d-fce7-4fa1-b72b-6232cb7eee79" style="table_TD" x="0" y="0" width="65" height="50"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle">
+									<font size="14"/>
+								</textElement>
+								<text><![CDATA[Amount]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="30" splitType="Stretch">
+			<componentElement>
+				<reportElement uuid="ef933239-df97-4d8d-9071-dce878d54c54" key="table" positionType="Float" x="0" y="0" width="802" height="30"/>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="list" uuid="1eccfd1d-230c-4d68-876c-bb8ee7d6abfa">
+						<datasetParameter name="WT_Warehouse_DeliveryWay_ID">
+							<datasetParameterExpression><![CDATA[$P{WT_Warehouse_DeliveryWay_ID}]]></datasetParameterExpression>
+						</datasetParameter>
+						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					</datasetRun>
+					<jr:column uuid="a358f24c-c9ba-423c-ba1b-ab3fef19be8d" width="50">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="a71da7ec-d575-423d-bc3d-bdfb883f5d55" x="0" y="0" width="50" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{DATEORDERED}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="0084ec59-4888-4cc3-a0e9-b0ff7a9c777e" width="80">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="571bc4d9-21e3-45ab-bce5-2598f556ad97" x="0" y="0" width="80" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="c04fb2cb-cff1-4d3b-8730-76f62a06a881" width="95">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="fc23bb4a-677e-40a2-b4cf-ac9ffd8696f5" x="0" y="0" width="95" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{TRACKINGNO}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="59876c48-7586-4fcb-95ef-56b3b78589a6" width="90">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="88c721d2-0494-4ac3-90a5-3a847003c159" x="0" y="0" width="90" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{DELIVERYWAY}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="4e1fe914-adfe-4cca-a65a-f3659f86bbdd" width="90">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="22de94b6-a0b8-4edb-afb0-55957af30511" x="0" y="0" width="90" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="b3aae595-7b08-4ff5-bf88-d919b8d10c49" width="90">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="cdd3e5eb-483a-4616-beab-d1fdb9476c1c" x="0" y="0" width="90" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{POSTAL}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="df6ef4ea-3614-47fd-b630-55622ccfdb68" width="90">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="3891b171-50f4-4441-badc-594721e4f5be" x="0" y="0" width="90" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{REGIONNAME}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="f437170c-1003-42e0-ac83-be4b9b6f84f9" width="90">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="900e218c-a1b3-40e7-9144-fddbc09757b1" x="0" y="0" width="90" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{CITY}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="35d15719-8d85-4360-9282-93bb14a426d0" width="65">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="39be8973-0b1f-4d2b-b263-5555134dbb5f" x="0" y="0" width="65" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{WEIGHT}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="d50d2d92-b51a-48be-bf01-115520fa240b" width="65">
+						<jr:detailCell style="table_TD" height="30" rowSpan="1">
+							<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+								<reportElement uuid="f9e4f533-38c1-483e-80a2-829f5cd048d0" x="0" y="0" width="65" height="30"/>
+								<textElement textAlignment="Center" verticalAlignment="Middle"/>
+								<textFieldExpression><![CDATA[$F{EXPRESSFEE}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="40" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="72071d31-c31c-4e70-946c-7768a05a7c82" x="741" y="20" width="65" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TOTALEXPRESSFEE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

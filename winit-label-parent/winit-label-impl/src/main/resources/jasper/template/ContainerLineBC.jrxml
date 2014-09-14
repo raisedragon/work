@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PackageBC" language="groovy" pageWidth="255" pageHeight="354" columnWidth="199" leftMargin="28" rightMargin="28" topMargin="28" bottomMargin="28" uuid="9078bfe9-2e23-4eb9-a607-3baec0fe97cc">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT I.BINARYDATA,SUBSTR(CAR.CONTAINERSERNO,0,1) FSERNO,CAR.CONTAINERSERNO ,
+ cst.LENGTH||'*'||cst.WIDTH||'*'||cst.HEIGHT||' CM'||' '||( SELECT ref.NAME
+ FROM AD_Ref_List ref,AD_REFERENCE re WHERE Value=cst.TYPE
+ and ref.AD_REFERENCE_ID=re.AD_REFERENCE_ID and UPPER(re.NAME) = '_CONTAINERTYPE')||' '||car.NETWEIGHT||' KG' as name
+ FROM WT_CONTAINERLINE CAR ,AD_CLIENTINFO CI,AD_IMAGE I,WT_CONTAINERTYPE CT,WT_CONTAINERSUBTYPE CST
+WHERE CAR.AD_CLIENT_ID=CI.AD_CLIENT_ID AND
+CAR.WT_CONTAINERTYPE_ID=CT.WT_CONTAINERTYPE_ID AND CT.WT_CONTAINERSUBTYPE_ID=CST.WT_CONTAINERSUBTYPE_ID
+ AND CI.LOGOREPORT_ID=I.AD_IMAGE_ID AND CI.AD_CLIENT_ID=11 AND  CAR.WT_CONTAINERLINE_ID=$P{RECORD_ID}]]>
+	</queryString>
+	<field name="BINARYDATA" class="java.io.InputStream"/>
+	<field name="FSERNO" class="java.lang.String"/>
+	<field name="CONTAINERSERNO" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="254" splitType="Stretch">
+			<image hAlign="Center">
+				<reportElement uuid="a526e1a2-105c-4d86-9217-ff2d065824f2" x="14" y="48" width="171" height="50"/>
+				<imageExpression><![CDATA[$F{BINARYDATA}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement uuid="e0a70a1b-42c1-4122-90fa-8eaa0c44afc4" x="0" y="90" width="199" height="15"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[http://www.winit.com.cn]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="6e26715c-1a3b-4c54-8723-2626a0cc82c0" x="-17" y="115" width="30" height="80"/>
+				<textElement textAlignment="Left" verticalAlignment="Top">
+					<font size="50" isBold="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FSERNO}]]></textFieldExpression>
+			</textField>
+			<componentElement>
+				<reportElement uuid="268a5744-d8a5-4dd0-b135-73a485ee10b4" x="18" y="114" width="195" height="80"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="2" barHeight="100">
+					<jr:codeExpression><![CDATA[$F{CONTAINERSERNO}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField>
+				<reportElement uuid="7cd1d38a-6be5-4201-881f-cef40a9ba796" x="18" y="194" width="195" height="30"/>
+				<textElement textAlignment="Center">
+					<font size="13" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="7cd1d38a-6be5-4201-881f-cef40a9ba796" x="18" y="176" width="195" height="15"/>
+				<textElement textAlignment="Center" rotation="None" markup="none">
+					<font fontName="SansSerif" size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONTAINERSERNO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="5606c174-e12f-40ae-b955-9af845eb7e11" x="18" y="224" width="181" height="30"/>
+				<textElement textAlignment="Center">
+					<font size="16" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Made  in China]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

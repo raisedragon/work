@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PackageBC" language="groovy" pageWidth="440" pageHeight="312" columnWidth="384" leftMargin="28" rightMargin="28" topMargin="28" bottomMargin="28" uuid="9078bfe9-2e23-4eb9-a607-3baec0fe97cc">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="65"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[select p.serno
+  from wt_packageinfo p, wt_iteminfo i
+ where i.wt_packageinfo_id = p.wt_packageinfo_id
+ and i.wt_iteminfo_id= $P{RECORD_ID}]]>
+	</queryString>
+	<field name="SERNO" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="256" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="e0a70a1b-42c1-4122-90fa-8eaa0c44afc4" x="67" y="-51" width="239" height="152"/>
+				<textElement textAlignment="Center">
+					<font size="100"/>
+				</textElement>
+				<text><![CDATA[B]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement uuid="268a5744-d8a5-4dd0-b135-73a485ee10b4" x="49" y="71" width="283" height="80"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="2" barHeight="80">
+					<jr:codeExpression><![CDATA[$F{SERNO}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField>
+				<reportElement uuid="6834e9c8-665f-43f3-86cf-07872f2961d1" x="0" y="151" width="384" height="41"/>
+				<textElement textAlignment="Center">
+					<font size="30" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SERNO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

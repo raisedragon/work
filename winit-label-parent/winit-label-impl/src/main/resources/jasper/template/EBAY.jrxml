@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="1800" pageHeight="595" orientation="Landscape" columnWidth="1780" leftMargin="0" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e3f9eff4-84a7-4bda-86e7-d9fa830c5f15">
+	<property name="ireport.zoom" value="0.9982500000000003"/>
+	<property name="ireport.x" value="946"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Created1" class="java.sql.Timestamp">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Created2" class="java.sql.Timestamp">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select sum(Chargedweight) as Chargedweight,
+       sum(volume) as volume,
+       sum(weight) as weight,
+       sum(ItemQty) as ItemQty,
+       min(SellerName) as SellerName,
+       min(ebaytransactionid) as ebaytransactionid,
+       min(datefinish) as datefinish,
+       min(status) as status,
+       min(postal) as postal,
+       min(datedeliveryfinish) as datedeliveryfinish,
+       min(dateupload) as dateupload,
+       min(regionname) as regionname,
+       min(DateUploadCSV) as DateUploadCSV,
+       min(trackingno) as trackingno,
+       min(documentno) as documentno,
+       min(value) as value,
+       min(DeliveryWay) as DeliveryWay,
+       min(sourcename) as source,
+       min(platform) as platform
+  from (select ex.documentno,
+                bp.name as SellerName,
+                bp.value,
+                dw.name as DeliveryWay,
+                case
+                  when lm.unit = 'FeeWeight' then
+                   greatest(exi.volume * 1000000 / lm.conversionrate,
+                            exi.weight)
+                  when lm.unit = 'Weight' then
+                   exi.weight
+                  when lm.unit = 'Volumn' then
+                   exi.volume
+                end as Chargedweight,
+                NVL(sum(ep.qty), 0) as ItemQty,
+                ex.trackingno,
+                ex.postal,
+                ex.regionname,
+                str_list(ex.wt_exwarehouse_id) as ebaytransactionid,
+                ex.dateordered as DateUploadCSV,
+                l.created as dateupload,
+                ex.datedeliveryfinish,
+                r.name as status,
+                ex.datefinish,
+                exi.volume,
+                exi.weight,
+                sls.name as sourcename,
+                ex.platform
+           from wt_exwarehouse ex
+           left join C_BPartner bp
+             on bp.c_bpartner_id = ex.c_bpartner_id
+           left join C_SellerSource sls
+             on sls.c_sellersource_id = bp.c_sellersource_id
+           left join WT_ExWarehouseProduct ep
+             on ep.wt_exwarehouse_id = ex.wt_exwarehouse_id
+           left join WT_Warehouse_DeliveryWay dw
+             on dw.wt_warehouse_deliveryway_id =
+                ex.wt_warehouse_deliveryway_id
+           left join WT_TransportMode tm
+             on tm.wt_transportmode_id = dw.wt_transportmode_id
+           left join WT_LogisticsMode lm
+             on lm.wt_logisticsmode_id = tm.wt_logisticsmode_id
+           left join
+                (select wt_exwarehouseproduct_id,sum(volume) as volume,sum(weight) as weight
+                 from (select distinct ei.wt_exwarehouseproduct_id,si.wt_storageitem_id,si.volume,si.weight
+                       from WT_StorageItem si
+                       join WT_ExWarehouseItem ei on ei.itemserno = si.serno
+                     )
+                  group by  wt_exwarehouseproduct_id
+                 ) exi on exi.wt_exwarehouseproduct_id = ep.wt_exwarehouseproduct_id
+           LEFT join ad_changelog l
+             on l.record_id = ex.wt_exwarehouse_id and length(trim(ex.TrackingNo))>0
+            and l.ad_table_id = 1000090 -- wt_exwarehouse
+            and l.ad_column_id = 1002045 -- TrackingNo
+            and l.newvalue <> 'NULL'
+            and l.oldvalue = 'NULL'
+           left join wv_reference r
+             on r.value = ex.status
+            and r.Ad_Reference_ID = 1000053
+            and r.Ad_Language = 'en_US'
+          where ex.created between $P{Created1} and $P{Created2}  AND
+          ex.status <> 'DR'
+       and ex.status <> 'VO'
+          group by ex.documentno,
+                   bp.name,
+                   bp.value,
+                   dw.name,
+                   case
+                     when lm.unit = 'FeeWeight' then
+                      greatest(exi.volume * 1000000 / lm.conversionrate,
+                               exi.weight)
+                     when lm.unit = 'Weight' then
+                      exi.weight
+                     when lm.unit = 'Volumn' then
+                      exi.volume
+                   end,
+                   ex.trackingno,
+                   ex.postal,
+                   ex.city,
+                   ex.regionname,
+                   ex.dateordered,
+                   l.created,
+                   ex.datedeliveryfinish,
+                   r.name,
+                   ep.wt_exwarehouseproduct_id,
+                   ex.datefinish,
+                   exi.volume,
+                   exi.weight,
+                   ex.wt_exwarehouse_id,
+                   sls.name,
+                   ex.platform
+          order by ex.documentno desc)
+ group by documentno
+order by DateUploadCSV,datefinish,SellerName]]>
+	</queryString>
+	<field name="CHARGEDWEIGHT" class="java.math.BigDecimal"/>
+	<field name="VOLUME" class="java.math.BigDecimal"/>
+	<field name="WEIGHT" class="java.math.BigDecimal"/>
+	<field name="ITEMQTY" class="java.math.BigDecimal"/>
+	<field name="SELLERNAME" class="java.lang.String"/>
+	<field name="EBAYTRANSACTIONID" class="java.lang.String"/>
+	<field name="DATEFINISH" class="java.sql.Timestamp"/>
+	<field name="STATUS" class="java.lang.String"/>
+	<field name="POSTAL" class="java.lang.String"/>
+	<field name="DATEDELIVERYFINISH" class="java.sql.Timestamp"/>
+	<field name="DATEUPLOAD" class="java.sql.Timestamp"/>
+	<field name="REGIONNAME" class="java.lang.String"/>
+	<field name="DATEUPLOADCSV" class="java.sql.Timestamp"/>
+	<field name="TRACKINGNO" class="java.lang.String"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<field name="VALUE" class="java.lang.String"/>
+	<field name="DELIVERYWAY" class="java.lang.String"/>
+	<field name="SOURCE" class="java.lang.String"/>
+	<field name="PLATFORM" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="149" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="346" y="79" width="396" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="false"/>
+					<paragraph tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[Seller Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1245" y="79" width="82" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Tracking number upload]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1104" y="79" width="56" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Address(province)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="991" y="79" width="63" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Tracking No]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="877" y="79" width="61" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Charge weight]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="938" y="79" width="53" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Item Quantity]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1327" y="79" width="89" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Delivery to buyer(buyer sign on POD)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1054" y="79" width="50" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Postal code]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="742" y="79" width="69" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Shipping Method]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1160" y="79" width="85" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Seller upload CSV to WINIT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="101" y="79" width="75" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Outbound Warehouse Number]]></text>
+			</staticText>
+			<frame>
+				<reportElement uuid="404f360d-4c81-4865-b986-dc7c8a14b0d2" x="742" y="0" width="961" height="36"/>
+			</frame>
+			<staticText>
+				<reportElement uuid="d5844cdb-8d35-452a-8f49-ddf19627136f" x="0" y="0" width="742" height="36"/>
+				<textElement>
+					<font size="24"/>
+				</textElement>
+				<text><![CDATA[Outbound Warehouse Report]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="243f73c8-7ed8-42c6-9e32-f21a5e02ce08" x="0" y="36" width="101" height="30"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Date : From]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd ">
+				<reportElement uuid="fe1c6547-246b-4105-9164-d4e036fefde8" x="101" y="36" width="75" height="30"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Created1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="bd188956-28a4-41fd-8012-3d227ee275a1" x="176" y="36" width="90" height="30"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[To]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement uuid="b5ab50bd-e9ab-41a3-a0f8-b3493113df3f" x="266" y="36" width="476" height="30"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Created2}]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="3c6a00c6-493d-4b84-9032-90f552a148bd" x="742" y="36" width="961" height="30"/>
+			</frame>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="176" y="79" width="90" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="false"/>
+					<paragraph tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[Seller ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="811" y="79" width="66" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[CBM]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1416" y="79" width="109" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Outbound Status]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1525" y="79" width="89" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Outbound Date & Time]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1703" y="79" width="77" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Platform]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="0" y="79" width="101" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="false"/>
+					<paragraph tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[Transaction ID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="266" y="79" width="80" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="false"/>
+					<paragraph tabStopWidth="40"/>
+				</textElement>
+				<text><![CDATA[Source]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="1614" y="79" width="89" height="70"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Service Time]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="40" splitType="Stretch">
+			<textField pattern="###0.000" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="877" y="0" width="61" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CHARGEDWEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="742" y="0" width="69" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DELIVERYWAY}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="081c62ac-8bbe-4b6a-9170-402c3d03dcdf" stretchType="RelativeToBandHeight" x="101" y="0" width="75" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="991" y="0" width="63" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRACKINGNO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="346" y="0" width="396" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERNAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="938" y="0" width="53" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ITEMQTY}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1054" y="0" width="50" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{POSTAL}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1104" y="0" width="56" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REGIONNAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1160" y="0" width="85" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEUPLOADCSV}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1245" y="0" width="82" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEUPLOAD}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1327" y="0" width="89" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEDELIVERYFINISH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="176" y="0" width="90" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VALUE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.0000" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="811" y="0" width="66" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VOLUME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1416" y="0" width="109" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STATUS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1525" y="0" width="89" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEFINISH}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1614" y="0" width="89" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="081c62ac-8bbe-4b6a-9170-402c3d03dcdf" positionType="Float" x="0" y="0" width="101" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isStrikeThrough="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+					<paragraph tabStopWidth="40"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EBAYTRANSACTIONID}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="266" y="0" width="80" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SOURCE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="" isBlankWhenNull="true">
+				<reportElement uuid="78e75664-e774-4139-8262-0aa5e44a4ee1" stretchType="RelativeToBandHeight" x="1703" y="0" width="77" height="40"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PLATFORM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

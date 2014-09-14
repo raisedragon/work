@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ShipmentSI" language="groovy" pageWidth="955" pageHeight="842" columnWidth="915" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b855a098-17fd-430c-8bd8-d03c6c5766a7">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="17"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select s.wt_shipment_id,
+       s.documentno,
+       s.trackingso,
+       port1.en_name as portoflading,
+       port2.en_name as portofdischarge,
+       nvl(s.trackingcarrier, s.oceanshippingname || '/' || s.oceanvoyage) as name,
+       s.trueoutvolume,
+       s.trueoutweight,
+       s.trueoutcount,
+       nvl(car.sealno,' ') as sealno,
+       nvl(car.cupboardno,' ') as cupboardno,
+       t1.name_en as shipperName,
+       t1.address_en as shipperAddress,
+       t2.name_en as consigneeName,
+       t2.address_en as consigneeAddr,
+       (select count(sp.wt_storagepackage_id) as packages
+          from wt_shipment s
+          left join WT_ContainerLine cl
+            on cl.wt_shipment_id = s.wt_shipment_id
+          left join WT_StoragePackage sp
+            on sp.wt_containerline_id = cl.wt_containerline_id
+         where s.wt_shipment_id = $P{RECORD_ID}) as packages,
+       (select replace(to_char(wmsys.wm_concat(TRANSLATE(t.description USING CHAR_CS))),',',chr(13)) as description
+          from (select distinct s.wt_shipment_id as wt_shipment_id,
+                                substr(formline.description,
+                                       instr(formline.description, ' '),
+                                       length(formline.description)) as description
+                  from wt_shipment s
+                  left join wt_customsform form
+                    on form.wt_shipment_id = s.wt_shipment_id
+                  left join WT_CustomsFormLine formline
+                    on formline.wt_customsform_id = form.wt_customsform_id
+                 where s.wt_shipment_id = $P{RECORD_ID}) t) as description
+  from wt_shipment s
+  left join wt_transceiver t1
+    on t1.wt_transceiver_id = s.shipper_id
+  left join wt_transceiver t2
+    on t2.wt_transceiver_id = s.consignee_id
+  left join wt_carline car
+    on car.wt_shipment_id = s.wt_shipment_id
+  left join c_port port1 on port1.c_port_id = s.c_portoflading_id
+   left join c_port port2 on port2.c_port_id = s.c_portofdischarge_id
+ where s.wt_shipment_id = $P{RECORD_ID}]]>
+	</queryString>
+	<field name="WT_SHIPMENT_ID" class="java.math.BigDecimal"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<field name="TRACKINGSO" class="java.lang.String"/>
+	<field name="PORTOFLADING" class="java.lang.String"/>
+	<field name="PORTOFDISCHARGE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="TRUEOUTVOLUME" class="java.math.BigDecimal"/>
+	<field name="TRUEOUTWEIGHT" class="java.math.BigDecimal"/>
+	<field name="TRUEOUTCOUNT" class="java.math.BigDecimal"/>
+	<field name="SEALNO" class="java.lang.String"/>
+	<field name="CUPBOARDNO" class="java.lang.String"/>
+	<field name="SHIPPERNAME" class="java.lang.String"/>
+	<field name="SHIPPERADDRESS" class="java.lang.String"/>
+	<field name="CONSIGNEENAME" class="java.lang.String"/>
+	<field name="CONSIGNEEADDR" class="java.lang.String"/>
+	<field name="PACKAGES" class="java.math.BigDecimal"/>
+	<field name="DESCRIPTION" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="477" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="4950ea36-8fcc-47c2-b7c1-67750d00c55f" x="0" y="0" width="900" height="29"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="16" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[提单补料 SI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ebb1429d-1359-4059-9d18-7b01276a9104" x="0" y="29" width="100" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[SO NO.(订舱号):]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8e378b89-b24a-4ba6-9141-a5088dbdac3a" x="0" y="49" width="450" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[SHIPPER(发货人)：]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="5a448941-1212-4b2b-ac21-e59f3e305d62" x="100" y="29" width="350" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRACKINGSO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="996e7ecd-6169-4974-ad86-962b1182d135" x="0" y="69" width="450" height="20"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SHIPPERNAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="d29f0fd2-db4c-464a-bdbb-5b860571e959" x="0" y="137" width="450" height="22"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[CONSIGNEE(收货人) :]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="abddbf03-67d4-4205-82a2-e3a52e2fa4e1" x="0" y="159" width="450" height="20"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONSIGNEENAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="6d99f3fd-aae2-41c0-9a4e-0a6d3fd8cb0f" x="0" y="226" width="450" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[NOTIFY(通知人):]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="59715e1b-3a0f-4575-a838-ab835b8aa853" x="0" y="246" width="450" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[SAME AS CONSIGNEE]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3c256dc1-8325-40dd-a792-49f077710024" x="0" y="267" width="450" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Ocean Vessel / Voy. No. (船名/航次)]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="c9f1da5b-929d-49ce-9181-8e71435e628f" x="0" y="287" width="450" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="07a30ee2-bb3d-49d1-8972-a406d9f1ff39" x="0" y="308" width="150" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Port of loading (装货港)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="81509d62-4ad9-4dea-824d-b7a56f73fd03" x="150" y="308" width="150" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Port of discharge (卸货港)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3b1b977a-d4f3-416f-bda7-720ebce531f9" x="300" y="308" width="150" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Place of delivery (交货地)]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b1c75905-26f6-4cc4-9c0b-76831648ab3b" x="0" y="328" width="150" height="43"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PORTOFLADING}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="1a508f9e-129c-41d1-aec2-a088bdb671b8" x="150" y="328" width="150" height="43"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PORTOFDISCHARGE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="75cb9328-248d-4a1e-ad0f-2a4244e72dcf" x="300" y="328" width="150" height="43"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PORTOFDISCHARGE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="57ca2313-aa03-4ca5-a6b9-ca2856be609a" x="0" y="371" width="150" height="40"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[CNTR No. / SEAL No.
+柜号 / 封条号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8441bf71-24b0-4db7-8e1c-dcc582625898" x="150" y="371" width="150" height="40"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Marks and numbers
+唛头]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="55c9b073-7f61-45f2-8c60-c8d2af6d144f" x="300" y="371" width="150" height="40"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[No. of Ctns/pkgs
+箱/件数]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="ff00ef51-0f7e-4835-a74f-1fcc2a4c129f" x="0" y="411" width="150" height="66"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA["CNTR#"+$F{CUPBOARDNO}+"/SEAL#"+$F{SEALNO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="35d0fdbf-175b-4adb-af40-68981b61b8d9" x="150" y="411" width="150" height="66"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[N/M]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="3960ef3b-e094-4c44-aca9-ea850b63f292" x="300" y="411" width="150" height="66"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRUEOUTCOUNT}+"PKGS"+"/"+$F{PACKAGES}+"CTNS"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="55c9b073-7f61-45f2-8c60-c8d2af6d144f" x="780" y="371" width="120" height="40"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Measurement (CBM)
+体积]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="57ca2313-aa03-4ca5-a6b9-ca2856be609a" x="450" y="371" width="210" height="40"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Description
+货品描述]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="3960ef3b-e094-4c44-aca9-ea850b63f292" x="780" y="411" width="120" height="66"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRUEOUTVOLUME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="8441bf71-24b0-4db7-8e1c-dcc582625898" x="660" y="371" width="120" height="40"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Gross weight (Kgs)
+毛重]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="ff00ef51-0f7e-4835-a74f-1fcc2a4c129f" x="450" y="411" width="210" height="66"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESCRIPTION}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="3974d64e-78f9-46e1-b20b-49f23b6860f1" x="535" y="139" width="165" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[补料/对单/提单确认 E-MAIL: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="52a7ab5b-95d8-401f-8b51-066e64c21471" x="513" y="159" width="21" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TO]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="09386f2a-3206-4a75-982d-1d17370833e4" x="534" y="159" width="166" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="2cf48331-110d-4bdf-829b-580ffe547bf9" x="450" y="29" width="450" height="342"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<image>
+					<reportElement uuid="b3f5d16a-a1bb-4f01-b898-d0291a73dc1d" x="63" y="40" width="199" height="49"/>
+					<imageExpression><![CDATA["../images/si.jpg"]]></imageExpression>
+				</image>
+			</frame>
+			<textField>
+				<reportElement uuid="ee2d02fd-569c-4323-9075-d09403a839e7" x="660" y="411" width="120" height="66"/>
+				<box>
+					<bottomPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRUEOUTWEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="5ac633e2-d1ca-4c6b-9f64-7a6c8c42cfaa" x="0" y="89" width="450" height="48"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SHIPPERADDRESS}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="feb02bb7-ad88-4ef5-abf1-579e3d27d77f" x="0" y="179" width="450" height="47"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONSIGNEEADDR}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

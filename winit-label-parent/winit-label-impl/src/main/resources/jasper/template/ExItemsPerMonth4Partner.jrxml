@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ExItemsPerMonth4Partner" language="groovy" pageWidth="410" pageHeight="500" columnWidth="370" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="900532c1-fef6-46bb-9bba-367c0ff63038">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<parameter name="warehouse" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT Y, (M || '月') M, SUM(QTY) QTY
+  FROM (SELECT CASE
+                 WHEN TO_CHAR(DATEFINISH, 'yyyy') = TO_CHAR(SYSDATE, 'yyyy') THEN
+                  '今年'
+                 ELSE
+                  '去年'
+               END Y,
+               TO_CHAR(DATEFINISH, 'MM') M,
+               QTY
+          FROM AD_EXITEMSPERDAY
+         WHERE TO_CHAR(DATEFINISH, 'yyyy') >= TO_CHAR(SYSDATE, 'yyyy') - 1
+           AND (((WAREHOUSE = $P{warehouse} OR WAREHOUSE = 9999) AND
+                NVL($P{warehouse}, 0) > 0) OR NVL($P{warehouse}, 0) <= 0))
+ GROUP BY Y, M
+ ORDER BY Y, M]]>
+	</queryString>
+	<field name="Y" class="java.lang.String"/>
+	<field name="M" class="java.lang.String"/>
+	<field name="QTY" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="60" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="d39e5fbc-b82d-4c7d-8546-da059fd0eb4d" x="0" y="0" width="370" height="60"/>
+				<textElement>
+					<font size="24" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[业务伙伴每周出库单品数]]></text>
+			</staticText>
+		</band>
+	</title>
+	<summary>
+		<band height="280" splitType="Stretch">
+			<crosstab>
+				<reportElement uuid="2c76934a-3d02-4790-b308-ad9d578fee8b" x="0" y="0" width="370" height="280"/>
+				<crosstabHeaderCell>
+					<cellContents backcolor="#F0F8FF" mode="Opaque">
+						<staticText>
+							<reportElement uuid="b9d4d036-2ac9-42f3-9d83-3d2aed71df1c" style="Crosstab Data Text" x="0" y="0" width="70" height="30"/>
+							<box topPadding="1" bottomPadding="1">
+								<pen lineWidth="0.5"/>
+								<topPen lineWidth="0.5"/>
+								<leftPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+								<rightPen lineWidth="0.5"/>
+							</box>
+							<textElement>
+								<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+							</textElement>
+							<text><![CDATA[月/年]]></text>
+						</staticText>
+					</cellContents>
+				</crosstabHeaderCell>
+				<rowGroup name="M" width="70">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{M}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement uuid="f7e52bc7-8932-4fbd-8c16-d59854abfa51" style="Crosstab Data Text" x="0" y="0" width="70" height="25"/>
+								<textElement>
+									<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{M}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="Y" height="30">
+					<bucket order="Descending" class="java.lang.String">
+						<bucketExpression><![CDATA[$F{Y}]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement uuid="58be59a7-3835-4a71-bfa4-82ca28599af5" style="Crosstab Data Text" x="0" y="0" width="150" height="30"/>
+								<textElement>
+									<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{Y}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="QTYMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{QTY}]]></measureExpression>
+				</measure>
+				<crosstabCell width="150" height="25">
+					<cellContents>
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="###0;-###0">
+							<reportElement uuid="b13ec545-840c-4f45-afef-7b9715ce5317" style="Crosstab Data Text" x="0" y="0" width="150" height="25"/>
+							<textElement textAlignment="Right">
+								<paragraph rightIndent="10"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{QTYMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell height="25" rowTotalGroup="M">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField>
+							<reportElement uuid="81d03b9f-5d25-49b8-b4ee-772caa26db83" style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$V{QTYMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="50" columnTotalGroup="Y">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField>
+							<reportElement uuid="a0e0f2ab-d399-4a8b-87a3-c764007da9f3" style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$V{QTYMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell rowTotalGroup="M" columnTotalGroup="Y">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField>
+							<reportElement uuid="2444e24d-0ba3-473e-948e-c67f165d48dd" style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$V{QTYMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

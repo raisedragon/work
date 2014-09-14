@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CustomerAvgAmount" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c7d9c36c-f14b-41df-a165-59114780c39f">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Created1" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Created2" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="C_BPartner_ID" class="java.math.BigDecimal">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+  to_char(cbp.created, 'yyyy-mm-dd') as cbpcreated,
+  cbp.value,
+  cbp.name,
+  round(sum(case when bpcal.invoiceamt<0 then abs(bpcal.invoiceamt) else 0 end) / case when $P{Created2}>sysdate then ceil(sysdate - $P{Created1})+1 ELSE ceil($P{Created2} - $P{Created1})+1 end, 2) AS totalAmt
+from c_bpartner cbp
+left join wt_bp_customer_accountline bpcal on bpcal.c_bpartner_id=cbp.c_bpartner_id and bpcal.created between $P{Created1} and to_date(concat(to_char($P{Created2},'yyyy-MM-dd'),' 23:59:59'), 'yyyy-MM-dd HH24:mi:ss')
+where
+  cbp.c_bp_group_id=103
+  and cbp.isactive='Y'
+ AND ((cbp.c_bpartner_id=$P{C_BPartner_ID} and nvl($P{C_BPartner_ID},0)>0) or nvl($P{C_BPartner_ID},0)<=0)
+group by
+  to_char(cbp.created, 'yyyy-mm-dd'),
+  cbp.value,
+  cbp.name,
+  cbp.c_bpartner_id]]>
+	</queryString>
+	<field name="CBPCREATED" class="java.lang.String"/>
+	<field name="VALUE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="TOTALAMT" class="java.math.BigDecimal"/>
+	<group name="CBPCREATED">
+		<groupExpression><![CDATA[$F{CBPCREATED}]]></groupExpression>
+	</group>
+	<group name="VALUE">
+		<groupExpression><![CDATA[$F{VALUE}]]></groupExpression>
+	</group>
+	<group name="NAME">
+		<groupExpression><![CDATA[$F{NAME}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="99" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="b99d03d1-0571-4e23-babb-0aa79506815c" x="0" y="10" width="555" height="29"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="14" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[日均消费金额统计]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="363fa657-442f-460a-8ebd-8ad49d1bf640" x="140" y="39" width="116" height="21"/>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Created1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="2028b717-0372-4ce8-8f69-2d687a50f610" x="398" y="39" width="157" height="21"/>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Created2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="96d4daf4-76ee-44ec-9f03-75a0fd2e2e7b" x="2" y="39" width="138" height="21"/>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[开始日期：]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9712f4b1-2284-45da-88c8-265c1c9f12ac" x="256" y="39" width="142" height="21"/>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[结束日期：]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="fabf267d-f63b-4d19-abd4-d4df121f42a5" x="2" y="69" width="138" height="30"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[开户日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="6f5c952b-6066-46ea-b946-f93ec094c825" x="140" y="69" width="116" height="30"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户编码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="6ae35e00-db03-4673-9a5c-8878e21aba36" x="256" y="69" width="142" height="30"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户名称]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="120f8f51-71ce-490b-ac9f-f10f3fdf7f68" x="398" y="69" width="157" height="30"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[日均消费金额（USD）]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="39" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="aaa01116-6b52-409f-a744-58c2a9a1f6de" x="2" y="0" width="138" height="39"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0">
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CBPCREATED}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0710e73d-5462-4040-885a-ece22e24a437" x="140" y="0" width="116" height="39"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VALUE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="328d4de5-0828-44c7-91fd-1a25df65ae1a" x="256" y="0" width="142" height="39"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a39d2d36-ed56-4d85-9ffc-9d208b33500a" x="398" y="0" width="157" height="39"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TOTALAMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="30" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="13" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="11" splitType="Stretch"/>
+	</summary>
+</jasperReport>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="BPartnerCredit" language="groovy" pageWidth="612" pageHeight="792" columnWidth="612" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="2d803a37-2fe4-4f7d-a3fd-71a1b78f9079">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT
+     to_char(VALIDFROM,'YYYY-MM-DD') VALIDFROM,
+     to_char(VALIDTO,'YYYY-MM-DD') VALIDTO,
+     CREDITLIMIT
+FROM WT_BPARTNERCREDIT where WT_BPARTNERCREDIT_ID=$P{RECORD_ID}]]>
+	</queryString>
+	<field name="VALIDFROM" class="java.lang.String"/>
+	<field name="VALIDTO" class="java.lang.String"/>
+	<field name="CREDITLIMIT" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="215" splitType="Stretch">
+			<textField>
+				<reportElement uuid="b11324c1-6529-402c-876d-60bcb6caaf57" x="0" y="0" width="83" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["尊敬的用户："]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="25" width="162" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["您好！感谢您选择万邑通服务！"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="fe3b7145-1a00-4b9d-9540-0e428105df0c" x="83" y="0" width="529" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="51756482-f840-447a-82bc-cee18cd6313b" x="182" y="25" width="430" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="25" width="20" height="15"/>
+			</frame>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="40" width="511" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["鉴于您的历史消费记录及之前良好的信用记录，您申请的临时信用额度【"+$F{CREDITLIMIT}+"】已通过审核，"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="40" width="20" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="15" width="612" height="10"/>
+			</frame>
+			<textField>
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="105" width="78" height="15"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["[温馨提示]"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="51756482-f840-447a-82bc-cee18cd6313b" x="98" y="105" width="514" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="105" width="20" height="15"/>
+			</frame>
+			<textField>
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="120" width="204" height="15"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["(1)如有疑问，请与万邑通客服专员联系。"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="51756482-f840-447a-82bc-cee18cd6313b" x="224" y="120" width="388" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="120" width="20" height="15"/>
+			</frame>
+			<textField>
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="135" width="162" height="15"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["(2) 客服邮箱：cs@winit.com.cn"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="135" width="20" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="51756482-f840-447a-82bc-cee18cd6313b" x="182" y="135" width="430" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="150" width="20" height="15"/>
+			</frame>
+			<textField>
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="150" width="210" height="15"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["(3)本邮件为系统自动发送，请勿在线回复。"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="51756482-f840-447a-82bc-cee18cd6313b" x="230" y="150" width="382" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="51756482-f840-447a-82bc-cee18cd6313b" x="0" y="165" width="612" height="20"/>
+			</frame>
+			<textField>
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="185" width="150" height="15"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["敬祝：生意兴隆！万事如意！"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="185" width="20" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="51756482-f840-447a-82bc-cee18cd6313b" x="170" y="185" width="442" height="15"/>
+			</frame>
+			<textField>
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="200" width="112" height="15"/>
+				<textElement>
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["万邑通客服中心  敬启"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="200" width="20" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="51756482-f840-447a-82bc-cee18cd6313b" x="132" y="200" width="480" height="15"/>
+			</frame>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="55" width="511" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["信用有效期限从"+$F{VALIDFROM}+"到"+$F{VALIDTO}+"止，超出该临时信用额度或信用有效期限将无法下达"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="55" width="20" height="15"/>
+			</frame>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="2e56c0db-6189-418e-b583-46e7cc0057f3" x="20" y="70" width="511" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["【海外仓入库单】及【海外仓出库单】，请您于"+$F{VALIDTO}+"日前完成充值，以免对您的生意造成影响。"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="0" y="70" width="20" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="e09adb91-09ae-4474-b001-8bd972aab3cd" x="0" y="85" width="612" height="20"/>
+			</frame>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="531" y="40" width="81" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="531" y="55" width="81" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="185d0fda-adf3-46cb-8be8-96c5bfd1392d" x="531" y="70" width="81" height="15"/>
+			</frame>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="UbiExpressManifest" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="9eba87c4-1443-481b-8056-79ec6d699e6a">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<subDataset name="empty dataset" uuid="eaea7f1d-adf9-49ae-a582-c6f491b0e3c3"/>
+	<subDataset name="list" uuid="4fd68e04-fa06-459f-90e5-903e5ea8b1ef">
+		<field name="zone" class="java.lang.String"/>
+		<field name="desc" class="java.lang.String"/>
+		<field name="items" class="java.lang.String"/>
+		<field name="weight" class="java.lang.String"/>
+	</subDataset>
+	<parameter name="ManifestCreatedDate" class="java.lang.String"/>
+	<parameter name="ManifestNumber" class="java.lang.String"/>
+	<parameter name="list" class="java.util.List"/>
+	<parameter name="totalItems" class="java.lang.String"/>
+	<parameter name="totalWeight" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select 1 from dual]]>
+	</queryString>
+	<field name="1" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="152" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="17749940-69ae-494f-9baf-66d47ba424ae" x="0" y="0" width="555" height="25"/>
+				<textElement>
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Manifest Summary Report]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1d59f224-9109-4f75-97f8-f7971e048ad7" x="0" y="25" width="555" height="16"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Australia Post Manifest Summary for Wan Yi Tong]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="23ad01c6-e8c8-40bb-9308-9dc283bd0904" x="0" y="41" width="250" height="111"/>
+				<textElement>
+					<font size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Customer's Address:
+Manifest Created Date:
+Manifest Number:
+Merchant ID:
+Merchant Location ID:
+Australia Post Account Number:
+Lodgement Facility:
+]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="3cfee115-8d7c-4df5-9082-51513c9f4121" x="250" y="41" width="305" height="111"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PO Box 1145 MASCOT NSW 1460" + "\n" +
+$P{ManifestCreatedDate} + "\n" +
+$P{ManifestNumber} + "\n" +
+"40032511" + "\n" +
+"S7F" + "\n" +
+"7353789" + "\n" +
+"278678 - SYDNEY PARCELS BULK LODGEMENT"]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="40" splitType="Stretch">
+			<line>
+				<reportElement uuid="def60fa4-63e5-488e-96a3-ffe99d44d589" x="0" y="0" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.5"/>
+				</graphicElement>
+			</line>
+			<componentElement>
+				<reportElement uuid="3e126ab0-2e6a-4fba-b550-81b00fff7ae3" key="table" x="0" y="0" width="555" height="39"/>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="empty dataset" uuid="1f35d1c5-087b-4aaf-8516-0f9b260989b4">
+						<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource(1)]]></dataSourceExpression>
+					</datasetRun>
+					<jr:column uuid="34920996-ad75-474d-ae36-bb0af27cd4e1" width="50">
+						<jr:detailCell height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="f7376f48-650c-4741-a1e9-c73309b24c18" x="0" y="0" width="50" height="38"/>
+								<textElement>
+									<font size="11" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Charge
+Zone]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="23adc021-5e89-4d9e-ae93-8478c84d64ad" width="110">
+						<jr:detailCell height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="c20ca8ba-be84-49b9-b96e-1ea39874e48f" x="0" y="0" width="110" height="38"/>
+								<textElement>
+									<font size="11" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Charge Code
+Description]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="c4805ae0-c4f6-4ebe-b036-f38c66037181" width="90">
+						<jr:detailCell height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="56d6488d-d6ca-4e3a-85fe-dcc45807ec22" x="0" y="0" width="90" height="38"/>
+								<textElement>
+									<font size="11" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Total
+Consignments]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="813fb1ea-69f5-424b-9225-21c2bd608968" width="55">
+						<jr:detailCell height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="630de450-d194-4c79-8944-1f4e6d7078a9" x="0" y="0" width="55" height="38"/>
+								<textElement>
+									<font size="11" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Total
+Articles]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="fa15f5d3-e836-47d5-b37b-70d3c266faba" width="75">
+						<jr:detailCell height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="cf5535af-bc8d-4491-bfd6-1106a634290f" x="0" y="0" width="75" height="38"/>
+								<textElement>
+									<font size="11" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Total Actual
+Weight (kg)]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="29c0e508-8377-41db-bf64-2eb022e4caca" width="75">
+						<jr:detailCell height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="9dcd577f-d981-4bb1-89c3-2ee8f5ff1752" x="0" y="0" width="75" height="38"/>
+								<textElement>
+									<font size="11" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Total Cubic
+Weight (kg)]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="bf0a35e9-d049-4505-9b4b-d55864e037c6" width="100">
+						<jr:detailCell height="38" rowSpan="1">
+							<staticText>
+								<reportElement uuid="adb80355-9089-4918-a008-853f37aaad93" x="0" y="0" width="100" height="38"/>
+								<textElement>
+									<font size="11" isBold="true"/>
+								</textElement>
+								<text><![CDATA[Total Chargeable
+Weight (kg)]]></text>
+							</staticText>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+			<line>
+				<reportElement uuid="4a314672-138b-4be8-9364-a85f9d75be6a" x="0" y="39" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.5"/>
+				</graphicElement>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<componentElement>
+				<reportElement uuid="8a5ae45f-1825-4ee5-94b6-56e20ae01d6c" key="table" positionType="Float" x="0" y="0" width="555" height="15"/>
+				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
+					<datasetRun subDataset="list" uuid="5a7441ee-9c3a-414e-bc44-7bad8c6477f1">
+						<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($P{list})]]></dataSourceExpression>
+					</datasetRun>
+					<jr:column uuid="8932e79f-f03e-4f89-ad6a-6ebbf2a4fdd8" width="50">
+						<jr:detailCell height="15" rowSpan="1">
+							<textField isStretchWithOverflow="true">
+								<reportElement uuid="5272f4aa-0284-4f74-9e40-5aabfeaab42f" x="0" y="0" width="50" height="15" isPrintWhenDetailOverflows="true"/>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{zone}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="e3e3ec14-dd08-480d-b1bd-c5bcbaa049b5" width="110">
+						<jr:detailCell height="15" rowSpan="1">
+							<textField isStretchWithOverflow="true">
+								<reportElement uuid="de36ef89-9375-4deb-8ca1-6efbf3ca64b8" x="0" y="0" width="110" height="15" isPrintWhenDetailOverflows="true"/>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{desc}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="56383442-a6b2-4094-b251-76e46c20eed0" width="90">
+						<jr:detailCell height="15" rowSpan="1">
+							<textField isStretchWithOverflow="true">
+								<reportElement uuid="d94b49b3-14aa-4990-88e4-a6637986c16b" x="0" y="0" width="90" height="15" isPrintWhenDetailOverflows="true"/>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{items}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="2d1c3570-addb-42bb-ae9e-bf43cf16d77f" width="55">
+						<jr:detailCell height="15" rowSpan="1">
+							<textField isStretchWithOverflow="true">
+								<reportElement uuid="0b5fd42d-9e79-4bee-ac22-8aef4c99a8b1" x="0" y="0" width="55" height="15" isPrintWhenDetailOverflows="true"/>
+								<textElement/>
+								<textFieldExpression><![CDATA[$F{items}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="f0f4817d-4ecd-4bea-8544-e727cbf05466" width="75">
+						<jr:detailCell height="15" rowSpan="1">
+							<textField isStretchWithOverflow="true">
+								<reportElement uuid="37236a02-f9ea-4d5e-9c14-ed8649418b9c" x="0" y="0" width="75" height="15" isPrintWhenDetailOverflows="true"/>
+								<box rightPadding="20"/>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{weight}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+					<jr:column uuid="2a610201-4231-4ebe-83cb-fd06fa31868e" width="75">
+						<jr:detailCell height="15" rowSpan="1"/>
+					</jr:column>
+					<jr:column uuid="8e29c8bd-4416-4c16-a59d-8a0304784329" width="100">
+						<jr:detailCell height="15" rowSpan="1">
+							<textField isStretchWithOverflow="true">
+								<reportElement uuid="31f34718-643d-430f-a339-493a14d4ebeb" x="0" y="0" width="100" height="15" isPrintWhenDetailOverflows="true"/>
+								<box rightPadding="10"/>
+								<textElement textAlignment="Right"/>
+								<textFieldExpression><![CDATA[$F{weight}]]></textFieldExpression>
+							</textField>
+						</jr:detailCell>
+					</jr:column>
+				</jr:table>
+			</componentElement>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="79" splitType="Stretch">
+			<line>
+				<reportElement uuid="68ffaed8-fbbe-4cc7-8cd2-f83ab989a12b" x="0" y="0" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement uuid="5eba0353-f3bf-42ec-8a00-1a3ab489685b" x="0" y="50" width="555" height="29"/>
+				<textElement/>
+				<text><![CDATA[These charges are estimates only and are inclusive of GST where GST applies. This is not an invoice requesting payment. Your tax invoice will be forwarded to you after your parcels are lodged and recorded centrally.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="fad7032a-a93a-4f65-9c23-8a4a5ea2cf51" x="0" y="1" width="160" height="20"/>
+				<textElement/>
+				<text><![CDATA[Totals]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="64b80418-3639-4d12-806d-1aa737ced40f" x="160" y="1" width="90" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{totalItems}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="cfb26d14-9f94-45b5-85b7-60f031f805b3" x="250" y="1" width="55" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{totalItems}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="aa64185f-829d-4883-8bfb-acbc07a59930" x="305" y="1" width="75" height="20"/>
+				<box rightPadding="20"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{totalWeight}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="76b87782-360a-4f36-8a7c-e0ac12d63936" x="455" y="1" width="100" height="20"/>
+				<box rightPadding="10"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$P{totalWeight}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="436eb45d-707c-4adb-aba1-a9622e64f56e" x="380" y="1" width="75" height="20"/>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<line>
+				<reportElement uuid="b0a55ae5-eab4-44e1-b174-f6176370698b" x="0" y="34" width="555" height="1"/>
+				<graphicElement>
+					<pen lineWidth="1.5"/>
+				</graphicElement>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

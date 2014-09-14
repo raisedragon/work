@@ -1,0 +1,689 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Order" language="groovy" pageWidth="2592" pageHeight="595" orientation="Landscape" columnWidth="2592" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9028621-e9b8-428b-b604-e61314a0c4cf">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[SELECT
+               A.SKU, --产品SKU编码
+               A.CLIENTCODE, --客户编码
+               A.CLIENTNAME, --客户
+               MIN(A.CREATED), --产品注册日期
+               A.CATG, --产品分类
+               A.NAME, --中文产品名称
+               A.ENAME, --英文产品名称
+               A.SELLERWEIGHT,
+               A.SELLERVOLUME,
+               A.SELLERLENGTH,
+               A.SELLERWIDTH,
+               A.SELLERHEIGHT, --卖家输入重量/体积/长/宽/高
+               A.WEIGHT,
+               A.VOLUME,
+               A.LENGTH,
+               A.WIDTH,
+               A.HEIGHT, --核实重量/体积/长/宽/高
+               '中国' AS IMPORTCOUNTRY, --国家
+               MAX(DECODE(A.country,'AU',A.PRICEIMPORTS)) AS 澳洲进口申报价值,
+               MAX(DECODE(A.country,'US',A.PRICEIMPORTS)) AS 美国进口申报价值,
+               MAX(DECODE(A.country,'CN',A.PRICEEXPORTS)) AS 出口申报价值,
+
+               MAX(DECODE(A.country,'AU',A.CUSTOMSTAXNO)) AS 澳洲进口税则号码,
+               MAX(DECODE(A.country,'US',A.CUSTOMSTAXNO)) AS 美国进口税则号码,
+               MAX(DECODE(A.country,'CN',A.CUSTOMSTAXNO)) AS 出口税则号码
+             --  A.PUBLISHDATE --完成注册时间
+  FROM (SELECT
+               cc.countrycode AS country，
+               P.SKU, --产品SKU编码
+               BP.VALUE AS CLIENTCODE, --客户编码
+               BP.NAME AS CLIENTNAME, --客户
+               PM.CREATED, --产品注册日期
+               CAT.NAME AS CATG, --产品分类
+               P.NAME, --中文产品名称
+               P.ENAME, --英文产品名称
+               P.SELLERWEIGHT,
+               P.SELLERVOLUME,
+               P.SELLERLENGTH,
+               P.SELLERWIDTH,
+               P.SELLERHEIGHT, --卖家输入重量/体积/长/宽/高
+               P.WEIGHT,
+               P.VOLUME,
+               P.LENGTH,
+               P.WIDTH,
+               P.HEIGHT, --核实重量/体积/长/宽/高
+               CL.PRICEIMPORTS, --进口申报价值
+               CL.PRICEEXPORTS, --出口申报价值
+               TAX.CUSTOMSTAXNO--进口税则号码
+          FROM M_PRODUCT P
+          LEFT JOIN C_BPARTNER BP
+            ON BP.C_BPARTNER_ID = P.C_BPARTNER_ID
+          LEFT JOIN M_PRODUCT_CATEGORY CAT
+            ON CAT.M_PRODUCT_CATEGORY_ID = P.M_PRODUCT_CATEGORY_ID
+          LEFT JOIN WT_PRODUCTMAINTENANCELINE PML
+            ON PML.M_PRODUCT_ID = P.M_PRODUCT_ID
+          LEFT JOIN WT_CLASSIFYIMPORT CL
+            ON CL.WT_PRODUCTMAINTENANCELINE_ID =
+               PML.WT_PRODUCTMAINTENANCELINE_ID
+               LEFT JOIN wt_productmaintenance pm ON pm.wt_productmaintenance_id = pml.wt_productmaintenance_id
+          LEFT JOIN WT_CUSTOMSTAXRULE TAX
+            ON TAX.WT_CUSTOMSTAXRULE_ID = CL.WT_CUSTOMSTAXRULE_ID
+            LEFT JOIN c_country cc ON cc.c_country_id = tax.c_country_id
+            )A
+GROUP BY
+               A.SKU, --产品SKU编码
+               A.CLIENTCODE, --客户编码
+               A.CLIENTNAME, --客户
+               A.CATG, --产品分类
+               A.NAME, --中文产品名称
+               A.ENAME, --英文产品名称
+               A.SELLERWEIGHT,
+               A.SELLERVOLUME,
+               A.SELLERLENGTH,
+               A.SELLERWIDTH,
+               A.SELLERHEIGHT, --卖家输入重量/体积/长/宽/高
+               A.WEIGHT,
+               A.VOLUME,
+               A.LENGTH,
+               A.WIDTH,
+               A.HEIGHT --核实重量/体积/长/宽/高]]>
+	</queryString>
+	<field name="SKU" class="java.lang.String"/>
+	<field name="CLIENTCODE" class="java.lang.String"/>
+	<field name="CLIENTNAME" class="java.lang.String"/>
+	<field name="MIN(A.CREATED)" class="java.sql.Timestamp"/>
+	<field name="CATG" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="ENAME" class="java.lang.String"/>
+	<field name="SELLERWEIGHT" class="java.math.BigDecimal"/>
+	<field name="SELLERVOLUME" class="java.math.BigDecimal"/>
+	<field name="SELLERLENGTH" class="java.math.BigDecimal"/>
+	<field name="SELLERWIDTH" class="java.math.BigDecimal"/>
+	<field name="SELLERHEIGHT" class="java.math.BigDecimal"/>
+	<field name="WEIGHT" class="java.math.BigDecimal"/>
+	<field name="VOLUME" class="java.math.BigDecimal"/>
+	<field name="LENGTH" class="java.math.BigDecimal"/>
+	<field name="WIDTH" class="java.math.BigDecimal"/>
+	<field name="HEIGHT" class="java.math.BigDecimal"/>
+	<field name="IMPORTCOUNTRY" class="java.lang.String"/>
+	<field name="澳洲进口申报价值" class="java.math.BigDecimal"/>
+	<field name="美国进口申报价值" class="java.math.BigDecimal"/>
+	<field name="出口申报价值" class="java.math.BigDecimal"/>
+	<field name="澳洲进口税则号码" class="java.lang.String"/>
+	<field name="美国进口税则号码" class="java.lang.String"/>
+	<field name="出口税则号码" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="564f54f0-7100-4dd0-bac2-5f7f9b0392aa" x="143" y="0" width="112" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户编码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="22e052f5-c6de-4582-ac03-cc0d86a17055" x="255" y="0" width="227" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b37f9b2a-868e-4b66-b107-9b384a87f484" x="482" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[产品注册日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="cb8ec814-1437-4ced-8c4e-960ecf9c470a" x="582" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[产品分类]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="17df2f37-da18-4dea-80e1-eaa2f5a77661" x="682" y="0" width="140" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[中文产品名称]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ac7bb5ef-1d4e-432d-8fa1-3881e41533b6" x="822" y="0" width="140" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[中文产品名称]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="bb2210fd-3644-4a25-89f9-256ce0bd9154" x="962" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[卖家输入重量]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3b42cf71-659f-45ea-a530-9e48239b934b" x="1136" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[卖家输入体积]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="4637ac3e-7536-40a0-9bc6-e6fd9cc93ab6" x="1310" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[卖家输入长]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="913cdb37-0726-4aed-87c0-141585d2bd39" x="1062" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[核实重量]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="24081f7b-b29e-4d44-bbdf-959ee6e9433e" x="1236" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[核实体积]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d57799c7-5c0a-472c-b58d-e0baa26e9c36" x="1410" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[核实长]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e5e1e36c-91b8-41ab-bc0d-c4dc3559b67c" x="1484" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[卖家输入宽]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="dbcd742c-678b-40fc-990b-ea3f4a064fc4" x="1658" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[卖家输入高]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="599aacee-0655-4df1-8b18-c06b8d41e022" x="1584" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[核实宽]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f254a3c0-b2c3-4627-9d30-98b0c8b2fa5d" x="1758" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[核实高]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="93f25488-db86-4e2a-890c-7dcdf1ede91c" x="1832" y="0" width="77" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国家]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="196ef68a-81d1-46c5-9424-d4177f729eec" x="1909" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[澳洲进口申报价值]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8887201e-cb1d-4493-af20-be138266ea61" x="2029" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[美国进口申报价值]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="bf159146-e3ef-411c-bbd3-3a868e015d4b" x="2149" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[出口申报价值]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5b421406-a8cc-4902-b8a9-c7fd61f4621c" x="2249" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[澳洲进口税则号码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="30655a14-db26-4bf7-9970-d3381ec728dd" x="2369" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[美国进口税则号码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f750d1c8-3fb3-4f0f-9a9f-6c6a845c61f0" x="2489" y="0" width="103" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[出口税则号码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="cc0cf4ec-6ceb-469e-8724-ca438d98c34a" x="0" y="0" width="143" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement/>
+				<text><![CDATA[产品SKU编码]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="20">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f72dbe31-d360-4985-8695-00d3b248c87c" x="143" y="0" width="112" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLIENTCODE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2b5ed8d6-6391-4e29-8a0a-1864f3483095" x="255" y="0" width="227" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CLIENTNAME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="456c8b60-2aaf-4d60-8ba3-742e3b3ec962" x="482" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{MIN(A.CREATED)}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="560a8015-7eea-415b-b481-4683ac8c8ec3" x="582" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CATG}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="9dfbee5f-6957-4942-99ef-b4ff8baceb1e" x="682" y="0" width="140" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="69cb08e2-9651-4598-927f-f11d6ed47b68" x="822" y="0" width="140" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ENAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="7842fc70-2384-47c4-b12f-1b6b2bf8ca9a" x="962" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERWEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="3fa81bf1-eeec-4393-bb6e-408b5b94c488" x="1136" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERVOLUME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="4f62fd57-40d2-48af-a668-efb7c22e18e4" x="1310" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERLENGTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="48d5d9d7-46f5-4d12-bb78-1bb187ee6c68" x="1062" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="bfe2c439-0159-48fa-85d4-7742be04ff61" x="1236" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VOLUME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b5a617e6-b66a-4676-9bc1-7c9f58e873ea" x="1484" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERWIDTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="bcfc37f4-2884-4f5a-9219-8d1e2dc886e5" x="1658" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERHEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="c4162cdc-009d-4104-aa71-b50a79a80191" x="1758" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{HEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="4207c5d2-4bf8-4eb0-84b0-3cba2f6a231f" x="1832" y="0" width="77" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IMPORTCOUNTRY}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="9e8da7a2-6673-4510-8248-4e2acad3e949" x="1909" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{澳洲进口申报价值}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a78b3237-285b-4f81-aac3-309aaa93349e" x="2029" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{美国进口申报价值}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="d17e2b1f-52fd-4f0b-9e79-532522fa9348" x="2149" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{出口申报价值}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="14f19291-e7ae-40ee-8d27-3717e6cf9385" x="2249" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{澳洲进口税则号码}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="055eedc4-cb80-4ac4-9e58-d41545f841f8" x="2369" y="0" width="120" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{美国进口税则号码}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="6fd80e2b-cb94-426c-a7be-69712e69b351" x="2489" y="0" width="103" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{出口税则号码}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2d1e8d17-7a2a-4948-9271-1114990fa988" x="1584" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WIDTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="1c13ebf7-880b-4592-88e2-4c74cab8bf0c" x="1410" y="0" width="74" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LENGTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="24241bde-ec51-42fb-a060-d76e70cb46fc" x="0" y="0" width="143" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{SKU}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

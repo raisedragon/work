@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+  
+<mapper namespace="com.winit.svr.impl.persistence.entity.LabelEntity">
+
+  <!-- USER INSERT -->
+
+  <insert id="insertLabel" parameterType="com.winit.svr.impl.persistence.entity.LabelEntity">
+    insert into ${prefix}WT_LABEL (ID_, REV_, DOCUMENT_NO_, TRACK_NO_)
+    values (
+      #{id ,jdbcType=VARCHAR},
+      1,
+      #{documentNo ,jdbcType=VARCHAR},
+      #{trackNo ,jdbcType=VARCHAR}
+    )
+  </insert>
+
+  <!-- USER UPDATE -->
+
+  <update id="updateLabel" parameterType="com.winit.svr.impl.persistence.entity.LabelEntity">
+    update ${prefix}WT_LABEL set
+      REV_ = #{revisionNext ,jdbcType=INTEGER},
+      DOCUMENT_NO_ = #{documentNo ,jdbcType=VARCHAR},
+      TRACK_NO_ = #{trackNo ,jdbcType=VARCHAR},
+      FILE_CODE_ = #{fileCode ,jdbcType=CLOB},
+      STATUS_ = #{status ,jdbcType=VARCHAR}
+    where ID_ = #{id}
+      and REV_ = #{revision}
+  </update>
+  
+  <!-- USER DELETE -->
+
+  <delete id="deleteLabel" parameterType="com.winit.svr.impl.persistence.entity.LabelEntity">
+    delete from ${prefix}WT_LABEL where ID_ = #{id} and REV_ = #{revision}
+  </delete>
+
+  <!-- USER RESULTMAP -->
+
+  <resultMap id="labelResultMap" type="com.winit.svr.impl.persistence.entity.LabelEntity">
+    <id property="id" column="ID_" jdbcType="VARCHAR" />
+    <result property="revision" column="REV_" jdbcType="INTEGER" />
+    <result property="documentNo" column="DOCUMENT_NO_" jdbcType="VARCHAR" />
+    <result property="trackNo" column="TRACK_NO_" jdbcType="VARCHAR" />
+    <result property="fileCode" column="FILE_CODE_" jdbcType="CLOB" />
+    <result property="status" column="STATUS_" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <!-- USER SELECT -->
+
+  <select id="selectLabelById" parameterType="string" resultMap="labelResultMap">
+    select * from ${prefix}WT_LABEL where ID_ = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  
+  <select id="selectLabelByDocumentNo" parameterType="string" resultMap="labelResultMap">
+    select * from ${prefix}WT_LABEL where DOCUMENT_NO_ = #{documentNo,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="selectLabelByQueryCriteria" parameterType="com.winit.svr.impl.LabelQueryImpl" resultMap="labelResultMap">
+  	${limitBefore}
+    select RES.* ${limitBetween}
+    <include refid="selectLabelByQueryCriteriaSql" />
+    ${orderBy}
+    ${limitAfter}
+  </select>
+  
+   <select id="selectLabelCountByQueryCriteria" parameterType="com.winit.svr.impl.LabelQueryImpl" resultType="long">
+    select count(RES.ID_)
+    <include refid="selectLabelByQueryCriteriaSql" />
+  </select>
+  
+  <sql id="selectLabelByQueryCriteriaSql">
+    from ${prefix}WT_LABEL RES 
+    <where>
+      <if test="id != null">
+        RES.ID_ = #{id}
+      </if>
+      <if test="documentNo != null">
+        and RES.DOCUMENT_NO_ = #{documentNo}
+      </if>
+      <if test="trackNo != null">
+        and RES.TRACK_NO_ = #{trackNo}
+      </if>
+      <if test="status != null">
+        and RES.STATUS_ = #{status}
+      </if>
+    </where>
+  </sql>
+
+  <select id="selectLabelByNativeQuery" parameterType="java.util.Map" resultMap="labelResultMap">
+    <if test="resultType == 'LIST_PAGE'">
+      ${limitBefore}
+    </if>
+    ${sql}
+    <if test="resultType == 'LIST_PAGE'">
+      ${limitAfter}
+    </if>
+  </select>
+
+  <select id="selectLabelByNativeQuery_mssql_or_db2" parameterType="java.util.Map" resultMap="labelResultMap">
+    <if test="resultType == 'LIST_PAGE'">
+      ${limitBeforeNativeQuery}
+    </if>
+    ${sql}
+    <if test="resultType == 'LIST_PAGE'">
+      ${limitAfter}
+    </if>
+  </select>
+
+  <select id="selectLabelCountByNativeQuery" parameterType="java.util.Map" resultType="long">
+    ${sql}
+  </select>
+  
+</mapper>

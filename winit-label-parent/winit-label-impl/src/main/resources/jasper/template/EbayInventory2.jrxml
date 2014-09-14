@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="1099" pageHeight="842" columnWidth="1079" leftMargin="0" rightMargin="20" topMargin="20" bottomMargin="20" uuid="55de68f7-c31f-4d7c-9f77-c552541093f1">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="RECORD_ID" class="java.math.BigDecimal"/>
+	<queryString>
+		<![CDATA[SELECT w.name as site,
+       sysdate as systemtime,
+       lo.locatorserno as location,
+       c.value as sellervalue,           --卖家ID
+       c.name as sellername,
+       P.SKU,
+       NVL(WS.QTYONHAND, 0) AS QUANTITY,
+       NVL(p.volume * ws.qtyonhand, 0) as summarized,
+       (
+       Select r.avgsales
+       from  M_Replenish   r
+       where r.m_product_id=p.m_product_id and rownum=1
+       )      as avgsales                                          ---平均日销量
+  FROM WT_WAREHOUSESTORAGE WS,
+       M_WAREHOUSE         W,
+       M_LOCATOR           LO,
+       M_PRODUCT           P,
+       C_BPARTNER          C,
+       WT_SUBAREA          S
+ WHERE WS.M_WAREHOUSE_ID = W.M_WAREHOUSE_ID
+   AND W.M_WAREHOUSE_ID = S.M_WAREHOUSE_ID
+   AND S.SUBAREATYPE = 'H'
+   AND S.WT_SUBAREA_ID = LO.WT_SUBAREA_ID
+   AND WS.M_PRODUCT_ID = P.M_PRODUCT_ID
+   AND P.C_BPARTNER_ID = C.C_BPARTNER_ID
+   AND ws.qtyonhand <> 0
+   AND ws.m_warehouse_id = $P{RECORD_ID}]]>
+	</queryString>
+	<field name="SITE" class="java.lang.String"/>
+	<field name="SYSTEMTIME" class="java.sql.Timestamp"/>
+	<field name="LOCATION" class="java.lang.String"/>
+	<field name="SELLERVALUE" class="java.lang.String"/>
+	<field name="SELLERNAME" class="java.lang.String"/>
+	<field name="SKU" class="java.lang.String"/>
+	<field name="QUANTITY" class="java.math.BigDecimal"/>
+	<field name="SUMMARIZED" class="java.math.BigDecimal"/>
+	<field name="AVGSALES" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="71" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="152" y="38" width="655" height="18"/>
+				<textElement>
+					<font fontName="SansSerif" size="12"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3139d470-49de-4dc6-a9b0-62897afbbf22" x="0" y="0" width="438" height="18"/>
+				<textElement>
+					<font fontName="SansSerif" size="12"/>
+				</textElement>
+				<text><![CDATA[DAILY INVENTORY REPORT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c46c93c0-f16e-4ee7-b7b3-edd64c8514b4" x="623" y="56" width="95" height="15"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[Summarized CBM]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d4e2a0b1-f19e-4fbe-be3b-fd8cae53223e" x="563" y="56" width="60" height="15"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<text><![CDATA[QUANTITY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="36c5a07d-1337-4d5f-9439-00e0995dc370" x="438" y="56" width="125" height="15"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[MODEL(SKU)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="211e7d64-db93-4cc9-90b3-afbad53ab5a6" x="241" y="56" width="197" height="15"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<text><![CDATA[SellerName]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c942de81-939d-46d9-b744-7f3cd520d622" x="0" y="56" width="63" height="15"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Site]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="56b452f7-1ab3-432e-9130-001b2b922229" x="63" y="56" width="89" height="15"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[Location]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="56b452f7-1ab3-432e-9130-001b2b922229" x="152" y="56" width="89" height="15"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[SellerID]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="56b452f7-1ab3-432e-9130-001b2b922229" x="718" y="56" width="89" height="15"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[AvgSales]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd HH:mm:ss">
+				<reportElement uuid="f82135b6-1361-4164-b774-cb82a8bd1377" x="0" y="38" width="152" height="18"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{SYSTEMTIME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="f05635be-83d9-4ba9-9c18-ec80383de6be" x="0" y="18" width="438" height="20"/>
+				<textElement/>
+				<text><![CDATA[Report generation date & time]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="15" splitType="Stretch">
+			<textField>
+				<reportElement uuid="804d5377-571b-4cf0-9e9b-62dd34e8f2ff" x="0" y="0" width="63" height="15"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SITE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="606d7d06-4666-4cbe-bbc3-3745afe68c73" x="63" y="0" width="89" height="15"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{LOCATION}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="6bdb21c1-a568-4db0-96fd-0400970ac500" x="241" y="0" width="197" height="15" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="10" isUnderline="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERNAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="132c8bb8-d0c4-4817-be12-876ca19fbe8e" x="438" y="0" width="125" height="15" isPrintWhenDetailOverflows="true"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SKU}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="a08e87ac-a1fb-4f3d-a7d4-5c7d03fd1d2a" positionType="FixRelativeToBottom" x="563" y="0" width="60" height="15"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{QUANTITY}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="55486fa1-33b8-4a1a-80c6-8a3224266163" x="623" y="0" width="95" height="15"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SUMMARIZED}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="f0b1e463-b88a-4dd6-96ed-3ac9e382d64c" x="152" y="0" width="89" height="15"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{SELLERVALUE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="5d86b590-1693-4325-9ff3-c97021f817b6" x="718" y="0" width="89" height="15"/>
+				<box>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AVGSALES}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

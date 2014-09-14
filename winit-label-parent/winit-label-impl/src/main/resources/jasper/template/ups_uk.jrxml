@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="288" pageHeight="432" columnWidth="288" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" >
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="217"/>
+	<parameter name="documentNo" class="java.lang.String"/>
+	<parameter name="skus" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select name,
+address1,
+address2,
+address3,
+city,
+postal,
+countryname,
+documentno
+from wt_owms_exwarehouse
+where documentno=$P{documentNo}]]>
+	</queryString>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="ADDRESS1" class="java.lang.String"/>
+	<field name="ADDRESS2" class="java.lang.String"/>
+	<field name="ADDRESS3" class="java.lang.String"/>
+	<field name="CITY" class="java.lang.String"/>
+	<field name="POSTAL" class="java.lang.String"/>
+	<field name="COUNTRYNAME" class="java.lang.String"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="432" splitType="Stretch">
+			<staticText>
+				<reportElement  x="0" y="0" width="288" height="114"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="30" isBold="true"/>
+				</textElement>
+				<text><![CDATA[UPS  UK]]></text>
+			</staticText>
+			<staticText>
+				<reportElement  x="0" y="113" width="288" height="22"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Received Address:]]></text>
+			</staticText>
+			<textField>
+				<reportElement  x="0" y="131" width="288" height="160"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="14" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME} + "\n" +
+($F{ADDRESS1} == null ? "" : ($F{ADDRESS1} + "\n")) +
+($F{ADDRESS2} == null ? "" : ($F{ADDRESS2} + "\n")) +
+($F{ADDRESS3} == null ? "" : ($F{ADDRESS3} + "\n")) +
+$F{CITY} + "\n" +
+$F{POSTAL}.toUpperCase() + "\n" +
+($F{COUNTRYNAME}.toUpperCase().equals("UK") ? "GB" : $F{COUNTRYNAME}.toUpperCase())]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement  x="0" y="291" width="75" height="25"/>
+				<box leftPadding="5"/>
+				<textElement markup="none">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Shipment:]]></text>
+			</staticText>
+			<textField>
+				<reportElement  x="75" y="291" width="213" height="25"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{documentNo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement  mode="Transparent" x="0" y="326" width="35" height="106" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="12" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[SKU:]]></text>
+			</staticText>
+			<textField>
+				<reportElement  x="35" y="326" width="253" height="106"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{skus}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

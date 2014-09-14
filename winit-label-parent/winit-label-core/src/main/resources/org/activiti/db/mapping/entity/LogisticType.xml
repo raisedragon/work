@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+  
+<mapper namespace="com.winit.svr.impl.persistence.entity.LogisticTypeEntity">
+
+  <!-- USER INSERT -->
+
+  <insert id="insertLogisticType" parameterType="com.winit.svr.impl.persistence.entity.LogisticTypeEntity">
+    insert into ${prefix}WT_LOGISTIC_TYPE (ID_, REV_, NAME_, CODE_)
+    values (
+      #{id ,jdbcType=VARCHAR},
+      1,
+      #{name ,jdbcType=VARCHAR},
+      #{code ,jdbcType=VARCHAR}
+    )
+  </insert>
+
+  <!-- USER UPDATE -->
+
+  <update id="updateLogisticType" parameterType="com.winit.svr.impl.persistence.entity.LogisticTypeEntity">
+    update ${prefix}WT_LOGISTIC_TYPE set
+      REV_ = #{revisionNext ,jdbcType=INTEGER},
+      NAME_ = #{name ,jdbcType=VARCHAR},
+      CODE_ = #{code ,jdbcType=VARCHAR}
+    where ID_ = #{id}
+      and REV_ = #{revision}
+  </update>
+  
+  <!-- USER DELETE -->
+
+  <delete id="deleteLogisticType" parameterType="com.winit.svr.impl.persistence.entity.LogisticTypeEntity">
+    delete from ${prefix}WT_LOGISTIC_TYPE where ID_ = #{id} and REV_ = #{revision}
+  </delete>
+
+  <!-- USER RESULTMAP -->
+
+  <resultMap id="logisticTypeResultMap" type="com.winit.svr.impl.persistence.entity.LogisticTypeEntity">
+    <id property="id" column="ID_" jdbcType="VARCHAR" />
+    <result property="revision" column="REV_" jdbcType="INTEGER" />
+    <result property="name" column="NAME_" jdbcType="VARCHAR" />
+    <result property="code" column="CODE_" jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <!-- USER SELECT -->
+
+  <select id="selectLogisticTypeById" parameterType="string" resultMap="logisticTypeResultMap">
+    select * from ${prefix}WT_LOGISTIC_TYPE where ID_ = #{id,jdbcType=VARCHAR}
+  </select>
+    
+  <select id="selectLogisticTypeByCode" parameterType="string" resultMap="logisticTypeResultMap">
+    select * from ${prefix}WT_LOGISTIC_TYPE where CODE_ = #{code,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="selectLogisticTypeByQueryCriteria" parameterType="com.winit.svr.impl.LogisticTypeQueryImpl" resultMap="logisticTypeResultMap">
+  	${limitBefore}
+    select RES.* ${limitBetween}
+    <include refid="selectLogisticTypeByQueryCriteriaSql" />
+    ${orderBy}
+    ${limitAfter}
+  </select>
+  
+   <select id="selectLogisticTypeCountByQueryCriteria" parameterType="com.winit.svr.impl.LogisticTypeQueryImpl" resultType="long">
+    select count(RES.ID_)
+    <include refid="selectLogisticTypeByQueryCriteriaSql" />
+  </select>
+  
+  <sql id="selectLogisticTypeByQueryCriteriaSql">
+    from ${prefix}WT_LOGISTIC_TYPE RES 
+    <where>
+      <if test="id != null">
+        RES.ID_ = #{id}
+      </if>
+      <if test="name != null">
+        and RES.NAME_ = #{name}
+      </if>
+      <if test="nameLike != null">
+        and RES.NAME_ like #{nameLike}
+      </if>
+      <if test="code != null">
+        and RES.CODE_ = #{code}
+      </if>
+      <if test="codeLike != null">
+        and RES.CODE_ like #{codeLike}
+      </if>
+    </where>
+  </sql>
+
+  <select id="selectLogisticTypeByNativeQuery" parameterType="java.util.Map" resultMap="logisticTypeResultMap">
+    <if test="resultType == 'LIST_PAGE'">
+      ${limitBefore}
+    </if>
+    ${sql}
+    <if test="resultType == 'LIST_PAGE'">
+      ${limitAfter}
+    </if>
+  </select>
+
+  <select id="selectLogisticTypeByNativeQuery_mssql_or_db2" parameterType="java.util.Map" resultMap="logisticTypeResultMap">
+    <if test="resultType == 'LIST_PAGE'">
+      ${limitBeforeNativeQuery}
+    </if>
+    ${sql}
+    <if test="resultType == 'LIST_PAGE'">
+      ${limitAfter}
+    </if>
+  </select>
+
+  <select id="selectLogisticTypeCountByNativeQuery" parameterType="java.util.Map" resultType="long">
+    ${sql}
+  </select>
+  
+</mapper>

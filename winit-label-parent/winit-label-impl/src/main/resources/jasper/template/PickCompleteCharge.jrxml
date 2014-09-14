@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="PutOnSale" language="groovy" pageWidth="595" pageHeight="1561" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="0" uuid="41ba1c0b-ab4a-44ad-9770-23106814e835">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select
+      to_char(co.created,'yyyy-mm-dd')as created ,                    --下单时间
+      bp.c_bpartner_id,             --卖家
+      co.documentno,                --海外仓入库单单号
+      m.name as demostic,           --国内仓
+      t.name as transmode,          --运输方式
+      w.name as destination,        --海外仓
+      NVL(co.volume,0) as confiredvolume,            --总体积
+      NVL(co.weight,0) as confiredweight,            --总重量
+      decode(co.chargedweight,0,'-',''||to_char(round(co.chargedweight,3))) as finishedchargedweight,
+        CASE
+         WHEN lm.unit='FeeWeight'  THEN
+         NVL(co.volume*1000000/lm.conversionrate,0)
+         ELSE
+         0
+       END as OrderVolumeWeight,    --体积重
+      ca.usablebalance,             --账户余额
+      re.name as type,              --类型
+      cal.trxfrzamt,                --交易金额
+      cu1.iso_code  as currency1,   --币制
+      cal.acctfrzamt,               --冻结金额
+   sum(cal.acctfrzamt) over(partition by co.c_order_id order by co.c_order_id)  as totalAmt,                           --汇总冻结金额
+      cu2.iso_code as currency2,    --币制
+      to_char('海外仓入库完成') as finishtime
+from wt_pickorder po
+left join c_order co on co.c_order_id=po.c_order_id
+left join m_Warehouse m on m.m_warehouse_id=co.m_warehouse_id
+left join m_Warehouse w on w.m_warehouse_id=co.destination
+left join wt_transportmode t on t.wt_transportmode_id=co.wt_transportmode_id
+left join wt_logisticsmode lm on lm.wt_logisticsmode_id=t.wt_logisticsmode_id
+left join c_bpartner bp on bp.c_bpartner_id=co.c_bpartner_id
+left join WT_BP_Customer_Account ca on ca.c_bpartner_id=bp.c_bpartner_id
+left join Wt_Bp_Customer_Accountline cal on cal.wt_bp_customer_account_id=ca.wt_bp_customer_account_id and cal.record_id=co.c_order_id　and cal.ad_table_id=259
+left join c_currency cu1 on cu1.c_currency_id=cal.c_trxcurrency_id
+left join c_currency cu2 on cu2.c_currency_id=cal.c_currency_id
+left join wv_reference re on re.Ad_Reference_ID=1000091 and re.value=cal.transtype
+where re.Ad_Language='zh_CN'and po.wt_pickorder_id=$P{RECORD_ID}
+order by re.name]]>
+	</queryString>
+	<field name="CREATED" class="java.lang.String"/>
+	<field name="C_BPARTNER_ID" class="java.math.BigDecimal"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<field name="DEMOSTIC" class="java.lang.String"/>
+	<field name="TRANSMODE" class="java.lang.String"/>
+	<field name="DESTINATION" class="java.lang.String"/>
+	<field name="CONFIREDVOLUME" class="java.math.BigDecimal"/>
+	<field name="CONFIREDWEIGHT" class="java.math.BigDecimal"/>
+	<field name="FINISHEDCHARGEDWEIGHT" class="java.lang.String"/>
+	<field name="ORDERVOLUMEWEIGHT" class="java.math.BigDecimal"/>
+	<field name="USABLEBALANCE" class="java.math.BigDecimal"/>
+	<field name="TYPE" class="java.lang.String"/>
+	<field name="TRXFRZAMT" class="java.math.BigDecimal"/>
+	<field name="CURRENCY1" class="java.lang.String"/>
+	<field name="ACCTFRZAMT" class="java.math.BigDecimal"/>
+	<field name="TOTALAMT" class="java.math.BigDecimal"/>
+	<field name="CURRENCY2" class="java.lang.String"/>
+	<field name="FINISHTIME" class="java.lang.String"/>
+	<variable name="SumFZAMT" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{ACCTFRZAMT}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="47" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="ac26b57c-530a-4df1-bd33-de85f78fa757" x="2" y="0" width="77" height="15"/>
+				<textElement>
+					<font isBold="false" isItalic="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[尊敬的用户：]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="605b3095-c2a6-4def-92f5-2b003f4ea8b0" x="2" y="30" width="412" height="15"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA["       现为您奉上 "+$F{CREATED}+" 下达的海外仓入库成功提交提货单的详细信息。"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="ac26b57c-530a-4df1-bd33-de85f78fa757" x="0" y="15" width="242" height="15"/>
+				<textElement>
+					<font isBold="false" isItalic="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[        您好！感谢您选择万邑通服务！
+
+]]></text>
+			</staticText>
+			<frame>
+				<reportElement uuid="43a01c9e-1683-41e9-9061-c7ba7bf8704d" x="242" y="15" width="313" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="43a01c9e-1683-41e9-9061-c7ba7bf8704d" x="79" y="0" width="476" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="b8f4d12f-a9b4-4b1c-aad3-421460716bd7" x="414" y="30" width="141" height="15"/>
+			</frame>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="63" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="15082fb6-cbff-4dbf-80fe-e8496915f40c" x="2" y="0" width="131" height="21"/>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[【海外仓入库单信息】]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="892c459d-0bd2-44f1-ba5e-11a2ae394e55" x="2" y="21" width="77" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外入库单编号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b83864c3-5399-4f74-b2ac-3049c16063f4" x="79" y="21" width="54" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内仓]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3f25acd8-ec8f-43ab-88e7-3ed1824b30fd" x="133" y="21" width="77" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[运输方式]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="69ca1fc9-9a98-40b8-8ada-5d3a6a64b5e1" x="210" y="21" width="81" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[目的地]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5c335dd2-079f-4b4d-83b9-38b6d8f1a5bf" x="291" y="21" width="64" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[总体积(CBM)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="dfec6901-8bc7-4fef-b8fc-0e232d1f8d0a" x="355" y="21" width="59" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[总重量(KG)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3f39c118-484f-476c-80c1-c9432bb5dd7a" x="414" y="21" width="75" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[总计费重(KG)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="52e9c3cb-6fac-465f-b1d3-262c2528d036" x="489" y="21" width="66" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="false" isItalic="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[体积重(KG)]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="605b3095-c2a6-4def-92f5-2b003f4ea8b0" x="2" y="43" width="77" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="bad93d18-3325-41e1-b0d4-5b421895c293" x="79" y="43" width="54" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DEMOSTIC}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="d2a3508a-4581-42ac-94a1-cbcbe1f7f9e8" x="133" y="41" width="77" height="22"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TRANSMODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="946a66d7-7370-486d-b4a7-93f681a4dacb" x="210" y="41" width="81" height="22"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DESTINATION}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000">
+				<reportElement uuid="302d56df-96ea-4669-b754-efc6238b0e7a" x="355" y="41" width="59" height="22"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CONFIREDWEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000">
+				<reportElement uuid="6ed17dfc-ed62-42f8-b731-d87a2bdf2379" positionType="FixRelativeToBottom" x="414" y="41" width="75" height="22"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{FINISHEDCHARGEDWEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.000">
+				<reportElement uuid="5aedf5da-4188-4733-9922-706dde61af73" x="489" y="41" width="66" height="22"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ORDERVOLUMEWEIGHT}]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="6c61c5df-2712-491d-b776-72b3510ac6b9" x="133" y="0" width="422" height="21"/>
+			</frame>
+			<textField pattern="#,##0.0000">
+				<reportElement uuid="b987dcff-fd55-4932-a2c0-60d14deb0efd" x="291" y="41" width="64" height="22"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CONFIREDVOLUME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="65" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="8803c131-4e27-4027-9604-28fc3cf72a1c" x="2" y="0" width="93" height="22"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[【账户信息】]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="974fa5cc-4790-4c66-aa80-1929c4d8840d" x="2" y="45" width="121" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[类型]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="eb6d213c-1c67-4e32-9360-361a809e3b1f" x="226" y="45" width="77" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[交易金额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="df840103-1221-4390-97b6-699a81e2f555" x="303" y="45" width="86" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[币制]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a9e95f9d-4c35-46ec-81b5-56cdfd157285" x="389" y="45" width="75" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[冻结金额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="974fa5cc-4790-4c66-aa80-1929c4d8840d" x="123" y="45" width="103" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[结算时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="df840103-1221-4390-97b6-699a81e2f555" x="464" y="45" width="90" height="20"/>
+				<box>
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[币制]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8803c131-4e27-4027-9604-28fc3cf72a1c" x="2" y="22" width="121" height="22"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[您的账户余额(USD)：]]></text>
+			</staticText>
+			<elementGroup/>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="4b80e882-60b8-484a-8bcb-ef16713ea7a6" x="123" y="22" width="67" height="22"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{USABLEBALANCE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="8803c131-4e27-4027-9604-28fc3cf72a1c" x="355" y="22" width="109" height="22"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[冻结金额(USD)：]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="fbc1fc5d-99c4-4ff3-868e-9ce4bef29e36" x="464" y="22" width="91" height="23"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TOTALAMT}]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="6c61c5df-2712-491d-b776-72b3510ac6b9" x="95" y="0" width="459" height="22"/>
+			</frame>
+			<frame>
+				<reportElement uuid="43a01c9e-1683-41e9-9061-c7ba7bf8704d" x="190" y="22" width="165" height="23"/>
+			</frame>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement uuid="689737d1-1216-4bdd-a835-968f3cff7f0a" x="2" y="0" width="121" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TYPE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="4275d5bb-9b4b-4399-8d20-d1d0b9ef5cbe" x="123" y="0" width="103" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{FINISHTIME}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="ebd02a5b-91e3-4583-9de4-bbd9c663e718" x="226" y="0" width="77" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TRXFRZAMT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="ad0098f4-d4d9-48e4-8d97-f475ea1f4dd5" x="303" y="0" width="86" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CURRENCY1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement uuid="bac8b1e4-f059-4b57-bcf4-65cff9e45278" x="389" y="0" width="75" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{ACCTFRZAMT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="dc702169-5c7c-4168-98fd-625a59cd51ea" x="464" y="0" width="90" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CURRENCY2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band/>
+	</columnFooter>
+	<pageFooter>
+		<band/>
+	</pageFooter>
+	<summary>
+		<band height="164" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="ce8de258-8dcc-48c3-a451-6001f571278e" x="0" y="110" width="242" height="16"/>
+				<textElement>
+					<font isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[  万邑通客服中心  敬启
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ce8de258-8dcc-48c3-a451-6001f571278e" x="0" y="17" width="79" height="15"/>
+				<textElement>
+					<font isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[【温馨提示】
+
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ce8de258-8dcc-48c3-a451-6001f571278e" x="0" y="48" width="255" height="15"/>
+				<textElement>
+					<font isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[(2)  如有疑问，请与万邑通客服专员联系。
+
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ce8de258-8dcc-48c3-a451-6001f571278e" x="0" y="63" width="255" height="16"/>
+				<textElement>
+					<font isBold="false" isUnderline="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[(3)  客服邮箱：cs@winit.com.cn。
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ce8de258-8dcc-48c3-a451-6001f571278e" x="0" y="79" width="255" height="16"/>
+				<textElement>
+					<font isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[(4)  本邮件为系统自动发送，请勿在线回复。]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ce8de258-8dcc-48c3-a451-6001f571278e" x="0" y="95" width="242" height="15"/>
+				<textElement verticalAlignment="Top">
+					<font isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[     敬祝：生意兴隆！万事如意！
+
+]]></text>
+			</staticText>
+			<frame>
+				<reportElement uuid="6c61c5df-2712-491d-b776-72b3510ac6b9" x="79" y="17" width="476" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="43a01c9e-1683-41e9-9061-c7ba7bf8704d" x="255" y="62" width="300" height="17"/>
+			</frame>
+			<frame>
+				<reportElement uuid="d3f01304-edfb-4483-af28-a62895fb052e" x="255" y="79" width="300" height="16"/>
+			</frame>
+			<frame>
+				<reportElement uuid="b8f4d12f-a9b4-4b1c-aad3-421460716bd7" x="242" y="95" width="313" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="7c7e8e2d-b6f4-4b3a-84e0-e679067480cd" x="242" y="110" width="313" height="16"/>
+			</frame>
+			<frame>
+				<reportElement uuid="a4f09c4b-ed7c-4b75-93dd-c67a2fb29698" x="255" y="48" width="300" height="15"/>
+			</frame>
+			<staticText>
+				<reportElement uuid="ce8de258-8dcc-48c3-a451-6001f571278e" x="0" y="32" width="255" height="16"/>
+				<textElement>
+					<font isBold="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[(1)  以上冻结金额并未产生实际扣费。
+
+]]></text>
+			</staticText>
+			<frame>
+				<reportElement uuid="a4f09c4b-ed7c-4b75-93dd-c67a2fb29698" x="255" y="32" width="300" height="16"/>
+			</frame>
+		</band>
+	</summary>
+</jasperReport>

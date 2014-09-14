@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Order" language="groovy" pageWidth="2808" pageHeight="595" orientation="Landscape" columnWidth="2808" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9028621-e9b8-428b-b604-e61314a0c4cf">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="1743"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="DateFrom" class="java.util.Date"/>
+	<parameter name="DateTo" class="java.util.Date"/>
+	<queryString>
+		<![CDATA[SELECT A.*
+  FROM (SELECT BP.SALESREP_ID AS KAM,
+               BP.VALUE AS 客户编码,
+               BP.NAME AS 客户名称,
+               CO.DOCUMENTNO AS 海外仓入库单号,
+               RE1.NAME AS 入库单状态,
+               S.DOCUMENTNO AS 跨国物流单号,
+               RE2.NAME AS 报关方式,
+               S.TRACKSHIPPER AS 提单号，
+
+               TM.NAME AS 运输方式，
+
+               DOMESTIC.DOMESTICPRODUCTQTY AS 国内实收SKU总数,
+               DOMESTIC.DOMESTICITEMQTY AS 国内实收单品总数， OVERSEAS.OVERSEASPRODUCTQTY AS 海外实收SKU总数， OVERSEAS.OVERSEASITEMQTY AS 海外实收单品总数， CO.CONFIREDWEIGHT AS 重量， CO.CONFIREDVOLUME AS 体积， CO.FINISHEDCHARGEDWEIGHT AS 计费重， CO.DECLAREVALUEACTUAL AS 实际申报价值， ACCT.入库单冻结金额,
+               ACCT.入库单实际消费金额,
+               (SELECT MAX(L.CREATED)
+                  FROM AD_CHANGELOG_V L
+                 WHERE L.COLUMNNAME = 'Status'
+                   AND L.TABLENAME = 'C_Order'
+                   AND L.OLDVALUE = 'SC'
+                   AND L.NEWVALUE = 'DIC'
+                   AND L.RECORD_ID = CO.C_ORDER_ID) AS 国内入库时间,
+               S.TIMEOUTBOUND AS 国内出库时间,
+               (SELECT MAX(L.CREATED)
+                  FROM AD_CHANGELOG_V L
+                 WHERE L.COLUMNNAME = 'Status'
+                   AND L.TABLENAME = 'C_Order'
+                   AND L.NEWVALUE = 'FIC'
+                   AND L.RECORD_ID = CO.C_ORDER_ID) AS 海外入库时间,
+               CO.SHELVECOMPLETETIME AS 海外上架时间,
+               CO.SERVICECOMPLETETIME AS 完成时效
+          FROM C_ORDER CO
+          LEFT JOIN WV_REFERENCE RE1
+            ON RE1.VALUE = CO.STATUS
+           AND RE1.REFERENCENAME = '_ExternalInboundOrderStatus'
+           AND RE1.AD_LANGUAGE = 'zh_CN'
+          LEFT JOIN C_BPARTNER BP
+            ON BP.C_BPARTNER_ID = CO.C_BPARTNER_ID
+          LEFT JOIN WT_ORDERSHIPMENTMAPPING OSM
+            ON OSM.C_ORDER_ID = CO.C_ORDER_ID
+          LEFT JOIN WT_SHIPMENT S
+            ON S.WT_SHIPMENT_ID = OSM.WT_SHIPMENT_ID
+          LEFT JOIN WV_REFERENCE RE2
+            ON RE2.VALUE = S.EXPORTDECLAREMETHOD
+           AND RE2.REFERENCENAME = '_ExportDeclareMethod'
+           AND RE2.AD_LANGUAGE = 'zh_CN'
+          LEFT JOIN WT_TRANSPORTMODE TM
+            ON TM.WT_TRANSPORTMODE_ID = CO.WT_TRANSPORTMODE_ID
+
+          LEFT JOIN (SELECT COUNT(1) AS DOMESTICITEMQTY,
+                           COUNT(DISTINCT CL.C_ORDERLINE_ID) AS DOMESTICPRODUCTQTY,
+                           CO1.C_ORDER_ID
+                      FROM C_ORDER CO1
+                      LEFT JOIN C_ORDERLINE CL
+                        ON CL.C_ORDER_ID = CO1.C_ORDER_ID
+                      LEFT JOIN WT_STORAGEITEM IT
+                        ON IT.C_ORDER_ID = CO1.C_ORDER_ID
+                       AND IT.C_ORDERLINE_ID = CL.C_ORDERLINE_ID
+                     WHERE IT.STATUS NOT IN ('LV', 'LDO') --AND co.documentno ='51466'
+                    --验箱单品丢失/国内出库单品丢失
+                     GROUP BY CO1.C_ORDER_ID
+                    --ORDER BY co1.c_order_id
+                    ) DOMESTIC
+            ON DOMESTIC.C_ORDER_ID = CO.C_ORDER_ID
+
+          LEFT JOIN (SELECT COUNT(1) AS OVERSEASITEMQTY,
+                           COUNT(DISTINCT CL.C_ORDERLINE_ID) AS OVERSEASPRODUCTQTY,
+                           CO2.C_ORDER_ID
+                      FROM C_ORDER CO2
+                      LEFT JOIN C_ORDERLINE CL
+                        ON CL.C_ORDER_ID = CO2.C_ORDER_ID
+                      LEFT JOIN WT_STORAGEITEM IT
+                        ON IT.C_ORDER_ID = CO2.C_ORDER_ID
+                       AND IT.C_ORDERLINE_ID = CL.C_ORDERLINE_ID
+                     WHERE IT.STATUS NOT IN ('LV', 'LDO', 'LFI') --AND co.documentno ='51466'
+                    --验箱单品丢失/国内出库单品丢失/海外入库单品丢失
+                     GROUP BY CO2.C_ORDER_ID
+                    --ORDER BY co1.c_order_id
+                    ) OVERSEAS
+            ON OVERSEAS.C_ORDER_ID = CO.C_ORDER_ID
+          LEFT JOIN (SELECT ACL.C_BPARTNER_ID,
+                           ACL.RECORD_ID,
+                           SUM(ABS(ACL.INVOICEAMT)) 入库单实际消费金额,
+                           SUM(CASE
+                                 WHEN ACL.ACCTFRZAMT > 0 THEN
+                                  ACL.ACCTFRZAMT
+                                 ELSE
+                                  0
+                               END) 入库单冻结金额
+                      FROM WT_BP_CUSTOMER_ACCOUNTLINE ACL
+                     WHERE ACL.AD_TABLE_ID = 259
+                     GROUP BY ACL.C_BPARTNER_ID, ACL.RECORD_ID) ACCT
+            ON ACCT.C_BPARTNER_ID = BP.C_BPARTNER_ID
+           AND ACCT.RECORD_ID = CO.C_ORDER_ID
+         WHERE CO.STATUS IN ('DIC', 'FIC', 'FSC')
+         ORDER BY CO.C_ORDER_ID, BP.C_BPARTNER_ID) A
+ WHERE (TRUNC(国内入库时间) BETWEEN $P{DateFrom} AND $P{DateTo} + 1)
+    OR (TRUNC(海外入库时间) BETWEEN $P{DateFrom} AND $P{DateTo} + 1)
+    OR (TRUNC(海外上架时间) BETWEEN $P{DateFrom} AND $P{DateTo} + 1)]]>
+	</queryString>
+	<field name="KAM" class="java.math.BigDecimal"/>
+	<field name="客户编码" class="java.lang.String"/>
+	<field name="客户名称" class="java.lang.String"/>
+	<field name="海外仓入库单号" class="java.lang.String"/>
+	<field name="入库单状态" class="java.lang.String"/>
+	<field name="跨国物流单号" class="java.lang.String"/>
+	<field name="报关方式" class="java.lang.String"/>
+	<field name="提单号" class="java.lang.String"/>
+	<field name="运输方式" class="java.lang.String"/>
+	<field name="国内实收SKU总数" class="java.math.BigDecimal"/>
+	<field name="国内实收单品总数" class="java.math.BigDecimal"/>
+	<field name="海外实收SKU总数" class="java.math.BigDecimal"/>
+	<field name="海外实收单品总数" class="java.math.BigDecimal"/>
+	<field name="重量" class="java.math.BigDecimal"/>
+	<field name="体积" class="java.math.BigDecimal"/>
+	<field name="计费重" class="java.math.BigDecimal"/>
+	<field name="实际申报价值" class="java.math.BigDecimal"/>
+	<field name="入库单冻结金额" class="java.math.BigDecimal"/>
+	<field name="入库单实际消费金额" class="java.math.BigDecimal"/>
+	<field name="国内入库时间" class="java.sql.Timestamp"/>
+	<field name="国内出库时间" class="java.sql.Timestamp"/>
+	<field name="海外入库时间" class="java.sql.Timestamp"/>
+	<field name="海外上架时间" class="java.sql.Timestamp"/>
+	<field name="完成时效" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="2f8cb5bb-e937-407e-88c2-7167a8188fff" x="0" y="0" width="100" height="20"/>
+				<box>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[KAM]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="17de5f44-4caa-4cfb-9278-b136c3edf322" x="100" y="0" width="86" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户编码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1fea0177-4f7b-4c3c-a575-3a511135d72e" x="186" y="0" width="200" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户名称]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="005cc45d-7d23-4e4c-82c7-6fa3249c2e9e" x="386" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓入库单号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="86dbf1fb-f969-473a-948d-cfe1303cfeca" x="486" y="0" width="135" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[入库单状态]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="996117b4-72b6-49a0-a3ef-d281c541e533" x="621" y="0" width="125" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[跨国物流单号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="3e57abaf-942d-46c3-a198-8f1649f07d3c" x="746" y="0" width="118" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[报关方式]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7d3d8b87-ec8a-4b7e-873b-0dd4d7f751a4" x="864" y="0" width="109" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[提单号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="24f352f5-2839-4af4-9a4f-908e5b2a9970" x="973" y="0" width="130" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[运输方式]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5ce9f52b-fa78-4666-be81-e215465988b0" x="1103" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内实收SKU总数]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0113379f-6927-41a1-8605-2070c57f16b9" x="1203" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外实收SKU总数]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5a2a4709-4460-4335-810d-e8807400178f" x="1303" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内实收单品总数]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="425b38f3-e304-454b-bc4c-7a0419696a5d" x="1403" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外实收单品总数]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="522d06ce-b30f-4f1b-a1e0-f0662f18754e" x="1503" y="0" width="89" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[重量]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ad951721-84d5-4227-a3ca-d96a7a886ec1" x="1592" y="0" width="86" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[体积]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7b6a853e-5231-4f7a-9a46-8135f8a08fab" x="1678" y="0" width="84" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[计费重]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="bf8270ea-6885-4995-8fdb-2708d972052c" x="1762" y="0" width="114" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[实际申报价值]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1d36153d-7b87-47fa-b4c6-457e79881e25" x="1876" y="0" width="113" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[入库单冻结金额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="44c68889-d4ad-4157-a375-1dc14d017e56" x="1989" y="0" width="172" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[入库单实际消费金额]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5751407c-9293-44d5-85eb-fdd5384f692e" x="2161" y="0" width="134" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内入库时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="500304cc-0e08-4565-87d5-0ac4ddd30548" x="2295" y="0" width="134" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内出库时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="306485fc-267a-4835-a547-9fd49f3afcf0" x="2429" y="0" width="145" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外入库时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a213172d-7b8a-4f71-bc49-02656c99023a" x="2574" y="0" width="134" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外上架时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="170aeaa6-e11b-4c4e-9370-22d24ce1c718" x="2708" y="0" width="100" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[完成时效]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="20">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f5811921-a568-49f2-b133-505f226b2ce7" x="0" y="0" width="100" height="20"/>
+				<box>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{KAM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="43997ae6-d413-47f3-a6c6-e35ce0ac5d45" x="100" y="0" width="86" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{客户编码}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="56480e8a-89cf-4e6d-8b3a-86aa90bac987" x="186" y="0" width="200" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{客户名称}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ace86ad1-036d-499e-9b06-aa5e2a976868" x="386" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外仓入库单号}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="3f0d4043-dfe9-45ac-ae15-eafa53293ae4" x="486" y="0" width="135" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{入库单状态}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0248e884-f9c8-44a8-9f9d-577a3e44b702" x="621" y="0" width="125" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{跨国物流单号}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="d7f25da7-526d-40e2-861b-f1bf690267c0" x="746" y="0" width="118" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{报关方式}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="9baa4e9b-affb-4e61-a7df-b4bd654ccc37" x="864" y="0" width="109" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{提单号}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0e0fd8a2-5b3c-439d-a1ab-d1f9205acd42" x="973" y="0" width="130" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{运输方式}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="a2aff199-0f91-452d-b518-2bbab80ea4e4" x="1103" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{国内实收SKU总数}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="c5409dc7-f12e-4cac-a97c-189d5dfde29c" x="1303" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{国内实收单品总数}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="48d07d28-ebd4-4fa1-b8b0-8328f858a937" x="1203" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外实收SKU总数}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="5fe4e957-7285-4e0c-ab08-c94321762cdf" x="1403" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外实收单品总数}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="81787c0d-8932-4dcc-960b-c668eebe4fa2" x="1503" y="0" width="89" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{重量}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="dc182bae-ffe2-46fa-b9eb-71902e1a859f" x="1592" y="0" width="86" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{体积}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="3e297094-2651-488d-bd02-5ecbfcdd3818" x="1678" y="0" width="84" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{计费重}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="a8346c97-a4f5-4b16-b226-1ab07c9f3872" x="1762" y="0" width="114" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{实际申报价值}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="e6b7caf9-bbea-4239-b5fa-f1813f87a186" x="1876" y="0" width="113" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{入库单冻结金额}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="f4e391c7-c51c-4d76-b98f-6b3ac687c03f" x="1989" y="0" width="172" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{入库单实际消费金额}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="77ec6a7f-d784-493d-b953-a2d46f5e0a74" x="2161" y="0" width="134" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{国内入库时间}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="ac9b1436-a568-4083-8b29-4910e4640353" x="2295" y="0" width="134" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{国内出库时间}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="f7526d4b-6795-43ec-a917-8c1f93c5dcce" x="2429" y="0" width="145" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外入库时间}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm:ss" isBlankWhenNull="true">
+				<reportElement uuid="a258b8f4-ff58-4356-810b-631cca315aa8" x="2574" y="0" width="134" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外上架时间}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement uuid="0ae93738-e7fe-4422-a7aa-71366fe0901e" x="2708" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{完成时效}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

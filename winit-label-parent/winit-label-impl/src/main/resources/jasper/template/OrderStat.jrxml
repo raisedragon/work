@@ -1,0 +1,1040 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Order" language="groovy" pageWidth="2725" pageHeight="595" orientation="Landscape" columnWidth="2725" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9028621-e9b8-428b-b604-e61314a0c4cf">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Created1" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Created2" class="java.util.Date">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="destination" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select *
+from
+   (SELECT DISTINCT CORDER.*, NVL(A.SKUCOUNT,0) AS 实收SKU数量,NVL(A1.ITEMCOUNT,0) AS 实收UNIT数量,
+           NVL(A1.WEIGHT, 0) AS 实收重量,
+           nvl(a1.volume, 0) as 实收体积,
+           s.documentno as Winit系统物流单号,
+           s.trackshipper as 提单号,
+           s.timeetd  as 预计发运日期,
+           s.timelading  as 实际发运日期,
+           s.timeeta as 预计到达日期,
+           s.timedischarge as 实际到达日期,
+           s.timeoutbound as 国内出库日期,
+           (select max(l.created)
+            from ad_changeLog l
+            join ad_table t on t.ad_table_id = l.ad_Table_ID
+            join ad_column c
+                           on c.ad_column_id = l.ad_column_id
+            where t.tablename = 'C_Order'
+                  and c.columnname = 'Status'
+                  AND L.NEWVALUE = 'DIC'
+                  and l.record_id = corder.c_order_id) as 国内仓入库完成日期,
+
+            (select max(l.created)
+             from ad_changeLog l
+             join ad_table t
+                            on t.ad_table_id = l.ad_Table_ID
+             join ad_column c
+                            on c.ad_column_id = l.ad_column_id
+              where t.tablename = 'WT_Shipment'
+                           and c.columnname = 'Status'
+                           AND L.NEWVALUE = 'FWT'
+                           and l.record_id = s.wt_shipment_id) as 目的港清关完成日期,
+
+            (select max(l.created)
+             from ad_changeLog l
+             join ad_table t
+                            on t.ad_table_id = l.ad_Table_ID
+             join ad_column c
+                            on c.ad_column_id = l.ad_column_id
+             where t.tablename = 'WT_Shipment'
+                           and c.columnname = 'Status'
+                           and l.newvalue = 'FIC'
+                           and l.record_id = s.wt_shipment_id) as 海外仓到仓日期,
+            to_char($P{Created1},'yyyy-MM-dd') as created1,
+            to_char($P{Created2},'yyyy-MM-dd') as created2
+    from (select o.documentno as 海外仓入库号,
+               o.created    as 海外仓入库号生成日期,
+               partner.name as 卖家信息,
+               w2.name      as 目的仓库,
+               sv.etd       as 海运船期预计发运日期,
+             --  nvl(o.finisheditemqty, 0) as 实收Unit数量,
+             --  nvl(o.confiredweight, 0) as 实收重量,
+             --  nvl(o.confiredvolume, 0) as 实收体积,
+               po.datepromisedto as 预计提货日期,
+               po.datefinishto as 提货完成日期,
+               tp.name as 运输方式,
+               w1.name as 启运仓库,
+               o.servicestandardtime as 服务标准时间,
+               O.SHELVECOMPLETETIME AS 海外仓上架完成日期,
+               o.c_order_id as c_order_id,re.name as statusname,re1.name StorageOnTime,
+               partner.value partnervalue,
+               decode(cs.name ,null,' ',cs.name)  as sellersource --客户来源
+          FROM C_ORDER O
+          left join WV_REFERENCE re on o.status=re.value and re.AD_LANGUAGE='zh_CN' and re.AD_REFERENCE_ID=1000064 --_ExternalInboundOrderStatus
+          left join WV_REFERENCE re1 on o.StorageOnTime=re1.value and re1.AD_LANGUAGE='zh_CN' and re1.AD_REFERENCE_ID=1000128 --_StorageOnTime
+          left join WT_SeaVoyage sv on sv.wt_seavoyage_id = o.wt_seavoyage_id
+          left join c_bpartner partner
+            on o.c_bpartner_id = partner.c_bpartner_id
+          left join wt_pickorder po
+            on po.c_order_id = o.c_order_id
+          left join wt_transportmode tp
+            on tp.wt_transportmode_id = o.wt_transportmode_id
+          left join m_warehouse w1
+            on w1.m_warehouse_id = o.m_warehouse_id
+          left join m_warehouse w2
+            on w2.m_warehouse_id = o.destination
+          left join c_orderline line
+            on line.c_order_id = o.c_order_id
+          left join c_sellersource cs on cs.c_sellersource_id = partner.c_sellersource_id
+          where o.status in( 'DIC','FIC','FSC','OC')
+	AND ((O.DESTINATION = $P{destination} and nvl($P{destination},0) > 0) or nvl($P{destination},0) <= 0)
+               and o.Created between $P{Created1} and $P{Created2}
+          group by o.documentno,
+                  o.created,
+                  partner.name,
+                  w2.name,
+                  o.finisheditemqty,
+                  o.confiredweight,
+                  o.confiredvolume,
+                  po.datepromisedto,
+                  po.datefinishto,
+                  tp.name,
+                  w1.name,
+                  sv.etd,
+                  o.shelvecompletetime,
+                 o.servicestandardtime,
+                  o.c_order_id,re.name,re1.name,partner.value,cs.name
+          order by o.created desc) corder
+   left join wt_ordershipmentmapping osm on osm.c_order_id = corder.c_order_id
+   inner join wt_shipment s on s.wt_shipment_id = osm.wt_shipment_id
+   LEFT JOIN
+       (SELECT T.C_ORDER_ID,t.wt_shipment_id,COUNT(*) AS SKUCOUNT
+        FROM
+             (SELECT
+               count(item.m_product_id) as productnum,item.c_order_id,s1.wt_shipment_id
+              FROM WT_STORAGEITEM ITEM
+              JOIN WT_SHIPMENT S1 on s1.wt_shipment_id= item.wt_shipment_id
+              LEFT JOIN M_PRODUCT P  ON P.M_PRODUCT_ID = ITEM.M_PRODUCT_ID
+              GROUP BY S1.WT_SHIPMENT_ID, ITEM.M_PRODUCT_ID,ITEM.C_ORDER_ID
+              ) t
+        GROUP BY t.WT_SHIPMENT_ID, t.C_ORDER_ID
+       ) a on a.c_order_id = corder.c_order_id and a.wt_shipment_id=s.wt_shipment_id
+
+   LEFT JOIN
+       (SELECT
+               count(item.wt_storageitem_id) as itemcount,item.c_order_id,s1.wt_shipment_id,sum(item.weight) weight,sum(item.volume) volume
+        FROM WT_STORAGEITEM ITEM
+        JOIN WT_SHIPMENT S1   on s1.wt_shipment_id= item.wt_shipment_id --where item.C_ORDER_ID = 1001421
+        GROUP BY S1.WT_SHIPMENT_ID,ITEM.C_ORDER_ID
+       ) A1 ON A1.C_ORDER_ID = CORDER.C_ORDER_ID AND A1.WT_SHIPMENT_ID=S.WT_SHIPMENT_ID
+   )
+ order by 实际发运日期,Winit系统物流单号,海外仓入库号生成日期 desc]]>
+	</queryString>
+	<field name="海外仓入库号" class="java.lang.String"/>
+	<field name="海外仓入库号生成日期" class="java.sql.Timestamp"/>
+	<field name="卖家信息" class="java.lang.String"/>
+	<field name="目的仓库" class="java.lang.String"/>
+	<field name="海运船期预计发运日期" class="java.sql.Timestamp"/>
+	<field name="预计提货日期" class="java.sql.Timestamp"/>
+	<field name="提货完成日期" class="java.sql.Timestamp"/>
+	<field name="运输方式" class="java.lang.String"/>
+	<field name="启运仓库" class="java.lang.String"/>
+	<field name="服务标准时间" class="java.math.BigDecimal"/>
+	<field name="海外仓上架完成日期" class="java.sql.Timestamp"/>
+	<field name="C_ORDER_ID" class="java.math.BigDecimal"/>
+	<field name="STATUSNAME" class="java.lang.String"/>
+	<field name="STORAGEONTIME" class="java.lang.String"/>
+	<field name="PARTNERVALUE" class="java.lang.String"/>
+	<field name="SELLERSOURCE" class="java.lang.String"/>
+	<field name="实收SKU数量" class="java.math.BigDecimal"/>
+	<field name="实收UNIT数量" class="java.math.BigDecimal"/>
+	<field name="实收重量" class="java.math.BigDecimal"/>
+	<field name="实收体积" class="java.math.BigDecimal"/>
+	<field name="WINIT系统物流单号" class="java.lang.String"/>
+	<field name="提单号" class="java.lang.String"/>
+	<field name="预计发运日期" class="java.sql.Timestamp"/>
+	<field name="实际发运日期" class="java.sql.Timestamp"/>
+	<field name="预计到达日期" class="java.sql.Timestamp"/>
+	<field name="实际到达日期" class="java.sql.Timestamp"/>
+	<field name="国内出库日期" class="java.sql.Timestamp"/>
+	<field name="国内仓入库完成日期" class="java.sql.Timestamp"/>
+	<field name="目的港清关完成日期" class="java.sql.Timestamp"/>
+	<field name="海外仓到仓日期" class="java.sql.Timestamp"/>
+	<field name="CREATED1" class="java.lang.String"/>
+	<field name="CREATED2" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="110" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="0" y="0" width="2718" height="38"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="24" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓入库递送报告]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="610" y="90" width="56" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[目的仓库]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="666" y="90" width="82" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内实收SKU数量]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="1079" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内提货完成日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="1734" y="90" width="56" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[启运仓库]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="2196" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[目的港清关完成日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="817" y="90" width="81" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内实收重量(kg)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="2414" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓上架完成日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="2087" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[实际到达日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="970" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内预计提货日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="2305" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓到仓日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="1678" y="90" width="56" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[运输方式]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="0" y="90" width="78" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓入库号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="1978" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[预计到达日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="898" y="90" width="72" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内实收体积(m3)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="1885" y="90" width="93" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[实际发运日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="413" y="90" width="197" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[卖家信息]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="1611" y="90" width="67" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[空/海运单号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="1790" y="90" width="95" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[预计发运日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="748" y="90" width="69" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内实收Unit数量]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="160" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓入库号生成日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="1188" y="90" width="96" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Winit系统物流单号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="732db533-4abb-4821-b7fe-37a4693d6194" x="1284" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内入库完成日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e52893e3-7cbc-4fd7-a07c-7a0b8ee5e41d" x="2523" y="90" width="62" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[异常情况说明]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="78" y="90" width="82" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[状态]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="360" y="90" width="53" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[卖家编码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e52893e3-7cbc-4fd7-a07c-7a0b8ee5e41d" x="2585" y="90" width="133" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[服务标准时间(Work Day)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1d4e1a2d-f1b7-47dc-9ae2-c6fea7f25029" x="0" y="38" width="78" height="20"/>
+				<textElement/>
+				<text><![CDATA[生成日期范围]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement uuid="7727d503-36e6-4173-9999-e4f19e697550" x="78" y="38" width="191" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$F{CREATED1}+"至"+$F{CREATED2}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="53e50f97-79ab-46cb-a4e1-1ed82f0a6194" x="269" y="38" width="548" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA["异常标准：空运：上架完成时间-预计提货时间，海运：上架完成时间-预计发运时间"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="a846d35d-2fe5-40eb-908d-9a366f3c7d79" x="269" y="90" width="91" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="10" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[客户来源]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e52893e3-7cbc-4fd7-a07c-7a0b8ee5e41d" x="1502" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海运船期预计发运日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e52893e3-7cbc-4fd7-a07c-7a0b8ee5e41d" x="1393" y="90" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内出库日期]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="20">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="76bf8485-9ddf-4f74-a35b-b0b0016c007a" stretchType="RelativeToBandHeight" x="0" y="0" width="78" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外仓入库号}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="2d583047-fb6d-41de-8321-46bdb83dac9e" stretchType="RelativeToBandHeight" x="160" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外仓入库号生成日期}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="53e50f97-79ab-46cb-a4e1-1ed82f0a6194" stretchType="RelativeToBandHeight" x="413" y="0" width="197" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{卖家信息}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="cf742894-6d36-41de-a655-59342e6b7cb8" stretchType="RelativeToBandHeight" x="610" y="0" width="56" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{目的仓库}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ba7bb530-488b-43b9-b190-3ae9bc16656a" stretchType="RelativeToBandHeight" x="666" y="0" width="82" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{实收SKU数量}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a7e8b379-c693-4f99-8715-7f516a0a5f7e" stretchType="RelativeToBandHeight" x="748" y="0" width="69" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{实收UNIT数量}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="5f383862-b7f1-4bdc-9b17-ca162fda0aa7" stretchType="RelativeToBandHeight" x="817" y="0" width="81" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{实收重量}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b19e88ad-2b70-4a3e-86fc-4d3151c93584" stretchType="RelativeToBandHeight" x="898" y="0" width="72" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{实收体积}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="5f644a79-2e6a-46ae-a4f3-1989c843ba4b" stretchType="RelativeToBandHeight" x="970" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{预计提货日期}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a1fa52b6-c845-4d9c-a6e9-05edfe0b0c63" stretchType="RelativeToBandHeight" x="1188" y="0" width="96" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WINIT系统物流单号}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="321cb97a-4d2b-40e5-9716-ba2fe82ea661" stretchType="RelativeToBandHeight" x="1790" y="0" width="95" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{预计发运日期}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="708ec51b-0c38-4653-b4db-5f40021ecf9f" stretchType="RelativeToBandHeight" x="1885" y="0" width="93" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{实际发运日期}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="0cdd0adc-c9b4-4f45-aa13-625e993b9f8a" stretchType="RelativeToBandHeight" x="1978" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{预计到达日期}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="40b4722c-05a7-438a-ad43-725e0d02b204" stretchType="RelativeToBandHeight" x="2087" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{实际到达日期}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="f43edc89-bebf-4dd2-b2f4-4259ed75a32b" stretchType="RelativeToBandHeight" x="2196" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{目的港清关完成日期}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="24250b64-d88f-4241-9c35-c7250c1c83bb" stretchType="RelativeToBandHeight" x="2305" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外仓到仓日期}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="d9d3b675-7f85-4dae-80b5-858451b2f1a1" stretchType="RelativeToBandHeight" x="2414" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海外仓上架完成日期}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="1ae9a672-765f-4873-8e0f-070996d6782b" stretchType="RelativeToBandHeight" x="1079" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{提货完成日期}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="7e1117da-e365-4821-9d5c-85b36443e2ad" stretchType="RelativeToBandHeight" x="1611" y="0" width="67" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{提单号}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="408f8019-db31-46f0-a884-20545ebe26ae" stretchType="RelativeToBandHeight" x="1678" y="0" width="56" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{运输方式}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b92592b1-dcb7-43be-ba2d-0869017d7930" stretchType="RelativeToBandHeight" x="1734" y="0" width="56" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{启运仓库}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="2f7d52f1-3d94-4611-82cf-75df0e783167" stretchType="RelativeToBandHeight" x="1284" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{国内仓入库完成日期}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="53e50f97-79ab-46cb-a4e1-1ed82f0a6194" stretchType="RelativeToBandHeight" x="78" y="0" width="82" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STATUSNAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="53e50f97-79ab-46cb-a4e1-1ed82f0a6194" stretchType="RelativeToBandHeight" x="2523" y="0" width="62" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{STORAGEONTIME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="53e50f97-79ab-46cb-a4e1-1ed82f0a6194" stretchType="RelativeToBandHeight" x="360" y="0" width="53" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PARTNERVALUE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="53e50f97-79ab-46cb-a4e1-1ed82f0a6194" stretchType="RelativeToBandHeight" x="2585" y="0" width="133" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{服务标准时间}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement uuid="afbaa6bf-8c26-4430-b3fa-6c939529e461" stretchType="RelativeToBandHeight" x="269" y="0" width="91" height="20"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{SELLERSOURCE}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="2f7d52f1-3d94-4611-82cf-75df0e783167" stretchType="RelativeToBandHeight" x="1393" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{国内出库日期}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd HH:mm" isBlankWhenNull="true">
+				<reportElement uuid="2f7d52f1-3d94-4611-82cf-75df0e783167" stretchType="RelativeToBandHeight" x="1502" y="0" width="109" height="20"/>
+				<box>
+					<pen lineWidth="0.5"/>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{海运船期预计发运日期}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

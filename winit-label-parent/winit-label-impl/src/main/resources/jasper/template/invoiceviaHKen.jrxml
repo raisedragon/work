@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Study2" language="groovy" pageWidth="667" pageHeight="985" whenNoDataType="AllSectionsNoDetail" columnWidth="627" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e7ac027e-34d1-4312-ab63-5cb9271ed98c">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<subDataset name="Table Dataset 1" uuid="734593ed-ab2a-4556-b261-9a6d21c35768"/>
+	<parameter name="RECORD_ID" class="java.lang.Integer"/>
+	<queryString>
+		<![CDATA[SELECT --c_country_id,
+       datepickup,
+       documentno,
+       --NVL(WH,' ') AS WH,
+        NVL(CountryName,' ') AS CountryName,--NVL(WH_COUNTRY,' ') AS WH_COUNTRY,
+       NVL(WH,' ') AS WH,--NVL(SWH,' ') AS SWH,
+       DESCNAME,
+       COUNT(wt_storageitem_id) Qty,
+       SUM(PRICEIMPORTS) AMT,
+       SUM(PRICEIMPORTS) / COUNT(WT_STORAGEITEM_ID) IPRICE,
+       CASE
+         WHEN CODE = 'Air' THEN
+          'USD ' || FREIGHTIMPORTDECLARATION || '/KG'
+         WHEN CODE = 'Sea' THEN
+          'USD ' || FREIGHTIMPORTDECLARATION || '/1X' || TO_CHAR(CTYPENAME)
+       END FREIGHTRATES,
+       CTYPENAME,
+       consigee_name,
+       consigee_addr,
+       --shipper_name,
+       fromaddress,--shipper_addr,
+       fromaddr,
+       toaddr,
+       phone,
+       fax
+  FROM (SELECT shmpt.datepickup,
+               shmpt.documentno,
+               --r.name WH,
+               cc.name as countryname,
+               /*
+               CASE
+                 WHEN SUBSTR(m.name, 1, 2) = '澳洲' THEN
+                  'AUSTRALIA'
+                 WHEN SUBSTR(m.name, 1, 2) = '上海' THEN
+                  'SHANGHAI'
+                 WHEN SUBSTR(m.name, 1, 2) = '香港' THEN
+                  'HANGKONG'
+                 WHEN SUBSTR(m.name, 1, 2) = '深圳' THEN
+                  'SHENZHEN'
+               END WH_COUNTRY,*/
+               CASE
+                 WHEN SUBSTR(ms.name, 1, 2) = '澳洲' THEN
+                  'AUSTRALIA'
+                 WHEN SUBSTR(ms.name, 1, 2) = '上海' THEN
+                  'SHANGHAI'
+                 WHEN SUBSTR(ms.name, 1, 2) = '香港' THEN
+                  'HANGKONG'
+                 WHEN SUBSTR(ms.name, 1, 2) = '深圳' THEN
+                  'SHENZHEN'
+               END --SWH
+               WH,
+               lower(itemprice.customstaxno || ' ' || itemprice.declarename) DESCNAME,
+               itemprice.wt_storageitem_id,
+               itemprice.c_country_id,
+               ITEMPRICE.PRICEIMPORTS,
+               SHMPT.FREIGHTIMPORTDECLARATION,
+               ltype.code,
+               CTYPE.NAME CTYPENAME,
+               t.name_en as consigee_name,
+               t.address_en as consigee_addr,
+               --t2.name_en as shipper_name,
+               t2.address_en  as fromaddress,-- t2.address_en as shipper_addr,
+               p1.en_name as fromaddr,
+               p2.en_name as toaddr,
+               nvl(t2.phone,' ') as phone,
+               nvl(t2.fax,' ') as fax
+          FROM wt_customsform cust
+         INNER JOIN wt_shipment shmpt ON CUST.WT_SHIPMENT_ID = SHMPT.WT_SHIPMENT_ID
+          left join wt_transceiver t on t.wt_transceiver_id = shmpt.consignee_id
+          left join wt_transceiver t2 on t2.wt_transceiver_id = shmpt.shipper_id
+         INNER JOIN WT_TRANSPORTMODE TMODE ON SHMPT.WT_TRANSPORTMODE_ID = TMODE.WT_TRANSPORTMODE_ID
+         INNER JOIN WT_LOGISTICSMODE LMODE ON TMODE.WT_LOGISTICSMODE_ID = LMODE.WT_LOGISTICSMODE_ID
+         INNER JOIN WT_LOGISTICSTYPE LTYPE ON LMODE.WT_LOGISTICSTYPE_ID = LTYPE.WT_LOGISTICSTYPE_ID
+          left JOIN WT_CabinetType CTYPE ON SHMPT.WT_CabinetType_ID = CTYPE.WT_CabinetType_ID
+         INNER JOIN wt_containerline cona ON shmpt.wt_shipment_id = cona.wt_shipment_id
+         INNER JOIN wt_storagepackage pk ON cona.wt_containerline_id = pk.wt_containerline_id
+         INNER JOIN (SELECT pm.customstaxno,
+                           pm.declarename,
+                           item.wt_storageitem_id,
+                           item.wt_storagepackage_id,
+                           pm.priceimports,
+                           pm.c_country_id
+                      FROM wt_storageitem item
+                     INNER JOIN m_product pml
+                        ON item.m_product_id = pml.m_product_id
+                     INNER JOIN (SELECT ctr.customstaxno,
+                                       cls.declarename,
+                                       cls.priceimports,
+                                       cls.m_product_id,
+                                       cls.c_country_id
+                                  FROM WT_ClassifyProduct cls
+                                 INNER JOIN WT_CustomsTaxRule ctr ON ctr.wt_customstaxrule_id = cls.wt_customstaxrule_id
+                                 WHERE cls.priceexports = 0) pm ON pm.m_product_id = pml.m_product_id
+                     GROUP BY pm.customstaxno,
+                              pm.declarename,
+                              item.wt_storageitem_id,
+                              item.wt_storagepackage_id,
+                              pm.priceimports, pm.c_country_id) itemprice ON pk.wt_storagepackage_id = itemprice.wt_storagepackage_id
+          LEFT OUTER JOIN m_warehouse m  ON shmpt.m_warehouse_id = m.m_warehouse_id
+          LEFT OUTER JOIN m_warehouse ms ON shmpt.m_warehousesource_id = ms.m_warehouse_id
+          left join c_port p1 on p1.c_port_id = shmpt.c_portoflading_id
+          left join c_country cc on cc.c_country_id = p1.c_country_id
+          left join c_port p2 on p2.c_port_id = shmpt.c_portofdischarge_id
+--          LEFT OUTER JOIN wv_reference r ON shmpt.portofdischarge = r.value AND r.AD_Reference_ID = 1000076 AND R.AD_LANGUAGE = 'en_US'
+ WHERE CUST.WT_CUSTOMSFORM_ID = $P{RECORD_ID}
+      and itemprice.c_country_id = shmpt.c_country_id )
+ GROUP BY DESCNAME,
+          datepickup,
+          documentno,
+          -- WH,
+          countryname, -- WH_COUNTRY,
+          WH,--SWH,
+          FREIGHTIMPORTDECLARATION,
+          CODE,
+          CTYPENAME,
+          consigee_name,
+          consigee_addr,
+          --shipper_name,
+          fromaddress,--shipper_addr,
+          phone,
+          fax,
+         -- c_country_id,
+          fromaddr,
+          toaddr
+ ORDER BY DESCNAME]]>
+	</queryString>
+	<field name="DATEPICKUP" class="java.sql.Timestamp"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<field name="COUNTRYNAME" class="java.lang.String"/>
+	<field name="WH" class="java.lang.String"/>
+	<field name="DESCNAME" class="java.lang.String"/>
+	<field name="QTY" class="java.math.BigDecimal"/>
+	<field name="AMT" class="java.math.BigDecimal"/>
+	<field name="IPRICE" class="java.math.BigDecimal"/>
+	<field name="FREIGHTRATES" class="java.lang.String"/>
+	<field name="CTYPENAME" class="java.lang.String"/>
+	<field name="CONSIGEE_NAME" class="java.lang.String"/>
+	<field name="CONSIGEE_ADDR" class="java.lang.String"/>
+	<field name="FROMADDRESS" class="java.lang.String"/>
+	<field name="FROMADDR" class="java.lang.String"/>
+	<field name="TOADDR" class="java.lang.String"/>
+	<field name="PHONE" class="java.lang.String"/>
+	<field name="FAX" class="java.lang.String"/>
+	<variable name="Qty_SUM" class="java.lang.Long" incrementType="Report">
+		<variableExpression><![CDATA[new java.lang.Long($V{Qty_SUM}.longValue()+$F{QTY}.longValue())]]></variableExpression>
+		<initialValueExpression><![CDATA[new java.lang.Long(0)]]></initialValueExpression>
+	</variable>
+	<variable name="DateField" class="java.util.Date"/>
+	<variable name="AmtSUM" class="java.math.BigDecimal" incrementType="Report" calculation="Sum">
+		<variableExpression><![CDATA[new java.math.BigDecimal($V{AmtSUM}+$F{AMT}).setScale(4,BigDecimal.ROUND_HALF_UP)]]></variableExpression>
+		<initialValueExpression><![CDATA[new java.math.BigDecimal(0)]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="266" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="50b66eb0-0910-4a8e-b284-37c77e2919be" x="96" y="30" width="397" height="31"/>
+				<textElement textAlignment="Center">
+					<font size="16" isBold="true" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Winit Trade Company Limited]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="50b66eb0-0910-4a8e-b284-37c77e2919be" x="237" y="97" width="120" height="30"/>
+				<textElement textAlignment="Center">
+					<font size="16" isBold="true" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[INVOICE]]></text>
+			</staticText>
+			<image>
+				<reportElement uuid="5309a848-299a-48d2-af74-64feff07c028" x="0" y="0" width="147" height="30"/>
+				<imageExpression><![CDATA["../images/logo.jpg"]]></imageExpression>
+			</image>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="976e7ccb-04f7-4099-8312-25a3f35ff674" x="0" y="61" width="627" height="36" isPrintWhenDetailOverflows="true"/>
+				<textElement textAlignment="Center">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FROMADDRESS}]]></textFieldExpression>
+			</textField>
+			<textField pattern="MM/dd/yyyy" isBlankWhenNull="true">
+				<reportElement uuid="5efdadaf-af2b-4e73-a3cc-45d60a438ee0" x="493" y="164" width="134" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isUnderline="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEPICKUP}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="20d0c992-3fd9-47d2-87c4-54846a8ca6ba" x="493" y="127" width="134" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isUnderline="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="357" y="164" width="136" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[DATE:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="347" y="244" width="146" height="22"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[TERMS OF PAYMENT:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="357" y="127" width="136" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[INVOICE NO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="357" y="204" width="136" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[PRICE TERMS:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="493" y="246" width="134" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isUnderline="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[T/T]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="20d0c992-3fd9-47d2-87c4-54846a8ca6ba" x="493" y="147" width="134" height="17"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isUnderline="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="357" y="224" width="136" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[FREIGHT RATES:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="493" y="204" width="31" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="11" isUnderline="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[FOB ]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="456474ef-abfd-482b-afd7-5227fa5337cd" x="0" y="244" width="347" height="22"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA["FROM "+$F{FROMADDR}+" TO "+$F{TOADDR}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="456474ef-abfd-482b-afd7-5227fa5337cd" x="524" y="204" width="103" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[" "+$F{WH}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" x="0" y="147" width="41" height="17"/>
+				<textElement>
+					<font size="12" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[ADD:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" x="0" y="127" width="41" height="20"/>
+				<textElement verticalAlignment="Top">
+					<font size="12" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[TO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="357" y="147" width="136" height="17"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[CONTRACT NO:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="747f81b4-e930-4fb0-b2f2-ca073bafdbaa" x="41" y="127" width="256" height="20"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONSIGEE_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="7385cb23-de97-4cd1-8c6e-ccf52fd3fb6f" x="41" y="147" width="256" height="37" isPrintWhenDetailOverflows="true"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONSIGEE_ADDR}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="493" y="224" width="134" height="22"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" isUnderline="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[AS ARRANGED]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ad21130a-503d-4205-8f11-3bef2f4ffb8e" x="357" y="184" width="136" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[ORIGIN COUNTRY :]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="0adcb936-b127-4cd5-9fbf-31aac619cdb9" x="493" y="184" width="134" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{COUNTRYNAME}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="58" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="9d2c13da-0837-4940-acb4-87b8221f291f" style="table" x="0" y="0" width="77" height="58"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Marks&No.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="61611d73-19b0-4088-be14-229266a6b9c2" style="table" x="77" y="0" width="179" height="58"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[
+Descriptions]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="173b51ef-f074-4abd-bb9e-4bd7fba72713" style="table" x="256" y="0" width="41" height="58"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[
+Qty]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c2e906b9-c61d-436f-b19f-a2df1c374643" style="table" x="550" y="0" width="77" height="58"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[
+Amount]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f70d889d-4801-4cf9-ac28-e28befc4c75e" style="table" x="493" y="0" width="57" height="58"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[
+CUR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="173b51ef-f074-4abd-bb9e-4bd7fba72713" style="table" x="297" y="0" width="68" height="58"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[
+Unit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="173b51ef-f074-4abd-bb9e-4bd7fba72713" style="table" x="365" y="0" width="128" height="58"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[
+Unit Price]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="40" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" style="table" x="297" y="0" width="68" height="40"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[PC(S)]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ebfc5643-8501-4e55-a3ce-645001f31b2f" style="table" x="256" y="0" width="41" height="40"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{QTY}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;###0.00-" isBlankWhenNull="true">
+				<reportElement uuid="4844a19e-97ee-4316-9672-5fe547a35e22" style="table" x="550" y="0" width="77" height="40"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{AMT}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" style="table" x="493" y="0" width="57" height="40"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[USD]]></text>
+			</staticText>
+			<textField pattern="###0.000;###0.000-" isBlankWhenNull="true">
+				<reportElement uuid="786ea801-a620-42f4-bbd2-4e8a0fbe0e12" style="table" x="365" y="0" width="128" height="40"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{IPRICE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2473facc-6e9f-4f28-bf1f-0c8ece802f83" style="table" x="77" y="0" width="179" height="40"/>
+				<box leftPadding="1"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DESCNAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="7d9e783a-f06f-47df-ab33-b07a5a42500b" x="0" y="0" width="77" height="40"/>
+				<box>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="23" splitType="Stretch">
+			<textField>
+				<reportElement uuid="ea2b19c1-fc54-431a-8041-844fd57efa5e" x="550" y="2" width="29" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="a253635b-d104-449b-a4c0-24a8e7f20637" x="493" y="2" width="57" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Page.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a253635b-d104-449b-a4c0-24a8e7f20637" x="579" y="2" width="26" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[of]]></text>
+			</staticText>
+			<textField evaluationTime="Report">
+				<reportElement uuid="ea2b19c1-fc54-431a-8041-844fd57efa5e" x="605" y="2" width="21" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="163" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" style="table" x="0" y="0" width="256" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Total:]]></text>
+			</staticText>
+			<textField pattern="###0" isBlankWhenNull="true">
+				<reportElement uuid="35392ca7-33b4-4f03-8933-54281399c03c" style="table" x="256" y="0" width="41" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{Qty_SUM}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" style="table" x="365" y="0" width="128" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<textField pattern="###0.00" isBlankWhenNull="true">
+				<reportElement uuid="75ad909a-5ff6-4091-88e0-f828bc2c9c0b" style="table" x="550" y="0" width="76" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{AmtSUM}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" style="table" x="493" y="0" width="57" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[USD]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" style="table" x="297" y="0" width="68" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[PC(S)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" x="0" y="20" width="493" height="23"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+				</box>
+				<textElement verticalAlignment="Top">
+					<font size="12" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[All the goods are unused , non-field tested or factory trailed]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9bc80845-6fde-43fd-9158-607f94adaa07" x="435" y="122" width="191" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="12" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Winit Trade Company Limited]]></text>
+			</staticText>
+			<textField pattern="yyyy-MMM-dd">
+				<reportElement uuid="9e126392-9ac7-42e5-9a32-f896c575ce75" x="435" y="142" width="190" height="20"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DateFormat.getDateInstance(DateFormat.LONG, Locale.ENGLISH).format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="86e9ad10-6f09-4b56-bb7b-52b4e48a5157" x="0" y="43" width="627" height="78"/>
+				<textElement>
+					<font size="16"/>
+				</textElement>
+				<textFieldExpression><![CDATA["  "]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

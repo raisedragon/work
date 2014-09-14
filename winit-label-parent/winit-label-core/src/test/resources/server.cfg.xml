@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="idGenerator" class="com.winit.svr.impl.cfg.DefaultIdGeneratorImpl">
+  	<constructor-arg index="0" value="1"></constructor-arg>
+  	<constructor-arg index="1" value="1"></constructor-arg>
+  </bean>
+  
+  <bean id="labelHanlerList" class="java.util.ArrayList">
+	  <constructor-arg>
+	   <list>
+	    	<bean class="com.winit.svr.label.handler.impl.DefaultLableHanler"></bean>
+	   </list>
+	  </constructor-arg>
+ </bean>
+	
+  <bean id="labelServerConfiguration"
+    class="com.winit.svr.impl.cfg.StandaloneLabelServerConfiguration">
+
+    <property name="jdbcUrl" value="jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000" />
+    <property name="jdbcDriver" value="org.h2.Driver" />
+    <property name="jdbcUsername" value="sa" />
+    <property name="jdbcPassword" value="" />
+
+	<property name="idGenerator" ref="idGenerator"/>
+
+    <!-- Database configurations -->
+    <property name="databaseSchemaUpdate" value="drop-create" />
+
+    <!-- label handler implement list -->
+    <property name="labelHanlers" ref="labelHanlerList"/>
+    
+    
+  </bean>
+
+</beans>

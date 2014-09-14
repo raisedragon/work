@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="OrderItemsPerDay4Partner" language="groovy" pageWidth="1700" pageHeight="842" columnWidth="1660" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="64298e0f-5a09-4767-b59d-50dd9fff7a8b">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Crosstab Data Text" hAlign="Center"/>
+	<parameter name="year" class="java.lang.String"/>
+	<parameter name="month" class="java.lang.String"/>
+	<parameter name="warehouse" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT A.PARTNER_NAME, A.SHELVECOMPLETETIME, A.QTY, B.VALIDCOUNT
+  FROM (SELECT PARTNER_NAME, SHELVECOMPLETETIME, QTY
+          FROM AD_ORDERITEMSPERDAY
+         WHERE SHELVECOMPLETETIME BETWEEN
+               TO_DATE($P{year} || '-' || $P{month} || '-01', 'yyyy-MM-dd') AND
+               ADD_MONTHS(TO_DATE($P{year} || '-' || $P{month} || '-01',
+                                  'yyyy-MM-dd'),
+                          1) - 1
+           AND (((DESTINATION = $P{warehouse} OR DESTINATION = 9999) AND
+               NVL($P{warehouse}, 0) > 0) OR NVL($P{warehouse}, 0) <= 0)) A
+  LEFT JOIN (SELECT COUNT(1) VALIDCOUNT
+               FROM AD_ORDERITEMSPERDAY
+              WHERE SHELVECOMPLETETIME BETWEEN
+                    TO_DATE($P{year} || '-' || $P{month} || '-01',
+                            'yyyy-MM-dd') AND
+                    ADD_MONTHS(TO_DATE($P{year} || '-' || $P{month} || '-01',
+                                       'yyyy-MM-dd'),
+                               1) - 1
+                AND (((DESTINATION = $P{warehouse} OR DESTINATION = 9999) AND
+                    NVL($P{warehouse}, 0) > 0) OR
+                    NVL($P{warehouse}, 0) <= 0)
+                AND QTY <> 0) B
+    ON 1 = 1]]>
+	</queryString>
+	<field name="PARTNER_NAME" class="java.lang.String"/>
+	<field name="SHELVECOMPLETETIME" class="java.util.Date"/>
+	<field name="QTY" class="java.math.BigDecimal"/>
+	<field name="VALIDCOUNT" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="80" splitType="Stretch">
+			<textField>
+				<reportElement uuid="c646d0e1-321a-4ab8-9982-6a50dfcc8918" x="0" y="0" width="1660" height="60"/>
+				<textElement markup="none">
+					<font size="24" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA["业务伙伴"+ $P{month} +"月每日入库单品数"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="799b3fde-ee71-4f59-aa11-a0f0b27fbf48" x="0" y="60" width="1660" height="20" forecolor="#E61414"/>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VALIDCOUNT} > 0 ? "" : (java.lang.Integer.parseInt($P{year}) < java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)-2) ||(java.lang.Integer.parseInt($P{year}) == java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)-2 && java.lang.Integer.parseInt($P{month}) < java.util.Calendar.getInstance().get(java.util.Calendar.MONTH) -1 ) ? "您所查询的数据已过期失效。" : $P{year} + "年" + $P{month} + "月无入库记录。"]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<summary>
+		<band height="700" splitType="Stretch">
+			<crosstab>
+				<reportElement uuid="4987b1b8-6aa0-408c-9b72-66c807f59de8" x="0" y="0" width="1660" height="700"/>
+				<crosstabHeaderCell>
+					<cellContents backcolor="#F0F8FF" mode="Opaque">
+						<staticText>
+							<reportElement uuid="fe754493-c4c2-4f70-a7ae-531885c32ae0" style="Crosstab Data Text" x="0" y="0" width="100" height="30"/>
+							<box topPadding="1" bottomPadding="1">
+								<pen lineWidth="0.5"/>
+								<topPen lineWidth="0.5"/>
+								<leftPen lineWidth="0.5"/>
+								<bottomPen lineWidth="0.5"/>
+								<rightPen lineWidth="0.5"/>
+							</box>
+							<textElement textAlignment="Left">
+								<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+								<paragraph leftIndent="4" rightIndent="4"/>
+							</textElement>
+							<text><![CDATA[	        日期
+业务伙伴名称]]></text>
+						</staticText>
+						<line>
+							<reportElement uuid="70814cf3-1232-46c9-b197-bd6c33676363" style="Crosstab Data Text" x="0" y="0" width="100" height="30"/>
+							<graphicElement>
+								<pen lineWidth="0.5"/>
+							</graphicElement>
+						</line>
+					</cellContents>
+				</crosstabHeaderCell>
+				<rowGroup name="PARTNER_NAME" width="100">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[$F{PARTNER_NAME}]]></bucketExpression>
+					</bucket>
+					<crosstabRowHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField isStretchWithOverflow="true">
+								<reportElement uuid="e8c3d452-f392-4304-97a1-6486b141d639" style="Crosstab Data Text" x="0" y="0" width="100" height="25"/>
+								<textElement>
+									<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+								</textElement>
+								<textFieldExpression><![CDATA[$V{PARTNER_NAME}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabRowHeader>
+					<crosstabTotalRowHeader>
+						<cellContents/>
+					</crosstabTotalRowHeader>
+				</rowGroup>
+				<columnGroup name="SHELVECOMPLETETIME" height="30">
+					<bucket class="java.lang.String">
+						<bucketExpression><![CDATA[(new SimpleDateFormat("dd")).format($F{SHELVECOMPLETETIME})]]></bucketExpression>
+					</bucket>
+					<crosstabColumnHeader>
+						<cellContents backcolor="#F0F8FF" mode="Opaque">
+							<box>
+								<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+							</box>
+							<textField>
+								<reportElement uuid="9210055e-d883-44f7-9c3c-1092afef37db" style="Crosstab Data Text" x="0" y="0" width="50" height="30"/>
+								<textElement/>
+								<textFieldExpression><![CDATA[$V{SHELVECOMPLETETIME}]]></textFieldExpression>
+							</textField>
+						</cellContents>
+					</crosstabColumnHeader>
+					<crosstabTotalColumnHeader>
+						<cellContents/>
+					</crosstabTotalColumnHeader>
+				</columnGroup>
+				<measure name="QTYMeasure" class="java.math.BigDecimal" calculation="Sum">
+					<measureExpression><![CDATA[$F{QTY}]]></measureExpression>
+				</measure>
+				<crosstabCell width="50" height="25">
+					<cellContents>
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField pattern="###0;-###0">
+							<reportElement uuid="356a5877-e6cc-4047-907d-2a215573382f" style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement textAlignment="Right">
+								<paragraph rightIndent="4"/>
+							</textElement>
+							<textFieldExpression><![CDATA[$V{QTYMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell height="25" rowTotalGroup="PARTNER_NAME">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField>
+							<reportElement uuid="043e8cdb-8c12-4633-859c-6254cb50e369" style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$V{QTYMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell width="50" columnTotalGroup="SHELVECOMPLETETIME">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField>
+							<reportElement uuid="34aacde6-cea4-4248-a0a5-9261b703c1f3" style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$V{QTYMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+				<crosstabCell rowTotalGroup="PARTNER_NAME" columnTotalGroup="SHELVECOMPLETETIME">
+					<cellContents backcolor="#BFE1FF" mode="Opaque">
+						<box>
+							<pen lineWidth="0.5" lineStyle="Solid" lineColor="#000000"/>
+						</box>
+						<textField>
+							<reportElement uuid="4f4e0eb8-c257-49af-881d-3d49c6f9d71b" style="Crosstab Data Text" x="0" y="0" width="50" height="25"/>
+							<textElement/>
+							<textFieldExpression><![CDATA[$V{QTYMeasure}]]></textFieldExpression>
+						</textField>
+					</cellContents>
+				</crosstabCell>
+			</crosstab>
+		</band>
+	</summary>
+</jasperReport>

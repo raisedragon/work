@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="DomesticWarehouseInboundCompleted_subreport1" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="843125b5-515b-4c7d-9110-14bfb95eaaf9">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Order_ID" class="java.lang.String">
+		<defaultValueExpression><![CDATA[1000701]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[select p.value,
+p.name,
+ol.qtyentered,
+ol.finisheditemqty as redfinisheditemqty,
+ol.finisheditemqty,
+p.sellerweight,
+p.weight as redweight,
+p.weight,
+p.sellerlength,
+p.sellerwidth,
+p.sellerheight,
+p.length as redlength,
+p.width as redwidth,
+p.height as redheight,
+p.length,
+p.width,
+p.height
+ from C_OrderLine ol
+ left join m_product p on p.m_product_id =  ol.m_product_id
+ left join c_order c on c.c_order_id = ol.c_order_id
+ where c.c_order_id=$P{Order_ID}]]>
+	</queryString>
+	<field name="VALUE" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="QTYENTERED" class="java.math.BigDecimal"/>
+	<field name="REDFINISHEDITEMQTY" class="java.math.BigDecimal"/>
+	<field name="FINISHEDITEMQTY" class="java.math.BigDecimal"/>
+	<field name="SELLERWEIGHT" class="java.math.BigDecimal"/>
+	<field name="REDWEIGHT" class="java.math.BigDecimal"/>
+	<field name="WEIGHT" class="java.math.BigDecimal"/>
+	<field name="SELLERLENGTH" class="java.math.BigDecimal"/>
+	<field name="SELLERWIDTH" class="java.math.BigDecimal"/>
+	<field name="SELLERHEIGHT" class="java.math.BigDecimal"/>
+	<field name="REDLENGTH" class="java.math.BigDecimal"/>
+	<field name="REDWIDTH" class="java.math.BigDecimal"/>
+	<field name="REDHEIGHT" class="java.math.BigDecimal"/>
+	<field name="LENGTH" class="java.math.BigDecimal"/>
+	<field name="WIDTH" class="java.math.BigDecimal"/>
+	<field name="HEIGHT" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="48" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="138" y="17" width="50" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[计划数量（PCS）]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="341" y="17" width="102" height="16"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[产品尺寸（CM）]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="239" y="17" width="51" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[产品重量(KG) ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="66" y="17" width="72" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[产品中文名称]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="1" y="17" width="65" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[产品编号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="409" y="33" width="34" height="15"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[高]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="189" y="17" width="50" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[核实数量]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="341" y="33" width="34" height="15"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[长]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="290" y="17" width="51" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[核实产品重量(KG)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="443" y="33" width="34" height="15"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[长]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="511" y="33" width="34" height="15"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[高]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="443" y="17" width="102" height="16"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[核实产品尺寸（CM）]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="477" y="33" width="34" height="15"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[宽]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="14e37179-9d67-40ed-9f39-ec63f3e75056" x="375" y="33" width="34" height="15"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[宽]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="650ed7b1-8cab-41ec-9f18-65fd504df745" x="1" y="0" width="76" height="16"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[【产品信息】]]></text>
+			</staticText>
+			<frame>
+				<reportElement uuid="6d5db2c5-5f9a-481e-82e2-331d6f38c900" x="77" y="0" width="468" height="16"/>
+			</frame>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="31" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="1" y="0" width="65" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{VALUE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="66" y="0" width="72" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="138" y="0" width="50" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{QTYENTERED}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="189" y="0" width="50" height="31" forecolor="#000000">
+					<printWhenExpression><![CDATA[$F{QTYENTERED}.equals( $F{FINISHEDITEMQTY} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{FINISHEDITEMQTY}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00" isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="239" y="0" width="51" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERWEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00" isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="290" y="0" width="51" height="31">
+					<printWhenExpression><![CDATA[$F{SELLERWEIGHT}.equals( $F{WEIGHT} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="341" y="0" width="34" height="31"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERLENGTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="375" y="0" width="34" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERWIDTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="409" y="0" width="34" height="31"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SELLERHEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="443" y="0" width="34" height="31">
+					<printWhenExpression><![CDATA[$F{SELLERLENGTH}.equals( $F{LENGTH} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LENGTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="477" y="0" width="34" height="31">
+					<printWhenExpression><![CDATA[$F{SELLERWIDTH}.equals( $F{WIDTH} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{WIDTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="511" y="0" width="34" height="31">
+					<printWhenExpression><![CDATA[$F{SELLERHEIGHT}.equals( $F{HEIGHT} )]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{HEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00" isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="290" y="0" width="51" height="31" forecolor="#FF0000">
+					<printWhenExpression><![CDATA[(!$F{SELLERWEIGHT}.equals( $F{WEIGHT} ))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REDWEIGHT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="443" y="0" width="34" height="31" forecolor="#FF0000">
+					<printWhenExpression><![CDATA[(!$F{SELLERLENGTH}.equals( $F{LENGTH} ))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REDLENGTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="477" y="0" width="34" height="31" forecolor="#FF0000">
+					<printWhenExpression><![CDATA[(!$F{SELLERWIDTH}.equals( $F{WIDTH} ))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REDWIDTH}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="188" y="0" width="50" height="31" forecolor="#FF0000">
+					<printWhenExpression><![CDATA[(!$F{QTYENTERED}.equals( $F{FINISHEDITEMQTY} ))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REDFINISHEDITEMQTY}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e3d68319-509c-4c4b-8557-1d2888066880" x="511" y="0" width="34" height="31" forecolor="#FF0000">
+					<printWhenExpression><![CDATA[(!$F{SELLERHEIGHT}.equals( $F{HEIGHT}))]]></printWhenExpression>
+				</reportElement>
+				<box>
+					<pen lineColor="#000000"/>
+					<topPen lineWidth="1.0" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineColor="#000000"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{REDHEIGHT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="139" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="650ed7b1-8cab-41ec-9f18-65fd504df745" x="1" y="0" width="107" height="16"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[【温馨提示】]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="18ec2a7c-48e9-47ce-9b25-6c062b94bbd3" x="25" y="31" width="233" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["(2)	客服邮箱：cs@winit.com.cn"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="467e55d1-4ff5-43a1-8e7a-baa8e64bc234" x="25" y="46" width="296" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["(3)	本邮件为系统自动发送，请勿在线回复。"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="e53c490c-b057-478c-8f90-eed56660031d" x="25" y="91" width="233" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["敬祝：生意兴隆！万事如意！"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="1de135a6-c1c3-4b2a-8af5-89465f192ee6" x="25" y="106" width="233" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["万邑通客服中心  敬启"]]></textFieldExpression>
+			</textField>
+			<frame>
+				<reportElement uuid="2d09c39f-0ff9-4f3e-88f0-2728bd8a817b" x="25" y="76" width="521" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="edf4040b-6b30-444c-826a-dc8b11723ad0" x="25" y="61" width="521" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="b8a5f447-48a1-4c29-85f5-4d3e5eb92202" x="1" y="16" width="24" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="c2e7927a-f8b0-4df9-809e-4131bbd8950d" x="1" y="31" width="24" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="769fe746-68de-4428-ae5e-a6468c6cf541" x="1" y="46" width="24" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="048fc856-1c1d-493e-8a99-40e352f87bfa" x="1" y="61" width="24" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="3e6c0f3e-bb8e-43c2-8e57-12c3a334e247" x="1" y="76" width="24" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="3f044460-3387-4ebc-813f-52fa8820394d" x="1" y="91" width="24" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="df34fcbc-e55a-434a-a483-5ccff362f54b" x="1" y="106" width="24" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="bef004dc-b9a4-45e2-b1f2-1d75ceb066ee" x="108" y="0" width="438" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="0817b877-5cfd-4a68-b888-22bb4fbcb2ef" x="258" y="16" width="288" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="8530f704-3755-4fab-8c68-44597ee92e86" x="258" y="31" width="288" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="15b49db6-cb8a-4b3b-967f-609d41f97ee7" x="321" y="46" width="225" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="fcd749c3-ede3-43b3-b747-aa231a1d47f5" x="258" y="91" width="288" height="15"/>
+			</frame>
+			<frame>
+				<reportElement uuid="ebd9749d-8be7-4d7c-9da3-dbb1876e1148" x="258" y="106" width="288" height="15"/>
+			</frame>
+			<textField>
+				<reportElement uuid="121ffc4e-24fb-4cf9-adb5-236bb9fff062" x="25" y="16" width="233" height="15"/>
+				<textElement/>
+				<textFieldExpression><![CDATA["(1)	如有疑问，请与万邑通客服专员联系。"]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

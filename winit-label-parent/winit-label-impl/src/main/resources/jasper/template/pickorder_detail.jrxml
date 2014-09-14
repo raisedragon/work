@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="936" pageHeight="842" columnWidth="916" leftMargin="0" rightMargin="20" topMargin="20" bottomMargin="20" uuid="55de68f7-c31f-4d7c-9f77-c552541093f1">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Created1" class="java.util.Date"/>
+	<parameter name="Created2" class="java.util.Date"/>
+	<parameter name="warehouse" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT A.*,
+       (CASE
+         WHEN A.DELIVERYVIARULE <> 'PickUp' THEN
+          ' '
+         WHEN (
+           ((A.CODE = 'Air' OR A.CODE = 'Express') AND WORKDAY(A.DATEPROMISEDTO,A.PUC)<=2)
+              OR
+              (A.CODE = 'Sea' AND WORKDAY(A.DATEPROMISEDTO,A.PUC)<=3 ))
+              THEN
+          '成功'
+         ELSE
+          '失败'
+       END) AS SUCCESS  --提货单表现
+  FROM (SELECT
+               LT.CODE,
+               LT.NAME AS TRANSMODE,  --运输方式
+               PO.CREATED,       --提货单生成日期
+               RE.NAME AS DELIVERYVIARULE,
+               C.NAME AS CITY, --城市
+               PO.DOCUMENTNO, --提货单号
+               PO.DATEPROMISEDTO,--Winit确认提货日期
+               (SELECT MAX(L.CREATED)
+                  FROM AD_CHANGELOG_V L
+                 WHERE L.COLUMNNAME = 'Status'
+                   AND L.TABLENAME = 'WT_PickOrder'
+                   AND L.OLDVALUE = 'PIU'
+                   AND L.NEWVALUE = 'PUC'
+                   AND L.RECORD_ID = PO.WT_PICKORDER_ID) AS PUC --国内仓提货完成日期
+          FROM WT_PICKORDER PO
+          LEFT JOIN WV_REFERENCE RE
+            ON RE.VALUE = PO.DELIVERYVIARULE
+           AND RE.REFERENCENAME = 'WT_PickOrder DeliveryViaRule'
+           AND RE.AD_LANGUAGE = 'en_US'
+          LEFT JOIN C_ORDER CO
+            ON CO.C_ORDER_ID = PO.C_ORDER_ID
+          LEFT JOIN WT_TRANSPORTMODE TM
+            ON TM.WT_TRANSPORTMODE_ID = CO.WT_TRANSPORTMODE_ID
+          LEFT JOIN WT_LOGISTICSMODE LM
+            ON LM.WT_LOGISTICSMODE_ID = TM.WT_LOGISTICSMODE_ID
+          LEFT JOIN WT_LOGISTICSTYPE LT
+            ON LT.WT_LOGISTICSTYPE_ID = LM.WT_LOGISTICSTYPE_ID
+          LEFT JOIN C_CITY C
+            ON C.C_CITY_ID = PO.C_CITY_ID
+            AND PO.STATUS = 'CO'
+         WHERE PO.CREATED >= $P{Created1}
+           AND PO.CREATED < $P{Created2} + 1
+		   AND ((CO.DESTINATION = $P{warehouse} and nvl($P{warehouse},0) > 0) or nvl($P{warehouse},0) <= 0)
+           AND PO.STATUS = 'CO') A]]>
+	</queryString>
+	<field name="CODE" class="java.lang.String"/>
+	<field name="TRANSMODE" class="java.lang.String"/>
+	<field name="CREATED" class="java.sql.Timestamp"/>
+	<field name="DELIVERYVIARULE" class="java.lang.String"/>
+	<field name="CITY" class="java.lang.String"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<field name="DATEPROMISEDTO" class="java.sql.Timestamp"/>
+	<field name="PUC" class="java.sql.Timestamp"/>
+	<field name="SUCCESS" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="41" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="8566b5d0-953f-4655-a8d4-dfaa044f419f" x="0" y="17" width="112" height="24"/>
+				<box>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[提货生成日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0a2ea19c-b35f-4a2e-a014-c219e1b91fbd" x="112" y="17" width="88" height="24"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[提货方式]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="61524850-8583-47e0-8c79-0160cb413394" x="300" y="17" width="100" height="24"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[卖家所在城市]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d6110c0b-fcc2-439b-891c-d25dffe835b2" x="400" y="17" width="141" height="24"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[提货单号]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="93029c2d-1ff6-40d5-8170-3863cb4c3064" x="541" y="17" width="135" height="24"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Winit确认提货日期]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="eb062574-4e76-4082-b273-71e33ef79881" x="676" y="17" width="160" height="24"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[国内仓提货完成日期]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="2a5a545c-af1b-41a0-a82e-e4196d994c77" x="112" y="0" width="188" height="17"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Created1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="ca9466f5-f867-4c55-9e05-994d02af1982" x="400" y="0" width="516" height="17"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Created2}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="8566b5d0-953f-4655-a8d4-dfaa044f419f" x="0" y="0" width="112" height="17"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[开始时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8566b5d0-953f-4655-a8d4-dfaa044f419f" x="300" y="0" width="100" height="17"/>
+				<box>
+					<topPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[结束时间]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f1707ce7-36b1-472e-83fa-c51a5d0ed114" x="200" y="17" width="100" height="24"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[运输方式]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f2ec8e43-4c66-438f-90bb-f417d78ee437" x="836" y="17" width="80" height="24"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[提货表现]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="ebf9e678-c69c-495f-8b19-b4acc0eff7bf" x="0" y="0" width="112" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CREATED}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="364211db-1a40-48f3-96c4-bf33345bbd6d" x="112" y="0" width="88" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DELIVERYVIARULE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="23b1d5e4-20a1-4f9e-abfd-bfda3ea5d3bd" x="300" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CITY}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="35ae5d82-b9b9-4558-92cf-9f6621fd4f97" x="400" y="0" width="141" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="7c9c3108-38be-48a1-8acb-660aa3c4d602" x="541" y="0" width="135" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DATEPROMISEDTO}]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+				<reportElement uuid="4b9bc8ee-ef7d-4edf-a35c-b8a6c5cc5da2" x="676" y="0" width="160" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PUC}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="802c8c7c-cab8-4614-9399-a640c043899f" x="200" y="0" width="100" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRANSMODE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="cab95c69-b623-46e2-89fc-317d7b007673" x="836" y="0" width="80" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SUCCESS}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

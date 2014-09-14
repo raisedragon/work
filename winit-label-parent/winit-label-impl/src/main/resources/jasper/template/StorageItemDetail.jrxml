@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Order" language="groovy" pageWidth="1008" pageHeight="595" orientation="Landscape" columnWidth="1008" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b9028621-e9b8-428b-b604-e61314a0c4cf">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Created" class="java.util.Date"/>
+	<parameter name="Created1" class="java.util.Date"/>
+	<queryString>
+		<![CDATA[SELECT A.COUNT       AS RECORDNUM,
+       IT.SERNO, --单品编码
+       REF.NAME, --单品状态
+       P.SKU, --单品SKU编码
+       CO.DOCUMENTNO AS CORDER, --海外仓入库单
+       PO.DOCUMENTNO AS PICKORDER, --提货单
+       SM.DOCUMENTNO AS SHIPMENT, --跨国物流单
+       EX.DOCUMENTNO AS EXWAREHOUSE --海外仓出库单
+  FROM WT_STORAGEITEM IT
+  LEFT JOIN M_PRODUCT P
+    ON P.M_PRODUCT_ID = IT.M_PRODUCT_ID
+  LEFT JOIN C_ORDER CO
+    ON CO.C_ORDER_ID = IT.C_ORDER_ID
+  LEFT JOIN WT_PICKORDER PO
+    ON PO.C_ORDER_ID = CO.C_ORDER_ID
+  LEFT JOIN WV_REFERENCE REF
+    ON REF.VALUE = IT.STATUS
+   AND REF.REFERENCENAME = '_ItemStatus'
+   AND REF.AD_LANGUAGE = 'zh_CN'
+  LEFT JOIN WT_SHIPMENT SM
+    ON SM.WT_SHIPMENT_ID = IT.WT_SHIPMENT_ID
+  LEFT JOIN WT_EXWAREHOUSE EX
+    ON EX.WT_EXWAREHOUSE_ID = IT.WT_EXWAREHOUSE_ID
+  LEFT JOIN (SELECT COUNT(1) AS COUNT
+               FROM WT_STORAGEITEM S
+              WHERE TRUNC(S.Created) >= $P{Created}
+                AND TRUNC(S.Created) < ($P{Created1} + 1)) A
+    ON 1 = 1
+ WHERE TRUNC(IT.Created) >= $P{Created}
+   AND TRUNC(IT.Created) < ($P{Created1} + 1)
+   AND ROWNUM < 65000
+]]>
+	</queryString>
+	<field name="RECORDNUM" class="java.math.BigDecimal"/>
+	<field name="SERNO" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="SKU" class="java.lang.String"/>
+	<field name="CORDER" class="java.lang.String"/>
+	<field name="PICKORDER" class="java.lang.String"/>
+	<field name="SHIPMENT" class="java.lang.String"/>
+	<field name="EXWAREHOUSE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="55" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="e7aa3933-4555-4309-a1d6-68b464ec0728" x="0" y="35" width="172" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[单品条码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f3fdd828-deb4-4ff4-bd96-a7560ae6b31e" x="173" y="35" width="122" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[单品状态]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9a0af466-9d7b-4876-8ecf-92ba79660f0a" x="295" y="35" width="160" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[单品SKU编码]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="580433b3-e8ff-4d15-a414-a8c2592ba4ca" x="455" y="35" width="141" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓入库单]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="921232e6-936f-4f26-8c3a-0b399836e880" x="596" y="35" width="141" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[提货单]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b101158d-79d8-4b34-a6c3-1f33c03b18b0" x="737" y="35" width="144" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[跨国物流单]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9c814697-fe93-42cb-a5fb-dd36a95bc20d" x="881" y="35" width="127" height="20"/>
+				<box>
+					<topPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[海外仓出库单]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="4ea9fea9-1406-4adc-aa94-4943611a948f" x="0" y="0" width="1008" height="35"/>
+				<textElement textAlignment="Center">
+					<font size="14" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{RECORDNUM}.intValue()>65000?"您处理的数据量太大,Excel无法全部显示,请缩小时间范围 ！" : " "]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="21">
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="cf5cee01-abc4-47bc-9f4e-7a17778b8030" x="0" y="0" width="172" height="20"/>
+				<box>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SERNO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="3915294f-acfc-4f86-9c9c-bd4b904fd0ce" x="173" y="0" width="122" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{NAME}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="c8199bb6-7e23-4956-8839-59d727a0121c" x="295" y="0" width="160" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SKU}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e7e5cc5b-6552-4c6d-8a42-a4946a9de831" x="455" y="0" width="141" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CORDER}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="7e6b3664-5538-4b85-81a3-5b4d068224b7" x="596" y="0" width="141" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PICKORDER}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0a05d52b-92b3-4ed9-8efa-2b5b6bb464a5" x="737" y="0" width="144" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SHIPMENT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="913505fd-a057-4adf-834f-48a42089dbea" x="881" y="0" width="127" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement>
+					<font size="12" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{EXWAREHOUSE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

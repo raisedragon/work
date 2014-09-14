@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="BatchLocatorBC" language="groovy" pageWidth="300" pageHeight="150" columnWidth="278" leftMargin="11" rightMargin="11" topMargin="11" bottomMargin="11" uuid="e8392f61-4bb2-4f8d-abd3-f0841591c53f">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SerNo1" class="java.lang.String"/>
+	<parameter name="SerNo2" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select i.binarydata, substr(l.locatorserno, 0, 1) prefix, l.locatorserno, l.x, l.y, l.z
+from m_locator l, ad_clientinfo c, ad_image i
+where l.ad_client_id = c.ad_client_id
+  and c.logoreport_id = i.ad_image_id
+  and c.ad_client_id = 11
+  and l.locatorserno >= $P{SerNo1}
+  and l.locatorserno <= $P{SerNo2}
+order by l.locatorserno]]>
+	</queryString>
+	<field name="BINARYDATA" class="java.io.InputStream"/>
+	<field name="PREFIX" class="java.lang.String"/>
+	<field name="LOCATORSERNO" class="java.lang.String"/>
+	<field name="X" class="java.lang.String"/>
+	<field name="Y" class="java.lang.String"/>
+	<field name="Z" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="110" splitType="Stretch">
+			<frame>
+				<reportElement uuid="eb6b5f44-44a1-4857-ac0f-940a684d8625" x="0" y="0" width="278" height="110"/>
+				<textField>
+					<reportElement uuid="992d06ce-1565-4231-b0bd-81fa3c9a16cd" x="0" y="0" width="62" height="47"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="24" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{PREFIX}]]></textFieldExpression>
+				</textField>
+				<frame>
+					<reportElement uuid="5ded8528-d253-4db7-a50e-3535661785f8" x="206" y="47" width="56" height="51"/>
+				</frame>
+			</frame>
+			<componentElement>
+				<reportElement uuid="bf9714b6-7f0e-4215-9de0-3bf4331dedc2" x="62" y="0" width="216" height="47"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="2" barHeight="85">
+					<jr:codeExpression><![CDATA[$F{LOCATORSERNO}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField>
+				<reportElement uuid="94820093-598c-47f6-828a-9bf3266cd09a" x="0" y="47" width="206" height="51"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="28" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LOCATORSERNO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

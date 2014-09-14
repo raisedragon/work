@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="20" bottomMargin="20" uuid="5a4fef77-709c-4a69-b36f-6f133cc43e01">
+	<property name="ireport.zoom" value="0.8264462809917354"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="serviceCode" class="java.lang.String"/>
+	<parameter name="documentNo" class="java.lang.String"/>
+	<parameter name="weight" class="java.lang.String"/>
+	<parameter name="operator" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+     t.documentno,
+     t.name,
+     t.city,
+     t.regionname,
+     t.postal,
+     t.address1,
+     t.address2,
+     t.address3,
+     t.phone
+FROM
+     WT_OWMS_EXWAREHOUSE t
+WHERE
+     t.documentno = $P{documentNo}]]>
+	</queryString>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="CITY" class="java.lang.String"/>
+	<field name="REGIONNAME" class="java.lang.String"/>
+	<field name="POSTAL" class="java.lang.String"/>
+	<field name="ADDRESS1" class="java.lang.String"/>
+	<field name="ADDRESS2" class="java.lang.String"/>
+	<field name="ADDRESS3" class="java.lang.String"/>
+	<field name="PHONE" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="555" splitType="Stretch">
+			<componentElement>
+				<reportElement uuid="62d09038-8d70-407c-99a5-d0c336bdcd05" x="0" y="40" width="320" height="70"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128A" drawText="false" checksumRequired="false" barWidth="2" barHeight="60">
+					<jr:codeExpression><![CDATA[$F{DOCUMENTNO}]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="84705a01-6d3d-4a7b-b857-f0533b44ce24" x="320" y="57" width="169" height="40"/>
+				<textElement>
+					<font size="28" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DOCUMENTNO}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="282e4d6f-6047-47f2-bcb5-3fd0167b5c24" x="489" y="57" width="100" height="40"/>
+				<textElement>
+					<font size="28"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{serviceCode}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="c3c64fd5-4810-4aeb-8a4f-742dfd17b988" x="667" y="41" width="145" height="80"/>
+				<box>
+					<pen lineWidth="1.5"/>
+					<topPen lineWidth="1.5"/>
+					<leftPen lineWidth="1.5"/>
+					<bottomPen lineWidth="1.5"/>
+					<rightPen lineWidth="1.5"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="18" isBold="false"/>
+				</textElement>
+				<text><![CDATA[POSTAGE
+PAID
+AUSTRALIA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="02d63032-2b44-4fe5-b1d3-8402a73d8391" x="20" y="110" width="235" height="50"/>
+				<textElement>
+					<font size="36" isBold="true" isItalic="true"/>
+				</textElement>
+				<text><![CDATA[Delivery To:]]></text>
+			</staticText>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="2c5d4d91-e6ae-4f7a-a56d-6ba23c407ef1" x="20" y="160" width="569" height="221"/>
+				<textElement>
+					<font size="36"/>
+					<paragraph lineSpacing="Fixed" lineSpacingSize="27.0"/>
+				</textElement>
+				<textFieldExpression><![CDATA[($F{NAME}  == null ? "" :$F{NAME}  + "\n")+ "\n" +
+($F{ADDRESS1} == null ? "" : $F{ADDRESS1} + "\n") + "\n" +
+($F{ADDRESS2} == null ? "" : $F{ADDRESS2} + "\n") +
+($F{ADDRESS3} == null ? "" : $F{ADDRESS3} + "\n")]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="0aefc6e8-9c57-4f5c-b409-bacfbfe22cda" x="589" y="121" width="223" height="113"/>
+				<textElement>
+					<font size="36"/>
+					<paragraph lineSpacing="Fixed" lineSpacingSize="25.0"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PHONE:\n" + ($F{PHONE}==null?"":$F{PHONE})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="be016f51-1133-4de6-9b76-ade3e79289cf" x="20" y="381" width="505" height="142"/>
+				<textElement>
+					<font size="36"/>
+					<paragraph lineSpacing="Fixed" lineSpacingSize="27.0"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CITY} + "\n" +
+$F{REGIONNAME} + " " + $F{POSTAL}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="27010c0c-acbb-4c2b-a0a7-944496aee3a5" x="525" y="382" width="287" height="142"/>
+				<textElement>
+					<font size="22"/>
+					<paragraph lineSpacing="Fixed" lineSpacingSize="18.0"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Weight: " + $P{weight} + "\n" +
+"Operator: " + ($P{operator}==null?"":$P{operator}) + "\n" +
+"From: " + "WAN YI TONG(AU)" + "\n" +
+"PO BOX 168\n" +
+"REGENTS PARK NSW 2143"]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

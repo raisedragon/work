@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="shipmentDFApply" language="groovy" pageWidth="895" pageHeight="842" columnWidth="855" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="ef76372e-cf85-48c2-adc6-818f988ea26f">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="344"/>
+	<parameter name="RECORD_ID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT shipment.WT_SHIPMENT_ID, shipment.TRACKSHIPPER,shipment.OCEANSHIPPINGNAME,shipment.OCEANVOYAGE,tc.name_en AS shiper,tct.name_en AS Consignee,"TO_CHAR"(wm_concat(cl.CUPBOARDNO)) AS CUPBOARDNO  FROM WT_SHIPMENT shipment
+LEFT JOIN WT_CarLine cl ON cl.WT_SHIPMENT_ID =  shipment.WT_SHIPMENT_ID
+LEFT JOIN WT_Transceiver tc ON tc.WT_Transceiver_ID=shipment.SHIPPER_ID
+LEFT JOIN WT_Transceiver tct ON tct.WT_Transceiver_ID=shipment.Consignee_ID
+WHERE shipment.WT_SHIPMENT_ID=$P{RECORD_ID}
+GROUP BY shipment.WT_SHIPMENT_ID,shipment.TRACKSHIPPER,shipment.OCEANSHIPPINGNAME,shipment.OCEANVOYAGE,tc.name_en,tct.name_en]]>
+	</queryString>
+	<field name="WT_SHIPMENT_ID" class="java.math.BigDecimal"/>
+	<field name="TRACKSHIPPER" class="java.lang.String"/>
+	<field name="OCEANSHIPPINGNAME" class="java.lang.String"/>
+	<field name="OCEANVOYAGE" class="java.lang.String"/>
+	<field name="SHIPER" class="java.lang.String"/>
+	<field name="CONSIGNEE" class="java.lang.String"/>
+	<field name="CUPBOARDNO" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="100" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="b99d03d1-0571-4e23-babb-0aa79506815c" x="28" y="0" width="467" height="32"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TELEX RELEASE APPLICATION]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="005d0120-019d-4c2c-9c52-e40e00af2c87" mode="Transparent" x="28" y="32" width="467" height="34"/>
+				<textElement textAlignment="Center">
+					<font fontName="SansSerif" size="14" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[电放申请]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ee8c212a-ead2-45f9-92f5-08dc9108a572" x="0" y="66" width="86" height="34"/>
+				<textElement>
+					<font fontName="SansSerif" size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TO     :  ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="73cac9df-d86d-46e5-a033-9fe96280f80c" x="110" y="66" width="402" height="34"/>
+				<textElement>
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Damco China Limited Shenzhen Branch]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="80" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="14b310f5-b63b-4dd2-bcf9-0589e38fc3e8" x="0" y="0" width="86" height="40"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[ATTN:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1f823c0d-65e0-4dc0-b2b7-e2746a1ea4a5" x="0" y="40" width="86" height="40"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[DATE:]]></text>
+			</staticText>
+			<textField pattern="MM-dd-yyyy">
+				<reportElement uuid="6a18418e-5612-4744-bd58-31191ed7c73d" x="110" y="40" width="402" height="40"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.util.Calendar.getInstance().getTime()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="622" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="9022e675-9a61-4f7a-b5b8-015fa81da230" x="0" y="23" width="269" height="26"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="14" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[B/L Number(提单号码):]]></text>
+			</staticText>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="59e84c5a-2841-44d7-9f72-fe12cfdbaa21" x="340" y="23" width="270" height="26"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="14" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRACKSHIPPER}==null ? "" : $F{TRACKSHIPPER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="313eefef-5d98-463c-bc87-3aad4d863112" x="0" y="62" width="269" height="32"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="14" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Vessel & Voyage (船名及航次) :]]></text>
+			</staticText>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="6817f1fc-8fae-4af4-838d-8b796b2b286e" x="340" y="62" width="270" height="32"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="14" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[( $F{OCEANSHIPPINGNAME}==null ? "" : $F{OCEANSHIPPINGNAME} )+" / "+( $F{OCEANVOYAGE}==null ? "" : $F{OCEANVOYAGE} )]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="be5b4a61-fa9b-4942-ad98-a4faf05084de" x="0" y="94" width="269" height="32"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="14" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Container No. (柜号):]]></text>
+			</staticText>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="d21f145b-0d76-4c29-bfe6-9554bcf8b9c7" x="340" y="94" width="270" height="32"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="14" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CUPBOARDNO}==null ? "" : $F{CUPBOARDNO}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="3e5a79cf-ca77-42d5-91c0-844bc8b96d4e" x="0" y="126" width="269" height="31"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="14" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Shipper (发货人) : ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="445b999f-899d-4b94-939d-3de0bd81d3a5" x="0" y="157" width="269" height="32"/>
+				<textElement verticalAlignment="Bottom">
+					<font size="14" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[Consignee (收货人):]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9dcd1955-943f-4e01-8800-ce173e173cb7" x="0" y="209" width="610" height="94"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[We have surrendered the full set of the above-mentioned original bill of lading to Maersk Logistics local office and herby request to release cargo covered by the above mentioned B/L to consignee without presenting any original B/L. We will undertake all the responsibilities, cost and risk that might be arising form this.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="097f5cef-048d-4c89-a490-3596e3a8bb40" x="0" y="323" width="610" height="54"/>
+				<textElement>
+					<font size="14" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[我公司以上货物即将运抵目的地，现将该票货物的正本提单(全套)交还贵司，并申请将提单所注货物直接发给收货人，收货人无需提供有关单证，由此引起的一切责任将由我司负责和承担。
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="887f9534-2365-401a-9402-ed622a60adeb" x="0" y="417" width="610" height="36"/>
+				<textElement>
+					<font size="14" isBold="true" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[(Signature & Company Chop of Applicant)（申请人签名并盖公章）]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="765c4e51-97c8-4cf4-8374-355a3cb696fd" x="0" y="453" width="156" height="30"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Date of Application:  ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2d65666e-4f80-4cab-bee6-f0b35f4d97b7" x="0" y="483" width="132" height="27"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[（申请日期）
+]]></text>
+			</staticText>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="53af83c3-78a7-46df-a7a9-44424068bc21" x="340" y="126" width="270" height="31"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="14" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SHIPER}==null ? "" : $F{SHIPER}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="false">
+				<reportElement uuid="8eb37408-e5c8-469b-8cba-d681d043887e" x="340" y="157" width="270" height="32"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="14" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CONSIGNEE}==null ? "" : $F{CONSIGNEE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="6bb0c32c-d372-4738-83ea-8e84e04f6027" x="0" y="397" width="280" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9535af98-8fe0-43d5-9f7a-51f0ab2fd59c" x="309" y="397" width="167" height="20"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="89a5a2c2-0305-4ba8-a0d9-45112b56b9a7" x="0" y="189" width="629" height="20"/>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="688105e2-006d-4b68-ba00-af02ee85268f" x="0" y="303" width="629" height="20"/>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0a01f601-188e-468a-80f0-490d4e476e44" x="0" y="377" width="629" height="20"/>
+				<textElement/>
+				<text><![CDATA[]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="365234f5-26b2-47f4-88ba-7713b64562bb" x="156" y="483" width="70" height="27"/>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[(month) ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ee31b918-64a0-477d-9a80-d0b13ef38693" x="244" y="483" width="65" height="27"/>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[(date)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="d8f86411-4874-48f7-a7b0-ec2b6a7d04e6" x="329" y="483" width="66" height="27"/>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[(year)]]></text>
+			</staticText>
+			<textField pattern="MM">
+				<reportElement uuid="3a85a8ea-6c33-491c-9e09-0667b8dfa891" x="156" y="453" width="70" height="30"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="14" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.util.Calendar.getInstance().getTime()]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd">
+				<reportElement uuid="aa0c4be9-9d2a-4094-889c-661be906d4a6" x="244" y="453" width="65" height="30"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="14" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.util.Calendar.getInstance().getTime()]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy">
+				<reportElement uuid="4ae16099-a7b4-4eed-8e2b-09c771cf981b" x="329" y="453" width="66" height="30"/>
+				<box>
+					<bottomPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="14" isUnderline="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.util.Calendar.getInstance().getTime()]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

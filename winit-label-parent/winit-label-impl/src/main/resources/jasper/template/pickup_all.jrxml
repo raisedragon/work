@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="pickup_all" language="groovy" pageWidth="432" pageHeight="288" columnWidth="392" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="d6fa959c-760b-47bf-9fc9-433fec825169">
+	<property name="ireport.zoom" value="1.6105100000000008"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="documentNo" class="java.lang.String"/>
+	<parameter name="name" class="java.lang.String"/>
+	<parameter name="phone" class="java.lang.String"/>
+	<parameter name="count" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT 1  FROM DUAL]]>
+	</queryString>
+	<field name="1" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="248" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="ea9639b0-188e-4b08-bf73-87b70a3706e1" mode="Transparent" x="12" y="8" width="196" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="12" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Winit Corporation]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="78994d13-d364-4549-81cb-75ecb0d21c51" mode="Transparent" x="12" y="27" width="196" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[GWS Destination Waybill Barcode:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="0cc4e718-abc3-444d-8cd4-aff5e7c7543a" mode="Transparent" x="12" y="68" width="196" height="20" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="10" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Order Information]]></text>
+			</staticText>
+			<componentElement>
+				<reportElement uuid="d1946e48-dd68-45e8-b801-d465249d68f3" x="220" y="8" width="168" height="59"/>
+				<jr:barbecue xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd" type="Code128" drawText="false" checksumRequired="false" barWidth="3" barHeight="110">
+					<jr:codeExpression><![CDATA[$P{documentNo}+(new Integer($P{documentNo}).intValue()%7)]]></jr:codeExpression>
+				</jr:barbecue>
+			</componentElement>
+			<staticText>
+				<reportElement uuid="04834217-6cf1-495a-a7a3-70453995b4f1" mode="Transparent" x="12" y="102" width="145" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Outbound Order No.:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7aa5dc1d-0341-4bda-86cd-95b84de2ee6b" mode="Transparent" x="12" y="119" width="145" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Consignee Information]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f0804325-613e-4ee0-9e66-2d251706e692" mode="Transparent" x="12" y="136" width="145" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[     Contact Person  Name  :]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="a208b836-936b-4bf1-adab-bc58d7478d06" x="156" y="102" width="231" height="18"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{documentNo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="b8107757-d5b9-4e4d-bdc3-cddd8151e5fb" x="220" y="73" width="168" height="14"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement textAlignment="Center">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Nr#:"+$P{documentNo}+(new Integer($P{documentNo}).intValue()%7)]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="c0a3fd80-c2ee-4579-ba68-d58bfb96bf60" x="156" y="136" width="231" height="18"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="6de2d52f-29d1-4f78-8196-7428946dc1ba" x="156" y="153" width="231" height="18"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{phone}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="8159f73f-4e51-418f-9cc5-39ca31fcf705" mode="Transparent" x="171" y="191" width="131" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Total Order Item quantity:]]></text>
+			</staticText>
+			<textField>
+				<reportElement uuid="4bd82c88-b830-41aa-b3d9-9e6b8bcead89" x="301" y="191" width="86" height="18"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{count}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="dd14d55c-0c79-4b9d-a583-13c392c31657" mode="Transparent" x="12" y="220" width="375" height="15" forecolor="#FF3300" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="7" isBold="true" isItalic="true" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[Notice：Receiving this package means that you have accepted WINIT terms of service condition]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9f922e1a-6c83-4ed5-b330-7211818a4f42" mode="Transparent" x="12" y="153" width="145" height="18" forecolor="#000000" backcolor="#FFFFFF"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="9" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[     Contact Person  Phone :]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

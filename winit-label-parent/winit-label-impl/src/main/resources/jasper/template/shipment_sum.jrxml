@@ -1,0 +1,2644 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="shipment_sum" language="groovy" pageWidth="842" pageHeight="869" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="612ac7fb-a5d3-4a55-b344-278c07ad6950">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Created1" class="java.sql.Timestamp"/>
+	<parameter name="warehouse" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT NVL(PO_DETAIL.PO_WEEK_SUC_NUM, 0) PO_WEEK_SUC_NUM,
+       NVL(PO_DETAIL.PO_WEEK_TOTAL_NUM, 0) PO_WEEK_TOTAL_NUM,
+       NVL(PO_DETAIL.PO_SUC_NUM, 0) PO_SUC_NUM,
+       NVL(PO_DETAIL.PO_TOTAL_NUM, 0) PO_TOTAL_NUM,
+       NVL(OD_DETAIL.OD_WEEK_SUC_NUM, 0) OD_WEEK_SUC_NUM,
+       NVL(OD_DETAIL.OD_WEEK_TOTAL_NUM, 0) OD_WEEK_TOTAL_NUM,
+       NVL(OD_DETAIL.OD_SUC_NUM, 0) OD_SUC_NUM,
+       NVL(OD_DETAIL.OD_TOTAL_NUM, 0) OD_TOTAL_NUM,
+       NVL(SM_DETAIL.SM_WEEK_EXPRESS_SUC_NUM, 0) SM_WEEK_EXPRESS_SUC_NUM,
+       NVL(SM_DETAIL.SM_WEEK_EXPRESS_NUM, 0) SM_WEEK_EXPRESS_NUM,
+       NVL(SM_DETAIL.SM_WEEK_AIR_SUC_NUM, 0) SM_WEEK_AIR_SUC_NUM,
+       NVL(SM_DETAIL.SM_WEEK_AIR_NUM, 0) SM_WEEK_AIR_NUM,
+       NVL(SM_DETAIL.SM_WEEK_SEA_SUC_NUM, 0) SM_WEEK_SEA_SUC_NUM,
+       NVL(SM_DETAIL.SM_WEEK_SEA_NUM, 0) SM_WEEK_SEA_NUM,
+       NVL(SM_DETAIL.SM_WEEK_AE_FSC_SUC_NUM, 0) SM_WEEK_AE_FSC_SUC_NUM,
+       NVL(SM_DETAIL.SM_WEEK_SEA_FSC_SUC_NUM, 0) SM_WEEK_SEA_FSC_SUC_NUM,
+       NVL(SM_DETAIL.SM_WEEK_TOTAL_NUM, 0) SM_WEEK_TOTAL_NUM,
+       NVL(SM_DETAIL.SM_EXPRESS_SUC_NUM, 0) SM_EXPRESS_SUC_NUM,
+       NVL(SM_DETAIL.SM_EXPRESS_NUM, 0) SM_EXPRESS_NUM,
+       NVL(SM_DETAIL.SM_AIR_SUC_NUM, 0) SM_AIR_SUC_NUM,
+       NVL(SM_DETAIL.SM_AIR_NUM, 0) SM_AIR_NUM,
+       NVL(SM_DETAIL.SM_SEA_SUC_NUM, 0) SM_SEA_SUC_NUM,
+       NVL(SM_DETAIL.SM_SEA_NUM, 0) SM_SEA_NUM,
+       NVL(SM_DETAIL.SM_AE_FSC_SUC_NUM, 0) SM_AE_FSC_SUC_NUM,
+       NVL(SM_DETAIL.SM_SEA_FSC_SUC_NUM, 0) SM_SEA_FSC_SUC_NUM,
+       NVL(SM_DETAIL.SM_TOTAL_NUM, 0) SM_TOTAL_NUM
+  FROM DUAL
+  LEFT JOIN ( -- 查询提货单
+             SELECT
+             -- 一周内符合条件票数
+              SUM(CASE
+                     WHEN PO_ACTUAL_DATE BETWEEN
+                          $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      PO_SUC_NUM
+                     ELSE
+                      0
+                   END) PO_WEEK_SUC_NUM,
+               -- 一周内总票数
+               SUM(CASE
+                     WHEN PO_ACTUAL_DATE BETWEEN
+                          $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      PO_TOTAL_NUM
+                     ELSE
+                      0
+                   END) PO_WEEK_TOTAL_NUM,
+               -- 累计符合条件票数
+               SUM(PO_SUC_NUM) PO_SUC_NUM,
+               -- 累计票数
+               SUM(PO_TOTAL_NUM) PO_TOTAL_NUM
+               FROM (SELECT
+                      --每天总提货票数
+                       COUNT(WT_PICKORDER_ID) PO_TOTAL_NUM,
+                       --每天总提货成功票数
+                       SUM(CASE
+                           -- 【国内仓提货日期】-【Winit确认提货日期】，空运或快递1个工作日内，海运两个工作日内票数
+                             WHEN ((TRANS = 'Air' OR TRANS = 'Express') AND
+                                  DIFF <= 1) OR (TRANS = 'Sea' AND DIFF <= 2) THEN
+                              1
+                             ELSE
+                              0
+                           END) PO_SUC_NUM,
+                       -- 【国内仓提货日期】
+                       ACTUAL_DATE AS PO_ACTUAL_DATE
+                        FROM (
+                              -- 计算提货天数
+                              SELECT PICKORDER.WT_PICKORDER_ID,
+                                      PO_LOG.ACTUAL_DATE,
+                                      PICKORDER.TRANS,
+                                      CASE
+                                        WHEN PO_LOG.ACTUAL_DATE -
+                                             PICKORDER.WINIT_DATE < 1 THEN
+                                         0
+                                        ELSE
+                                         WORKDAY(PICKORDER.WINIT_DATE,
+                                                 PO_LOG.ACTUAL_DATE) - 1
+                                      END DIFF
+                                FROM (
+                                       -- 提货单运输方式、Winit确认提货日期
+                                       SELECT PO.WT_PICKORDER_ID,
+                                               LT.CODE            TRANS,
+                                               PO.DATEPROMISEDTO  WINIT_DATE,
+                                               PO.CREATED
+                                         FROM WT_PICKORDER     PO,
+                                               C_ORDER          O,
+                                               WT_TRANSPORTMODE TM,
+                                               WT_LOGISTICSMODE LM,
+                                               WT_LOGISTICSTYPE LT
+                                        WHERE PO.C_ORDER_ID = O.C_ORDER_ID
+                                          AND O.WT_TRANSPORTMODE_ID =
+                                              TM.WT_TRANSPORTMODE_ID
+                                          AND TM.WT_LOGISTICSMODE_ID =
+                                              LM.WT_LOGISTICSMODE_ID
+                                          AND LM.WT_LOGISTICSTYPE_ID =
+                                              LT.WT_LOGISTICSTYPE_ID
+                                          AND PO.STATUS = 'CO' -- 只统计已完成
+                                          AND PO.DELIVERYVIARULE <> 'S' -- 排除发物流的单
+										  AND ((O.DESTINATION = $P{warehouse} and nvl($P{warehouse},0) > 0) or nvl($P{warehouse},0) <= 0)
+                                       ) PICKORDER
+                                LEFT JOIN (
+                                           -- 从日志中获取提货单对应的‘国内仓提货完成日期’
+                                           SELECT LOG.RECORD_ID,
+                                                   MAX(LOG.CREATED) ACTUAL_DATE
+                                             FROM AD_CHANGELOG_V LOG
+                                            WHERE LOG.NEWVALUE = 'PUC'
+                                              AND LOG.OLDVALUE = 'PIU'
+                                              AND LOG.TABLENAME = 'WT_PickOrder'
+                                              AND LOG.COLUMNNAME = 'Status'
+                                            GROUP BY LOG.RECORD_ID) PO_LOG
+                                  ON PICKORDER.WT_PICKORDER_ID = PO_LOG.RECORD_ID
+                               WHERE PO_LOG.ACTUAL_DATE <
+                                     $P{Created1} + 7
+                                  OR PO_LOG.ACTUAL_DATE IS NULL)
+                       GROUP BY ACTUAL_DATE)) PO_DETAIL
+    ON 1 = 1
+  LEFT JOIN (
+             -- 入库单
+             SELECT
+             -- 一周内符合条件票数
+              SUM(CASE
+                     WHEN SHELVECOMPLETETIME BETWEEN
+                          $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      OD_SUC_NUM
+                     ELSE
+                      0
+                   END) OD_WEEK_SUC_NUM,
+               -- 一周内总票数
+               SUM(CASE
+                     WHEN SHELVECOMPLETETIME BETWEEN
+                          $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      OD_TOTAL_NUM
+                     ELSE
+                      0
+                   END) OD_WEEK_TOTAL_NUM,
+               -- 累计符合条件票数
+               SUM(OD_SUC_NUM) OD_SUC_NUM,
+               -- 累计票数
+               SUM(OD_TOTAL_NUM) OD_TOTAL_NUM
+               FROM (SELECT COUNT(C_ORDER_ID) OD_TOTAL_NUM,
+                             SUM(CASE
+                                   WHEN (TRANS = 'Air' AND DIFF_AIR <= 1) OR
+                                        (TRANS = 'Express' AND DIFF_EXPRESS <= 1) OR
+                                        (TRANS = 'Sea' AND DIFF_SEA <= 0) THEN
+                                    1
+                                   ELSE
+                                    0
+                                 END) OD_SUC_NUM,
+                             SHELVECOMPLETETIME
+                        FROM (
+                              -- 计算相差日期
+                              SELECT OD.C_ORDER_ID,
+                                      OD.TRANS,
+                                      OD.SHELVECOMPLETETIME,
+                                      -- (国内仓发货时间 - 国内仓入库完成时间)
+                                      CASE
+                                        WHEN OD.TIME_OUT IS NULL OR
+                                             OD_LOG.TIME_IN IS NULL THEN
+                                         0
+                                        WHEN OD.TIME_OUT - OD_LOG.TIME_IN < 1 THEN
+                                         0
+                                        ELSE
+                                         WORKDAY(OD_LOG.TIME_IN, OD.TIME_OUT) - 1
+                                      END DIFF_AIR,
+                                      -- (国内仓发货时间 - winit确认提货时间)
+                                      CASE
+                                        WHEN OD.TIME_OUT IS NULL OR
+                                             OD.DATEPROMISEDTO IS NULL THEN
+                                         0
+                                        WHEN OD.TIME_OUT - OD.DATEPROMISEDTO < 1 THEN
+                                         0
+                                        ELSE
+                                         WORKDAY(OD.DATEPROMISEDTO, OD.TIME_OUT) - 1
+                                      END DIFF_EXPRESS,
+                                      -- (海运实际发运日期 - 船期预计发运日期)
+                                      CASE
+                                      -- 海运但是没有选择航次，则算按时运到
+                                        WHEN OD.ETD IS NULL OR
+                                             OD.TIME_LADING IS NULL THEN
+                                         0
+                                        WHEN OD.TIME_LADING - OD.ETD < 1 THEN
+                                         0
+                                        ELSE
+                                         TRUNC(OD.TIME_LADING) - TRUNC(OD.ETD)
+                                      END DIFF_SEA
+                                FROM (
+                                       -- 根据物流单查询入库单运输方式、国内仓发货时间、海运实际发运日期
+                                       SELECT O.C_ORDER_ID,
+                                               LT.CODE TRANS,
+                                               O.SHELVECOMPLETETIME,
+                                               SEA.ETD,
+                                               PO.DATEPROMISEDTO,
+                                               MAX(SM.TIMEOUTBOUND) TIME_OUT, -- 国内仓发货时间
+                                               MAX(SM.TIMELADING) TIME_LADING -- 海运实际发运日期（离岗时间）
+                                         FROM C_ORDER O
+                                         LEFT JOIN WT_SEAVOYAGE SEA
+                                           ON O.WT_SEAVOYAGE_ID =
+                                              SEA.WT_SEAVOYAGE_ID
+                                         LEFT JOIN WT_PICKORDER PO
+                                           ON O.C_ORDER_ID = PO.C_ORDER_ID
+                                         LEFT JOIN WT_STORAGEPACKAGE SP
+                                           ON O.C_ORDER_ID = SP.C_ORDER_ID
+                                         LEFT JOIN WT_CONTAINERLINE CL
+                                           ON SP.WT_CONTAINERLINE_ID =
+                                              CL.WT_CONTAINERLINE_ID
+                                         LEFT JOIN WT_SHIPMENT SM
+                                           ON CL.WT_SHIPMENT_ID = SM.WT_SHIPMENT_ID
+                                          AND SM.ISACTIVE = 'Y'
+                                          AND SM.STATUS <> 'VO'
+                                        INNER JOIN WT_TRANSPORTMODE TM
+                                           ON O.WT_TRANSPORTMODE_ID =
+                                              TM.WT_TRANSPORTMODE_ID
+                                        INNER JOIN WT_LOGISTICSMODE LM
+                                           ON TM.WT_LOGISTICSMODE_ID =
+                                              LM.WT_LOGISTICSMODE_ID
+                                        INNER JOIN WT_LOGISTICSTYPE LT
+                                           ON LM.WT_LOGISTICSTYPE_ID =
+                                              LT.WT_LOGISTICSTYPE_ID
+                                        WHERE O.STATUS = 'FSC' -- 只查询上架完成入库单
+										AND ((O.DESTINATION = $P{warehouse} and nvl($P{warehouse},0) > 0) or nvl($P{warehouse},0) <= 0)
+                                        GROUP BY O.C_ORDER_ID,
+                                                  O.SHELVECOMPLETETIME,
+                                                  SEA.ETD,
+                                                  PO.DATEPROMISEDTO,
+                                                  LT.CODE) OD
+                                LEFT JOIN (
+                                           -- 根据日志查询入库单 国内仓入库完成日期时间
+                                           SELECT LOG.RECORD_ID,
+                                                   MAX(LOG.CREATED) TIME_IN
+                                             FROM AD_CHANGELOG_V LOG
+                                            WHERE LOG.NEWVALUE = 'DIC'
+                                              AND LOG.OLDVALUE = 'SC'
+                                              AND LOG.TABLENAME = 'C_Order'
+                                              AND LOG.COLUMNNAME = 'Status'
+                                            GROUP BY LOG.RECORD_ID) OD_LOG
+                                  ON OD.C_ORDER_ID = OD_LOG.RECORD_ID
+
+                               WHERE OD.SHELVECOMPLETETIME <
+                                     $P{Created1} + 7
+                                  OR OD.SHELVECOMPLETETIME IS NULL)
+                       GROUP BY SHELVECOMPLETETIME)) OD_DETAIL
+    ON 1 = 1
+  LEFT JOIN (
+             --物流单
+             SELECT
+             -- 一周内快递合格票数
+              SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_EXPRESS_SUC_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_EXPRESS_SUC_NUM,
+               -- 一周内快递累计票数
+               SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_EXPRESS_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_EXPRESS_NUM,
+               -- 一周内空运合格票数
+               SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_AIR_SUC_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_AIR_SUC_NUM,
+               -- 一周内空运票数
+               SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_AIR_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_AIR_NUM,
+               -- 一周内海运合格票数
+               SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_SEA_SUC_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_SEA_SUC_NUM,
+               -- 一周内海运票数
+               SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_SEA_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_SEA_NUM,
+               -- 一周内空运快递上架合格票数
+               SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_AE_FSC_SUC_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_AE_FSC_SUC_NUM,
+               -- 一周内海运上架合格票数
+               SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_SEA_FSC_SUC_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_SEA_FSC_SUC_NUM,
+               -- 一周内总票数
+               SUM(CASE
+                     WHEN TIME_FSC BETWEEN $P{Created1} AND
+                          $P{Created1} + 7 THEN
+                      SM_TOTAL_NUM
+                     ELSE
+                      0
+                   END) SM_WEEK_TOTAL_NUM,
+               SUM(SM_EXPRESS_SUC_NUM) SM_EXPRESS_SUC_NUM, -- 快递合格累计票数
+               SUM(SM_EXPRESS_NUM) SM_EXPRESS_NUM, -- 快递累计票数
+               SUM(SM_AIR_SUC_NUM) SM_AIR_SUC_NUM, -- 空运合格累计票数
+               SUM(SM_AIR_NUM) SM_AIR_NUM, -- 空运累计票数
+               SUM(SM_SEA_SUC_NUM) SM_SEA_SUC_NUM, -- 海运合格累计票数
+               SUM(SM_SEA_NUM) SM_SEA_NUM, -- 海运累计票数
+               SUM(SM_AE_FSC_SUC_NUM) SM_AE_FSC_SUC_NUM, -- 空运快递上架合格累计票数
+               SUM(SM_SEA_FSC_SUC_NUM) SM_SEA_FSC_SUC_NUM, -- 海运商家合格累计票数
+               SUM(SM_TOTAL_NUM) SM_TOTAL_NUM -- 总累计票数
+               FROM ( --统计每天不同运输方式的票数
+                      SELECT COUNT(WT_SHIPMENT_ID) SM_TOTAL_NUM,
+                              -- 快递合格票数
+                              SUM(CASE
+                                    WHEN TRANS = 'Express' AND DIFF_INOUT <= 5 THEN
+                                     1
+                                    ELSE
+                                     0
+                                  END) SM_EXPRESS_SUC_NUM,
+                              -- 快递票数
+                              SUM(CASE
+                                    WHEN TRANS = 'Express' THEN
+                                     1
+                                    ELSE
+                                     0
+                                  END) SM_EXPRESS_NUM,
+                              -- 空运合格票数
+                              SUM(CASE
+                                    WHEN TRANS = 'Air' AND DIFF_INOUT <= 5 THEN
+                                     1
+                                    ELSE
+                                     0
+                                  END) SM_AIR_SUC_NUM,
+                              -- 空运票数
+                              SUM(CASE
+                                    WHEN TRANS = 'Air' THEN
+                                     1
+                                    ELSE
+                                     0
+                                  END) SM_AIR_NUM,
+                              -- 海运合格票数
+                              SUM(CASE
+                                    WHEN TRANS = 'Sea' AND
+                                         ((CITY = '上海' AND DIFF_INOUT_NATRUE <= 24) OR
+                                         ((CITY = '深圳' OR CITY = '香港') AND
+                                         DIFF_INOUT_NATRUE <= 21)) THEN
+                                     1
+                                    ELSE
+                                     0
+                                  END) SM_SEA_SUC_NUM,
+                              -- 海运票数
+                              SUM(CASE
+                                    WHEN TRANS = 'Sea' THEN
+                                     1
+                                    ELSE
+                                     0
+                                  END) SM_SEA_NUM,
+                              -- 空运、快递上架合格票数
+                              SUM(CASE
+                                    WHEN (TRANS = 'Express' OR TRANS = 'Air') AND
+                                         DIFF_FSC <= 1 THEN
+                                     1
+                                    ELSE
+                                     0
+                                  END) SM_AE_FSC_SUC_NUM,
+                              -- 空运、快递累计票数
+                              --SM_EXPRESS_NUM + SM_AIR_NUM SM_AE_NUM,
+                              -- 海运上架合格票数
+                              SUM(CASE
+                                    WHEN TRANS = 'Sea' AND DIFF_FSC <= 1 THEN
+                                     1
+                                    ELSE
+                                     0
+                                  END) SM_SEA_FSC_SUC_NUM,
+                              TIME_FSC
+                        FROM (
+                               -- 计算运输天数（分自然日和工作日）和海外仓上架完成时间（工作日）
+                               SELECT SMT.WT_SHIPMENT_ID,
+                                       SMT.TRANS,
+                                       SMT.CITY,
+                                       SMT_LOG.TIME_FSC,
+                                       -- (货物到港时间 - 国内仓发货时间)，工作日
+                                       CASE
+                                         WHEN SMT.TIMEDISCHARGE - SMT.TIMEOUTBOUND < 1 THEN
+                                          0
+                                         ELSE
+                                          WORKDAY(SMT.TIMEOUTBOUND, SMT.TIMEDISCHARGE) - 1
+                                       END DIFF_INOUT,
+                                       -- (货物到港时间 - 国内仓发货时间)，自然日
+                                       (SMT.TIMEDISCHARGE - SMT.TIMEOUTBOUND) AS DIFF_INOUT_NATRUE,
+                                       -- (海外仓上架完成时间 - 货物到达澳洲仓库时间)，工作日
+                                       CASE
+                                         WHEN SMT_LOG.TIME_FSC - SMT_LOG.TIME_FIC < 1 THEN
+                                          0
+                                         ELSE
+                                          WORKDAY(SMT_LOG.TIME_FIC, SMT_LOG.TIME_FSC) - 1
+                                       END AS DIFF_FSC
+                                 FROM (SELECT SM.WT_SHIPMENT_ID,
+                                               SM.TIMEDISCHARGE, -- 货物到港时间
+                                               SM.TIMEOUTBOUND, -- 国内仓发货时间
+                                               LT.CODE           TRANS,
+                                               CT.NAME           CITY -- 城市
+                                          FROM WT_SHIPMENT      SM,
+                                               WT_TRANSPORTMODE TM,
+                                               WT_LOGISTICSMODE LM,
+                                               WT_LOGISTICSTYPE LT,
+                                               M_WAREHOUSE      WH,
+                                               C_LOCATION       LOC,
+                                               C_CITY           CT
+                                         WHERE SM.WT_TRANSPORTMODE_ID =
+                                               TM.WT_TRANSPORTMODE_ID
+                                           AND TM.WT_LOGISTICSMODE_ID =
+                                               LM.WT_LOGISTICSMODE_ID
+                                           AND LM.WT_LOGISTICSTYPE_ID =
+                                               LT.WT_LOGISTICSTYPE_ID
+                                           AND SM.M_WAREHOUSESOURCE_ID =
+                                               WH.M_WAREHOUSE_ID
+                                           AND WH.C_LOCATION_ID = LOC.C_LOCATION_ID
+                                           AND LOC.C_CITY_ID = CT.C_CITY_ID
+										   AND ((SM.m_Warehouse_Id  = $P{warehouse} and nvl($P{warehouse},0) > 0) or nvl($P{warehouse},0) <= 0)
+                                           AND SM.STATUS = 'FSC') SMT
+                                 LEFT JOIN (SELECT RECORD_ID,
+                                                   MAX(DECODE(NEWVALUE,
+                                                              'FIC',
+                                                              CREATED)) TIME_FIC, -- 货物到达澳洲仓库时间
+                                                   MAX(DECODE(NEWVALUE,
+                                                              'FSC',
+                                                              CREATED)) TIME_FSC -- 海外仓上架完成时间
+                                              FROM (SELECT LOG.RECORD_ID,
+                                                           LOG.NEWVALUE,
+                                                           LOG.CREATED CREATED
+                                                      FROM AD_CHANGELOG_V LOG
+                                                     WHERE (LOG.NEWVALUE = 'FIC' OR
+                                                           LOG.NEWVALUE = 'FSC')
+                                                       AND LOG.TABLENAME =
+                                                           'WT_Shipment'
+                                                       AND LOG.COLUMNNAME = 'Status')
+                                             GROUP BY RECORD_ID) SMT_LOG
+                                   ON SMT.WT_SHIPMENT_ID = SMT_LOG.RECORD_ID
+                                WHERE SMT_LOG.TIME_FSC <
+                                      $P{Created1} + 7)
+                       GROUP BY TIME_FSC)) SM_DETAIL
+    ON 1 = 1]]>
+	</queryString>
+	<field name="PO_WEEK_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="PO_WEEK_TOTAL_NUM" class="java.math.BigDecimal"/>
+	<field name="PO_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="PO_TOTAL_NUM" class="java.math.BigDecimal"/>
+	<field name="OD_WEEK_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="OD_WEEK_TOTAL_NUM" class="java.math.BigDecimal"/>
+	<field name="OD_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="OD_TOTAL_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_EXPRESS_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_EXPRESS_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_AIR_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_AIR_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_SEA_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_SEA_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_AE_FSC_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_SEA_FSC_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_WEEK_TOTAL_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_EXPRESS_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_EXPRESS_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_AIR_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_AIR_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_SEA_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_SEA_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_AE_FSC_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_SEA_FSC_SUC_NUM" class="java.math.BigDecimal"/>
+	<field name="SM_TOTAL_NUM" class="java.math.BigDecimal"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="829" splitType="Stretch">
+			<staticText>
+				<reportElement uuid="66810d9b-7c4d-4f68-b265-8eac934dc464" x="0" y="0" width="90" height="20"/>
+				<textElement textAlignment="Right">
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[开始时间:]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd HH:mm:ss">
+				<reportElement uuid="ceee55cb-9ada-41d3-a89e-29ee7f034bd3" x="90" y="0" width="186" height="20"/>
+				<textElement/>
+				<textFieldExpression><![CDATA[$P{Created1}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="7c228f12-83ce-4af4-8f12-cc9ac869590b" x="276" y="0" width="230" height="20"/>
+				<textElement>
+					<font pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[查询值为开始时间后推6天]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="5f7a9891-ea51-464f-9ae1-961eaeefb3e2" mode="Transparent" x="0" y="20" width="90" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[Item]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="28c16818-0f3f-4d26-a847-5ed76d08256e" x="90" y="20" width="186" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[Requirements]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="67904287-eff8-4546-81c2-1061393e2504" x="276" y="20" width="90" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[Accumulated KPI performance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="fafdd7bd-48c4-4f9f-8de7-cac1caffdb06" x="366" y="20" width="70" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[Weekly KPI performance]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e6691420-74a7-4f49-97dc-0588445d237c" x="436" y="20" width="70" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[Succeed or not]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="00630059-1a50-49d2-a998-a8f1b3c8de24" x="506" y="20" width="78" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[weekly succeed order]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2f2d12b9-8bf9-4e0c-afc4-97568156455d" x="584" y="20" width="70" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[weekly order]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f4ec1092-26bd-41b3-a9be-f7e8cbfe9de8" x="654" y="20" width="78" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[Accumulated succeed order]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="f3142c2c-b506-4082-8054-77c1ea79de5c" x="732" y="20" width="70" height="34"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<text><![CDATA[Accumulated order]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="9369ac17-6b84-4549-81d8-e4249d610c26" x="90" y="54" width="186" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Express, Air: From WINIT confirmed pick up day to Domestic inbound completion within 1 working day
+Ocean: From WINIT confirmed pick up day to Domestic inbound completion within 2 working day
+, >98%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c71ee021-9103-4dc0-a5d8-5cd9c3e13819" x="0" y="54" width="90" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Pick up from seller to domestic inbound completion]]></text>
+			</staticText>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="cdd8728c-64b3-4a7d-8035-7f9df8868f37" x="276" y="54" width="90" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PO_TOTAL_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{PO_SUC_NUM}.divide( $F{PO_TOTAL_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="899001f3-ffb9-4bef-8f3e-2ec8df1c8414" x="366" y="54" width="70" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PO_WEEK_TOTAL_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{PO_WEEK_SUC_NUM}.divide( $F{PO_WEEK_TOTAL_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="cf332f84-e9c4-44db-9477-cd4380b9b226" x="436" y="54" width="70" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PO_TOTAL_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?false:($F{PO_SUC_NUM}.divide( $F{PO_TOTAL_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )>0.98)?"succeed":"failed"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="47859c8b-4a43-415d-9098-b185d44cf5a7" x="506" y="54" width="78" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PO_WEEK_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f990ee64-d1d9-45c2-a80a-4a87862dfb47" x="584" y="54" width="70" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PO_WEEK_TOTAL_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b4f6f42c-db04-482d-9137-32fbf177438e" x="654" y="54" width="78" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PO_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="5d03840c-6588-46d1-addc-06ff2c4cd324" x="732" y="54" width="70" height="100"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{PO_TOTAL_NUM}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="2d1d29de-2cf6-475d-be63-dba967f5eec2" x="0" y="154" width="90" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Domestic Outbound]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1199ea64-c84a-44ec-8213-f7f89b14b08b" x="90" y="154" width="186" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Express: From Winit confirmed pick up day to domestic outbound within 1 working day.
+Air: from Domestic Warehouse receiving completion to domestic outbound within 1 working day
+Ocean : actual outbound time<=scheduled outbound time,
+>98%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="7ac66ad3-2cfe-4286-b263-63cbc2227ffd" x="0" y="284" width="90" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Door-to-Door transportation to AU Warehouse]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="2a465bd3-acc3-4867-8794-b39a47c5f570" x="90" y="284" width="186" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Cycle time from China ship out to Winit AU fulfillment center, Express :3-5 calendar days
+>95%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="b45535ee-5f62-40c9-a03a-1a158961f108" x="0" y="344" width="90" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Door-to-Door transportation to AU Warehouse]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1e1fe622-06da-4287-859f-c9df1ab9bdee" x="90" y="344" width="186" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Cycle time from China ship out to Winit AU fulfillment center,  Air : 4-5 working days
+>95%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="853fe14b-563b-4537-9542-7298c54ce806" x="0" y="399" width="90" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Door-to-Door transportation to AU Warehouse]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a8a59246-6b8d-404b-b42d-fa102b97a437" x="90" y="399" width="186" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Cycle time from China ship out to Winit AU fulfillment center, Ocean : 19-21 calendar days
+ >95%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="1a5645af-a07c-48e3-a139-d62632841a9e" x="0" y="459" width="90" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[AU warehouse inbound handling(Winit)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="03ab0a89-1937-41bf-8d62-bbce0ff6aae0" x="90" y="459" width="186" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[within 8 hours(Express & Air),>95%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="206c5f62-e7e3-46c8-a444-fc02077fca25" x="0" y="504" width="90" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[AU warheouse inbound handling (Winit)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="816ab1cb-7b71-420a-81db-fb5c300f0d77" x="90" y="504" width="186" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[within 24hours(Ocean, 20'FCL),95%]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="8b236957-9ff0-4e6d-a320-497c586adc0b" x="0" y="549" width="90" height="75"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Outbound Operations]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c044d97c-313a-403a-99d2-6aa555bc50af" x="90" y="549" width="186" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Same day outbound processing (>=98%)
+* Cut off time:2:00pm (AU time)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="23c99137-5653-4db0-af0d-3a57cca8258e" x="90" y="584" width="186" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Pick & pack accuracy (100%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="93cd6225-32d1-452d-8b0b-aad81efef2c4" x="90" y="604" width="186" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Shipping label accuracy (100%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a01b9b2a-7369-491e-bd28-8794e2714586" x="0" y="624" width="90" height="65"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Damage/Shortage]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="124a2e08-ba37-49a9-b19a-acd22e188352" x="90" y="624" width="186" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[No damage/loss/shortage (0%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="c403bae7-3fdd-46bf-82ee-5847559baaa7" x="90" y="644" width="186" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Timely report for any damage/loss/shortage to WINIT within 4 hours (>=99%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="63abadcc-7ecd-4807-9263-c71b401fdbe6" x="0" y="689" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Return service]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="783f962d-cee6-4f6f-b0e8-aa1fd5aa00f9" x="90" y="689" width="186" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[12 hours putway after item arrives AU warehouse]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="a07c30de-64c8-4b3c-b087-b50277d2b613" x="0" y="724" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Last Mile Delivery ( AU Post )]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="507396cf-5d26-4462-bf91-3c559d03660c" x="90" y="724" width="186" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[1-6 working days delivery (90%)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ce054c1f-137d-40d8-b2b3-c8e2caf4d8f3" x="0" y="759" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Last Mile Delivery ( Toll IPEC )]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e495c494-e0de-457b-b341-61fb5f3e6235" x="90" y="759" width="186" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[1-6 working days delivery ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="e3d3dc86-7cb0-4d2e-b23d-f808fe501740" x="0" y="794" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[Last Mile Delivery ( Toll Priority )]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="ac4e73b9-b811-4f39-83e6-a20eb32d0200" x="90" y="794" width="186" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement>
+					<paragraph leftIndent="4"/>
+				</textElement>
+				<text><![CDATA[1-3 working days delivery ]]></text>
+			</staticText>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="d6d25e3c-8dbc-4582-bd52-62dedb35e2d9" x="276" y="154" width="90" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OD_TOTAL_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{OD_SUC_NUM}.divide( $F{OD_TOTAL_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="b0ae8c98-350f-4818-8c3b-2a7b430e6474" x="366" y="154" width="70" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OD_WEEK_TOTAL_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{OD_WEEK_SUC_NUM}.divide( $F{OD_WEEK_TOTAL_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e721cebc-84b4-4de0-8dbb-732850ec8acc" x="436" y="154" width="70" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OD_TOTAL_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?false:($F{OD_SUC_NUM}.divide( $F{OD_TOTAL_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )>0.98)?"succeed":"failed"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="32c23202-78a3-4549-b2ef-68c81441a44f" x="506" y="154" width="78" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OD_WEEK_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="edab4514-db32-4fb8-b8db-0a4ac7204538" x="584" y="154" width="70" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OD_WEEK_TOTAL_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a35097a9-6d83-4dbc-a24c-aa23792cc66a" x="654" y="154" width="78" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OD_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="94e9a18d-6ada-40d2-847f-3cb030a93f2b" x="732" y="154" width="70" height="130"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{OD_TOTAL_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="c0288402-a39e-4863-8adb-f267bacd8939" x="584" y="284" width="70" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_EXPRESS_NUM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="b3581fc3-2163-44a5-ae44-3ea7c6af62c5" x="366" y="284" width="70" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_EXPRESS_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_WEEK_EXPRESS_SUC_NUM}.divide( $F{SM_WEEK_EXPRESS_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="6d40ff6f-27e3-4fca-ab8c-fed87425cda3" x="654" y="284" width="78" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_EXPRESS_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="83d994f5-9d9b-425a-b600-de527ba54f81" x="436" y="284" width="70" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_EXPRESS_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?false:($F{SM_EXPRESS_SUC_NUM}.divide( $F{SM_EXPRESS_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )>0.95)?"succeed":"failed"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="9d7f5991-a15f-4338-9156-68c566f6e3bc" x="506" y="284" width="78" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_EXPRESS_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="26b88ba7-b01c-4c75-b8f8-bcafe92aac2f" x="732" y="284" width="70" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_EXPRESS_NUM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="1fba99b5-5a5c-4ea6-8593-c83b0b819d79" x="276" y="284" width="90" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_EXPRESS_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_EXPRESS_SUC_NUM}.divide( $F{SM_EXPRESS_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0af71a35-04f9-4410-be21-55f1c1da6617" x="584" y="344" width="70" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_AIR_NUM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="38d07e5a-4ffc-4f2b-8007-1b0ae4a5142a" x="366" y="344" width="70" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_AIR_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_WEEK_AIR_SUC_NUM}.divide( $F{SM_WEEK_AIR_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="91717fa5-4118-45ab-bec7-45bf73dd5f80" x="654" y="344" width="78" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_AIR_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a38dcc56-ed5c-4dca-a0ef-1aca847930f1" x="436" y="344" width="70" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_AIR_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?false:($F{SM_AIR_SUC_NUM}.divide( $F{SM_AIR_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )>0.95)?"succeed":"failed"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="93cedc70-5b5e-4e34-80d3-3aa5b574657a" x="506" y="344" width="78" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_AIR_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a970baee-8055-479d-89dd-440af88c45ec" x="732" y="344" width="70" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_AIR_NUM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="3d0308fb-5554-4bd8-9640-173a19b2feb1" x="276" y="344" width="90" height="55"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_AIR_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_AIR_SUC_NUM}.divide( $F{SM_AIR_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="6eab6816-a700-4ab2-bc39-69dcc37941ba" x="584" y="399" width="70" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_SEA_NUM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="9291dd7a-8c42-44ed-affc-5d3adb3f4f33" x="366" y="399" width="70" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_SEA_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_WEEK_SEA_SUC_NUM}.divide( $F{SM_WEEK_SEA_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="bc1a95a3-49e4-4e81-bbc0-a681980932b9" x="654" y="399" width="78" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_SEA_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="28abe877-d284-4549-a863-98c830d25f10" x="436" y="399" width="70" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_SEA_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?false:($F{SM_SEA_SUC_NUM}.divide( $F{SM_SEA_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )>0.95)?"succeed":"failed"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0a7f2e72-1297-437e-a99f-2ae37ba039b5" x="506" y="399" width="78" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_SEA_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f81ab1dc-dd13-4d62-918d-57823816c65b" x="732" y="399" width="70" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_SEA_NUM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="c404cc6b-281a-4293-b3bd-e5d3d8b760ad" x="276" y="399" width="90" height="60"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_SEA_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_SEA_SUC_NUM}.divide( $F{SM_SEA_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2b99152a-f095-4c00-999b-01de6efd3f2c" x="584" y="459" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_EXPRESS_NUM}.add( $F{SM_WEEK_AIR_NUM} )]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="56cb03ed-2f3a-42af-a2e4-04a85666a550" x="366" y="459" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_EXPRESS_NUM}.add( $F{SM_WEEK_AIR_NUM} ).compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_WEEK_AE_FSC_SUC_NUM}.divide( $F{SM_WEEK_EXPRESS_NUM}.add( $F{SM_WEEK_AIR_NUM} ), 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="62579eee-639b-4543-b452-908e5637c8d2" x="654" y="459" width="78" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_AE_FSC_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="d4d62d73-bc82-4f89-961b-72b3bbdfea1d" x="436" y="459" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_EXPRESS_NUM}.add( $F{SM_AIR_NUM} ).compareTo( java.math.BigDecimal.ZERO )==0?false:($F{SM_AE_FSC_SUC_NUM}.divide( $F{SM_EXPRESS_NUM}.add( $F{SM_AIR_NUM} ), 4, java.math.BigDecimal.ROUND_HALF_UP )>0.95)?"succeed":"failed"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="1065ce95-22c6-4b17-8e86-22012f81ada9" x="506" y="459" width="78" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_AE_FSC_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="8213fedb-c8bc-4972-8283-a25fd6063a6c" x="732" y="459" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_EXPRESS_NUM}.add( $F{SM_AIR_NUM} )]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="3194cd45-7525-4b88-9d53-e7ffd0583e3b" x="276" y="459" width="90" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_EXPRESS_NUM}.add( $F{SM_AIR_NUM} ).compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_AE_FSC_SUC_NUM}.divide( $F{SM_EXPRESS_NUM}.add( $F{SM_AIR_NUM} ), 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ccacaddb-a835-47cd-a539-bbdc81cc721f" x="654" y="504" width="78" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_SEA_FSC_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="38dedfd5-8541-41b9-99ee-d43f2a08f650" x="366" y="504" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_SEA_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_WEEK_SEA_FSC_SUC_NUM}.divide( $F{SM_WEEK_SEA_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 %" isBlankWhenNull="true">
+				<reportElement uuid="2b7a518e-8bf4-49d6-960e-ab0808f092ff" x="276" y="504" width="90" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_SEA_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?0:$F{SM_SEA_FSC_SUC_NUM}.divide( $F{SM_SEA_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="5e643b18-0b5c-4213-a8f4-afcb8a4c5156" x="732" y="504" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_SEA_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="9710a393-b2cb-49c8-8974-44129e48f72f" x="436" y="504" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_SEA_NUM}.compareTo( java.math.BigDecimal.ZERO )==0?false:($F{SM_SEA_FSC_SUC_NUM}.divide( $F{SM_SEA_NUM}, 4, java.math.BigDecimal.ROUND_HALF_UP )>0.95)?"succeed":"failed"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="226a70d0-75ea-4975-9eae-3db46826b1af" x="584" y="504" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_SEA_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="4ec70a0d-7421-466f-bda8-1d7d7a5c55de" x="506" y="504" width="78" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{SM_WEEK_SEA_FSC_SUC_NUM}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="7a5c192a-6d2f-46d2-ad5e-2d3f2dfd7da4" x="654" y="549" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="38d3c1d8-4be1-4b09-b73c-5efd63e0ccf8" x="366" y="549" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="3d08376c-7f7c-48e5-8a0d-8756b533adae" x="276" y="549" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="690a72fb-2de1-4852-adc0-6c5918706138" x="732" y="549" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="6a17f2b7-4762-4c57-96a3-766674ada747" x="436" y="549" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="4933d13f-1a90-47c8-94ff-96002aa561ea" x="584" y="549" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="5436341a-6873-4512-b08e-2437e6518590" x="506" y="549" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="7a61dc6b-9300-4cfa-a2dd-ae46ba4a3711" x="654" y="584" width="78" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="bde1a618-4fd8-4068-9e6b-60b47ba9f425" x="366" y="584" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="78f4d9b9-ad7a-4ee6-95f0-0bdd3690b6df" x="276" y="584" width="90" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="262e4b8e-e929-4ab7-8f62-9bfe07273844" x="732" y="584" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="94040f6f-6fba-46f6-a37f-13caac9a76c9" x="436" y="584" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2c4de30b-b130-43b0-84fa-b9e4fadf96b7" x="584" y="584" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="92d86957-282d-4b09-9577-3504ba112d1a" x="506" y="584" width="78" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="215a259f-9b2d-4633-a95e-727f715944eb" x="276" y="604" width="90" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f1d043be-a87d-4093-b35d-288275a52444" x="584" y="604" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="369244ca-76d5-45d4-bb0f-15ff2f085622" x="366" y="604" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="88e92afe-03d9-4c76-b856-d2d351bba9d5" x="732" y="604" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e189c667-9607-42c5-a285-f60e06cbffc1" x="654" y="604" width="78" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ee58a677-e3f1-42a8-8b11-bccd010f4b84" x="506" y="604" width="78" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="6c0e31b6-4c54-489d-8762-273a8f8fce03" x="436" y="604" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="583bd8e8-02ae-4a75-b859-90d298ceb853" x="276" y="624" width="90" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="81b48509-df5e-4272-a5a2-b5cf4692cdea" x="584" y="624" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b814a796-56e1-4e6d-9f6c-a064369711b1" x="366" y="624" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="c25776a1-ead0-43e7-b6f8-86c3c6990938" x="732" y="624" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="4071d7aa-5bec-4b73-a2cd-2f6f94119ed1" x="654" y="624" width="78" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="2c6d2009-17b1-442b-930a-a2f672aec901" x="506" y="624" width="78" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0603e1f8-5dfc-4c8e-82fa-50770a63a6aa" x="436" y="624" width="70" height="20"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="cbe15dee-562d-444e-ab5a-3e9dc0e9cf8a" x="276" y="644" width="90" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="1cfdeeba-4e3f-4392-8560-9404ee9c0891" x="584" y="644" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="28f480fc-49c8-4409-8fda-152f4a962581" x="366" y="644" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="9e70a96a-23de-4b57-95b0-4bb69125a136" x="732" y="644" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="d0cda680-4c56-4e8a-ab28-d5b1cad83dbe" x="654" y="644" width="78" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="8bb7436f-2c85-4128-8132-c7142a16350f" x="506" y="644" width="78" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="79c23cb5-688c-44ca-ac50-23fcdec5a0a7" x="436" y="644" width="70" height="45"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f4b03816-a09e-404a-a487-3c942448bdea" x="276" y="689" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="e5105bab-4636-4b3b-9a10-8dd9651701ff" x="584" y="689" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f44b4235-3de2-4fad-ba63-a64e7b5a1ecb" x="366" y="689" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ebb79f7f-8b73-46c4-9e6d-39f3eda34265" x="732" y="689" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="a3d57c04-0ae3-4769-9572-1cdb996731a5" x="654" y="689" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="55fb13a5-1f95-40ce-b6d8-39baf523e2f2" x="506" y="689" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="14694c59-6b46-40ab-ae3b-35235a55564c" x="436" y="689" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="48cb7b2c-30a4-400b-9b59-e4a44a7e9548" x="654" y="724" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="89ad49bf-3a4a-4f3e-966e-3c3970ed210c" x="732" y="724" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="257c01f4-2623-40d3-8a3d-901625ff9597" x="366" y="724" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="dfdd2bb8-62b9-441f-9d24-33719dc17896" x="436" y="724" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f7b79d7a-c900-4ff0-a141-5ea0524566a5" x="506" y="724" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="19b4aab1-6a8e-46cc-8fa9-3b39451789ef" x="584" y="724" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="45ab70a2-e8a3-4093-b4a6-bcac8158f0d6" x="276" y="724" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="7962c8e1-89a8-44f9-878b-81d3408851c2" x="654" y="759" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="31483923-93bd-4226-a512-b9f9c07d8369" x="732" y="759" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="0bb459ff-3fda-4928-bc96-a80cf005c272" x="366" y="759" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="43cb19ce-fc07-4071-87bf-cdda79537908" x="436" y="759" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="25d607ea-c63b-4dac-813a-a99dea8dfbb5" x="506" y="759" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="f9bf14aa-1c17-442d-923c-c96b9fb50e9d" x="584" y="759" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="bb602533-5dc7-47b2-baa1-0676a3b6dda1" x="276" y="759" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="d146de37-a5e8-4e28-83e7-b49b6246a5d8" x="654" y="794" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="c4212a99-a3ed-4c28-8be8-d76977e5b4c1" x="732" y="794" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="29c12502-ecdb-4882-8868-f9fdd2746ae9" x="366" y="794" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="83d2de5f-5cce-4d5c-b624-e5f317a7e3c8" x="436" y="794" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<paragraph leftIndent="4" rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="78cee833-1332-429e-9f58-4965893dddaf" x="506" y="794" width="78" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="b5216a9a-836b-4d23-b9a5-d3a87b1043da" x="584" y="794" width="70" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement uuid="ba8c380c-cae3-4878-bc17-23832fd11180" x="276" y="794" width="90" height="35"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="4"/>
+				</textElement>
+				<textFieldExpression><![CDATA[]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+</jasperReport>
