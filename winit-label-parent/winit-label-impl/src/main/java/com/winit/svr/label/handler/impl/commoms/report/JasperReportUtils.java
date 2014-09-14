@@ -121,7 +121,8 @@ public class JasperReportUtils
             if (reportFile.lastModified() == jasperFile.lastModified()) {
             	log.info(" no need to compile use "+jasperFile.getAbsolutePath());
                 try {
-                    jasperReport = (JasperReport)JRLoader.loadObject(jasperFile.getAbsolutePath());
+                	
+                    jasperReport = (JasperReport)JRLoader.loadObjectFromFile(jasperFile.getAbsolutePath());
                 } catch (JRException e) {
                     jasperReport = null;
                     log.error("Can not load report - "+ e.getMessage());

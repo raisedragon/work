@@ -7,12 +7,13 @@
   <!-- USER INSERT -->
 
   <insert id="insertLabel" parameterType="com.winit.svr.impl.persistence.entity.LabelEntity">
-    insert into ${prefix}WT_LABEL (ID_, REV_, DOCUMENT_NO_, TRACK_NO_)
+    insert into ${prefix}WT_LABEL (ID_, REV_, DOCUMENT_NO_, TRACK_NO_,FILE_CODE_)
     values (
       #{id ,jdbcType=VARCHAR},
       1,
       #{documentNo ,jdbcType=VARCHAR},
-      #{trackNo ,jdbcType=VARCHAR}
+      #{trackNo ,jdbcType=VARCHAR},
+      #{fileCode ,jdbcType=CLOB}
     )
   </insert>
 

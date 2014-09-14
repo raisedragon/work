@@ -11,6 +11,7 @@ import com.winit.svr.LabelSystemException;
 import com.winit.svr.impl.interceptor.CommandContext;
 import com.winit.svr.label.LabelHandler;
 import com.winit.svr.label.RequestMessage;
+import com.winit.svr.label.RequestMessage.Consignee;
 import com.winit.svr.label.RequestMessage.Product;
 import com.winit.svr.label.handler.impl.commoms.report.JasperReportUtils;
 
@@ -27,19 +28,37 @@ public class UPSLable implements LabelHandler
 	
 
 
-	@Override
 	public Result handle(CommandContext commandContext, RequestMessage requestMessage)
 	{
 		List<Product> products = requestMessage.getBody().getProducts();
+		Consignee consignee = requestMessage.getBody().getConsignee();
+		
 		List<String> skus = new ArrayList<String>();
 		for(Product product:products){
 			String sku = product.getSku();
 			skus.add(sku);
 		}
+
+		List<String> consigneeAddressList = new ArrayList<String>();
+		if(StringUtils.isNotEmpty(consignee.getAddress1())){
+			consigneeAddressList.add(consignee.getAddress1());
+		}
+		if(StringUtils.isNotEmpty(consignee.getAddress2())){
+			consigneeAddressList.add(consignee.getAddress2());
+		}
+		if(StringUtils.isNotEmpty(consignee.getAddress3())){
+			consigneeAddressList.add(consignee.getAddress3());
+		}
+		
 		// 生成面单code 返回
 		Map param = new HashMap();
 		param.put("documentNo", requestMessage.getBody().getDocumentNo());
-		param.put("skus", StringUtils.join(skus.iterator(), "\n"));
+		param.put("consigneeName", ensureNotNull(consignee.getName()));
+		param.put("consigneeAddress", ensureNotNull(StringUtils.join(consigneeAddressList.iterator(),"\n")));
+		param.put("consigneeCity", ensureNotNull(consignee.getCity()));
+		param.put("consigneePostal", ensureNotNull(consignee.getPostcode()));
+		param.put("consigneeCountry", ensureNotNull(consignee.getCountry()));
+		param.put("skus", ensureNotNull(StringUtils.join(skus.iterator(), "\n")));
 		String base64Code;
 		try
 		{
@@ -53,11 +72,18 @@ public class UPSLable implements LabelHandler
 		return result;
 	}
 
-	@Override
 	public boolean isIdempotent()
 	{
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	private String ensureNotNull(String str){
+		if(str!=null){
+			return str;
+		}else{
+			return "";
+		}
 	}
 	
 }
