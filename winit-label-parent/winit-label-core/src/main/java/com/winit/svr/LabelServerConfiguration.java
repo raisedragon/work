@@ -196,7 +196,7 @@ public abstract class LabelServerConfiguration implements LabelServerServices {
   public abstract LabelServer buildLabelServer();
   
   public static LabelServerConfiguration createLabelServerConfigurationFromResourceDefault() {
-    return createLabelServerConfigurationFromResource("activiti.cfg.xml", "labelServerConfiguration");
+    return createLabelServerConfigurationFromResource("server.cfg.xml", "labelServerConfiguration");
   }
 
   public static LabelServerConfiguration createLabelServerConfigurationFromResource(String resource) {

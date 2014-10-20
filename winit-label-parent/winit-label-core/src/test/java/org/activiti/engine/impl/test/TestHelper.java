@@ -104,7 +104,7 @@ public abstract class TestHelper {
       log.error(outputMessage.toString());
 
       ((LabelServerImpl)labelServer)
-      .getProcessEngineConfiguration().getCommandExecutor()
+      .getLabelServerConfiguration().getCommandExecutor()
         .execute(new Command<Object>() {
           public Object execute(CommandContext commandContext) {
             DbSqlSession dbSqlSession = commandContext.getSession(DbSqlSession.class);

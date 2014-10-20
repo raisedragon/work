@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cache_ns">
+
+	<resultMap id="sysConfigMap" type="java.util.HashMap">
+		<result column="name" property="name"/>
+		<result column="value" property="value"/>
+	</resultMap>
+	
+    <select id="loadDeliverywayCache" resultType="DeliveryWay">
+    	select code,erpDeliveryID,isInternational,isApi,url,userName,password,serviceCode,type,filePath from wt_deliveryway
+    </select>
+    
+    <select id="loadSysConfig" resultMap="sysConfigMap">
+    	select name,value from wt_sysconfig
+    </select>
+    
+</mapper>

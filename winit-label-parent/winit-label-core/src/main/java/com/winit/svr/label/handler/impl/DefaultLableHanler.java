@@ -1,9 +1,9 @@
 package com.winit.svr.label.handler.impl;
 
+import com.winit.label.model.RequestMessage;
 import com.winit.svr.impl.interceptor.CommandContext;
 import com.winit.svr.label.Label;
 import com.winit.svr.label.LabelHandler;
-import com.winit.svr.label.RequestMessage;
 
 public class DefaultLableHanler implements LabelHandler
 {

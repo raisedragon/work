@@ -19,6 +19,7 @@ import com.winit.svr.LabelService;
 import com.winit.svr.ManagementService;
 import com.winit.svr.LabelServer;
 import com.winit.svr.LabelServers;
+import com.winit.svr.PropertyService;
 import com.winit.svr.delegate.event.ActivitiEventType;
 import com.winit.svr.delegate.event.impl.ActivitiEventBuilder;
 import com.winit.svr.impl.cfg.LabelServerConfigurationImpl;
@@ -38,6 +39,7 @@ public class LabelServerImpl implements LabelServer
 	protected IdentityService				identityService;
 	protected ManagementService				managementService;
 	protected LabelService					labelService;
+	protected PropertyService				propertyService;
 	protected CommandExecutor				commandExecutor;
 	protected Map<Class<?>, SessionFactory>	sessionFactories;
 	protected TransactionContextFactory		transactionContextFactory;
@@ -50,6 +52,7 @@ public class LabelServerImpl implements LabelServer
 		this.identityService = labelServerConfiguration.getIdentityService();
 		this.managementService = labelServerConfiguration.getManagementService();
 		this.labelService = labelServerConfiguration.getLabelService();
+		this.propertyService = labelServerConfiguration.getPropertyService();
 		this.commandExecutor = labelServerConfiguration.getCommandExecutor();
 		this.sessionFactories = labelServerConfiguration.getSessionFactories();
 		this.transactionContextFactory = labelServerConfiguration.getTransactionContextFactory();
@@ -116,8 +119,14 @@ public class LabelServerImpl implements LabelServer
 		return labelService;
 	}
 
-	public LabelServerConfigurationImpl getProcessEngineConfiguration()
+	public LabelServerConfigurationImpl getLabelServerConfiguration()
 	{
 		return labelServerConfiguration;
+	}
+
+	@Override
+	public PropertyService getPropertyService()
+	{
+		return propertyService;
 	}
 }

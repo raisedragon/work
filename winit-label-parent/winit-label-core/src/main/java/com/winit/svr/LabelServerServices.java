@@ -27,5 +27,7 @@ public interface LabelServerServices {
   
   LabelService getLabelService();
   
-  LabelServerConfiguration getProcessEngineConfiguration();
+  PropertyService getPropertyService();
+  
+  LabelServerConfiguration getLabelServerConfiguration();
 }

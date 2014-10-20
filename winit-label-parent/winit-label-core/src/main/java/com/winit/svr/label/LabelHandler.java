@@ -1,5 +1,6 @@
 package com.winit.svr.label;
 
+import com.winit.label.model.RequestMessage;
 import com.winit.svr.impl.interceptor.CommandContext;
 
 public interface LabelHandler

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.model.DeliveryWay">
+	<sql id ="allColumn">
+		id,logisticsProvidersCode,status,created,createBy,updated,updateBy,name,erpDeliveryID,
+		code,isInternational,isApi,url,userName,password,serviceCode,type,filePath
+	</sql>
+ 	<sql id="deliveryWayColume">
+        <trim suffix="" suffixOverrides=",">
+            <if test="logisticsProvidersCode != null">
+                logisticsProvidersCode,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="created != null">
+                created,
+            </if>
+            <if test="createBy != null">
+                createBy,
+            </if>
+            <if test="updated != null">
+                updated,
+            </if>
+            <if test="updateBy != null">
+                updateBy,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="erpDeliveryID != null">
+                erpDeliveryID,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="isInternational != null">
+                isInternational,
+            </if>
+            <if test="isApi != null">
+                isApi,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="userName != null">
+                userName,
+            </if>
+            <if test="password != null">
+                password,
+            </if>
+            <if test="serviceCode!= null">
+                serviceCode,
+            </if>
+             <if test="type!= null">
+                type,
+            </if>
+             <if test="filePath!= null">
+                filePath,
+            </if>
+        </trim>
+    </sql>
+    <sql id="deliveryWayValue">
+        <trim suffix="" suffixOverrides=",">
+            <if test="logisticsProvidersCode != null">
+                #{logisticsProvidersCode},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="created != null">
+                #{created},
+            </if>
+            <if test="createBy != null">
+                #{createBy},
+            </if>
+            <if test="updated != null">
+                #{updated},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="erpDeliveryID != null">
+                #{erpDeliveryID},
+            </if>
+            <if test="code != null">
+                #{code},
+            </if>
+            <if test="isInternational != null">
+                #{isInternational},
+            </if>
+            <if test="isApi != null">
+                #{isApi},
+            </if>
+            <if test="url != null">
+                #{url},
+            </if>
+            <if test="userName != null">
+                #{userName},
+            </if>
+            <if test="password != null">
+                #{password},
+            </if>
+            <if test="serviceCode!= null">
+                #{serviceCode},
+            </if>
+            <if test="type!= null">
+                #{type},
+            </if>
+             <if test="filePath!= null">
+                #{filePath},
+            </if>
+        </trim>
+    </sql>  	
+    
+    <!-- 新增轨迹 -->
+    <insert id="addDeliveryWay" parameterType="DeliveryWay">
+    	insert into wt_deliveryway (
+    		<include refid="deliveryWayColume"/>
+    	) values (
+    		<include refid="deliveryWayValue"/> 	
+    	)
+   	</insert>
+    
+    <insert id="addDeliveryWayList" parameterType="java.util.List" >
+    	insert into wt_deliveryway (
+			logisticsProvidersCode,status,created,createBy,updated,updateBy,name,
+			erpDeliveryID,code,isInternational,isApi,url,userName,password,serviceCode,type,filePath
+		) 
+    	values
+    	<foreach collection="list" index="index" item="item" separator=","> 
+    	<![CDATA[ 
+        (#{item.logisticsProvidersCode},#{item.status},#{item.created},#{item.createBy},
+        #{item.updated},#{item.updateBy},#{item.name},#{item.erpDeliveryID},#{item.code},
+        #{item.isInternational},#{item.isApi},#{item.url},#{item.userName},#{item.password},
+        #{item.serviceCode},#{item.type},#{item.filePath})  
+        ]]> 
+        </foreach> 
+    </insert>
+    
+    <select id="queryDeliveryWayByMap" parameterType="map" resultType="java.util.List">
+    	select <include refid="allColumn"/> from wt_deliveryway
+    	<where>
+    		<if test="name!=null">
+    			and name like CONCAT('%','${name}','%' )  
+    		</if>
+    		<if test="code!=null">
+    			and code like CONCAT('%','${code}','%' )  
+    		</if>
+    		<if test="status!=null">
+    			and status = #{status}
+    		</if>
+    	</where>
+    </select>
+    
+    <select id="queryCountByMap" parameterType="map" resultType="int">
+    	select count(id) from wt_deliveryway
+    	<where>
+    		<if test="logisticsProvidersCode!=null">
+    			and logisticsProvidersCode = #{logisticsProvidersCode} 
+    		</if>
+    		<if test="status!=null">
+    			and status = #{status}
+    		</if>
+    		<if test="isApi!=null">
+    			and isApi = #{isApi}
+    		</if>
+    	</where>
+    </select>
+    
+</mapper>

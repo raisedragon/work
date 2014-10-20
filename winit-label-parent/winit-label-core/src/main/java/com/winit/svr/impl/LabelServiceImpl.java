@@ -7,6 +7,8 @@ import java.util.Map;
 
 
 
+import com.winit.label.model.RequestMessage;
+import com.winit.label.model.ResponseMessage;
 import com.winit.svr.LabelIllegalArgumentException;
 import com.winit.svr.LabelService;
 import com.winit.svr.impl.cmd.CreateLabelQueryCmd;
@@ -25,8 +27,6 @@ import com.winit.svr.label.Label;
 import com.winit.svr.label.LabelQuery;
 import com.winit.svr.label.LogisticType;
 import com.winit.svr.label.LogisticTypeQuery;
-import com.winit.svr.label.RequestMessage;
-import com.winit.svr.label.ResponseMessage;
 
 public class LabelServiceImpl extends ServiceImpl implements LabelService
 {

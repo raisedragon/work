@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<settings>
+		<setting name="lazyLoadingEnabled" value="false" />
+	</settings>
+	<typeAliases>
+		<typeAlias type="com.winit.svr.impl.persistence.ByteArrayRefTypeHandler"
+			alias="ByteArrayRefTypeHandler" />
+	</typeAliases>
+	<typeHandlers>
+		<typeHandler handler="ByteArrayRefTypeHandler"
+			javaType="com.winit.svr.impl.persistence.entity.ByteArrayRef"
+			jdbcType="VARCHAR" />
+	</typeHandlers>
+	<mappers>
+		<mapper resource="com/winit/db/mapping/entity/ByteArray.xml" />
+		<mapper resource="com/winit/db/mapping/entity/Group.xml" />
+		<mapper resource="com/winit/db/mapping/entity/IdentityInfo.xml" />
+		<mapper resource="com/winit/db/mapping/entity/Membership.xml" />
+		<mapper resource="com/winit/db/mapping/entity/Property.xml" />
+		<mapper resource="com/winit/db/mapping/entity/Resource.xml" />
+		<mapper resource="com/winit/db/mapping/entity/TableData.xml" />
+		<mapper resource="com/winit/db/mapping/entity/User.xml" />
+		<mapper resource="com/winit/db/mapping/entity/VariableInstance.xml" />
+		<mapper resource="com/winit/db/mapping/entity/LogisticType.xml" />
+		<mapper resource="com/winit/db/mapping/entity/Label.xml" />
+	</mappers>
+</configuration>

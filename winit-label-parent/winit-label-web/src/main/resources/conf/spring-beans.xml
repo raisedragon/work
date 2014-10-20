@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.2.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
+
+	<bean id="idGenerator" class="com.winit.svr.impl.cfg.DefaultIdGeneratorImpl">
+		<constructor-arg index="0" value="1"></constructor-arg>
+		<constructor-arg index="1" value="1"></constructor-arg>
+	</bean>
+
+	<bean id="labelHanlerList" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<bean class="com.winit.svr.label.handler.impl.DefaultLableHanler"></bean>
+				<bean
+					class="com.winit.svr.label.handler.impl.usa.usps.USPSIntlLabelHandler"></bean>
+				<bean class="com.winit.svr.label.handler.impl.en.ups.UPSLabelHandler"></bean>
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="labelServerConfiguration" class="com.winit.svr.spring.SpringLabelServerConfiguration">
+		<property name="dataSource" ref="dataSource" />
+		<property name="transactionManager" ref="transactionManager" />
+		<!-- 设置数据库schema的更新方式 -->
+
+		<property name="idGenerator" ref="idGenerator" />
+
+		<!-- Database configurations -->
+		<property name="databaseSchemaUpdate" value="false" />
+
+		<!-- label handler implement list -->
+		<property name="labelHanlers" ref="labelHanlerList" />
+	</bean>
+
+	<bean id="labelServer" class="com.winit.svr.spring.LabelServerFactoryBean">
+		<property name="labelServerConfiguration" ref="labelServerConfiguration" />
+	</bean>
+
+	<!-- 工作流管理服务 -->
+	<bean id="labelService" factory-bean="labelServer"
+		factory-method="getLabelService" />
+	<bean id="propertyService" factory-bean="labelServer"
+		factory-method="getPropertyService" />
+</beans>

@@ -54,6 +54,7 @@ import com.winit.svr.LabelServer;
 import com.winit.svr.LabelServerConfiguration;
 import com.winit.svr.LabelService;
 import com.winit.svr.ManagementService;
+import com.winit.svr.PropertyService;
 import com.winit.svr.cfg.ProcessEngineConfigurator;
 import com.winit.svr.delegate.event.ActivitiEventDispatcher;
 import com.winit.svr.delegate.event.ActivitiEventListener;
@@ -63,6 +64,7 @@ import com.winit.svr.impl.IdentityServiceImpl;
 import com.winit.svr.impl.LabelServerImpl;
 import com.winit.svr.impl.LabelServiceImpl;
 import com.winit.svr.impl.ManagementServiceImpl;
+import com.winit.svr.impl.PropertyServiceImpl;
 import com.winit.svr.impl.ServiceImpl;
 import com.winit.svr.impl.cfg.standalone.StandaloneMybatisTransactionContextFactory;
 import com.winit.svr.impl.db.DbIdGenerator;
@@ -86,6 +88,7 @@ import com.winit.svr.impl.persistence.MembershipEntityManagerFactory;
 import com.winit.svr.impl.persistence.UserEntityManagerFactory;
 import com.winit.svr.impl.persistence.entity.ByteArrayEntityManager;
 import com.winit.svr.impl.persistence.entity.EventLogEntryEntityManager;
+import com.winit.svr.impl.persistence.entity.PropertyEntityManager;
 import com.winit.svr.impl.persistence.entity.ResourceEntityManager;
 import com.winit.svr.impl.persistence.entity.TableDataManager;
 import com.winit.svr.impl.persistence.entity.VariableInstanceEntityManager;
@@ -123,15 +126,17 @@ public abstract class LabelServerConfigurationImpl extends LabelServerConfigurat
   public static final String DB_SCHEMA_UPDATE_CREATE = "create";
   public static final String DB_SCHEMA_UPDATE_DROP_CREATE = "drop-create";
 
-  public static final String DEFAULT_WS_SYNC_FACTORY = "org.activiti.engine.impl.webservice.CxfWebServiceClientFactory";
+//  public static final String DEFAULT_WS_SYNC_FACTORY = "org.activiti.engine.impl.webservice.CxfWebServiceClientFactory";
   
-  public static final String DEFAULT_MYBATIS_MAPPING_FILE = "org/activiti/db/mapping/mappings.xml";
+  public static final String DEFAULT_MYBATIS_MAPPING_FILE = "com/winit/db/mapping/mappings.xml";
 
   // SERVICES /////////////////////////////////////////////////////////////////
 
   protected IdentityService identityService = new IdentityServiceImpl();
   protected ManagementService managementService = new ManagementServiceImpl();
   protected LabelService labelService = new LabelServiceImpl();
+  
+  protected PropertyService propertyService  = new PropertyServiceImpl();
   
   // COMMAND EXECUTORS ////////////////////////////////////////////////////////
   
@@ -191,7 +196,7 @@ public abstract class LabelServerConfigurationImpl extends LabelServerConfigurat
   protected VariableTypes variableTypes;
   
 
-  protected String wsSyncFactoryClassName = DEFAULT_WS_SYNC_FACTORY;
+//  protected String wsSyncFactoryClassName = DEFAULT_WS_SYNC_FACTORY;
 
   protected CommandContextFactory commandContextFactory;
   protected TransactionContextFactory transactionContextFactory;
@@ -353,6 +358,7 @@ protected void initCommandExecutors() {
     initService(identityService);
     initService(managementService);
     initService(labelService);
+    initService(propertyService);
   }
 
   protected void initService(Object service) {
@@ -566,7 +572,9 @@ protected void initCommandExecutors() {
       addSessionFactory(new GenericManagerFactory(TableDataManager.class));
       addSessionFactory(new GenericManagerFactory(VariableInstanceEntityManager.class));
       addSessionFactory(new GenericManagerFactory(EventLogEntryEntityManager.class));
-      
+
+      addSessionFactory(new GenericManagerFactory(PropertyEntityManager.class));
+
       
       addSessionFactory(new UserEntityManagerFactory());
       addSessionFactory(new GroupEntityManagerFactory());
@@ -894,7 +902,16 @@ protected void initCommandExecutors() {
     return this;
   }
   
-  public LabelServerConfiguration getProcessEngineConfiguration() {
+  public PropertyService getPropertyService(){
+	  return propertyService;
+  }
+  
+  public LabelServerConfigurationImpl setPropertyService(PropertyService propertyService){
+	  this.propertyService = propertyService;
+	    return this;
+  }
+  
+  public LabelServerConfiguration getLabelServerConfiguration() {
     return this;
   }
   
@@ -941,14 +958,14 @@ protected void initCommandExecutors() {
     return this;
   }
   
-  public String getWsSyncFactoryClassName() {
-    return wsSyncFactoryClassName;
-  }
-  
-  public LabelServerConfigurationImpl setWsSyncFactoryClassName(String wsSyncFactoryClassName) {
-    this.wsSyncFactoryClassName = wsSyncFactoryClassName;
-    return this;
-  }
+//  public String getWsSyncFactoryClassName() {
+//    return wsSyncFactoryClassName;
+//  }
+//  
+//  public LabelServerConfigurationImpl setWsSyncFactoryClassName(String wsSyncFactoryClassName) {
+//    this.wsSyncFactoryClassName = wsSyncFactoryClassName;
+//    return this;
+//  }
   
   
   public VariableTypes getVariableTypes() {

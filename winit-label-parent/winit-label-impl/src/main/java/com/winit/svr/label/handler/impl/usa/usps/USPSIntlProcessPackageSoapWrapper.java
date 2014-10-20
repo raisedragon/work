@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.winit.svr.LabelException;
 import com.winit.svr.label.context.ContextUtils;
-import com.winit.svr.label.handler.impl.commoms.axis.AxisLoggingHandler;
+import com.winit.svr.label.handler.impl.commons.axis.AxisLoggingHandler;
 import com.winit.svr.label.handler.impl.usa.usps.model.AuthenticateResult;
 import com.winit.svr.label.handler.impl.usa.usps.model.CalculatePostageResult;
 import com.winit.svr.label.handler.impl.usa.usps.model.CalculatePostageXmlDoc;

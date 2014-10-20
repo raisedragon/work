@@ -28,7 +28,7 @@ public class DbSchemaDrop {
 
   public static void main(String[] args) {
     LabelServerImpl processEngine = (LabelServerImpl) LabelServers.getDefaultProcessEngine();
-    CommandExecutor commandExecutor = processEngine.getProcessEngineConfiguration().getCommandExecutor();
+    CommandExecutor commandExecutor = processEngine.getLabelServerConfiguration().getCommandExecutor();
     CommandConfig config = new CommandConfig().transactionNotSupported();
     commandExecutor.execute(config, new Command<Object>() {
       public Object execute(CommandContext commandContext) {

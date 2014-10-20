@@ -3,12 +3,12 @@ package com.winit.svr;
 import java.util.Collection;
 import java.util.Map;
 
+import com.winit.label.model.RequestMessage;
+import com.winit.label.model.ResponseMessage;
 import com.winit.svr.label.Label;
 import com.winit.svr.label.LabelQuery;
 import com.winit.svr.label.LogisticType;
 import com.winit.svr.label.LogisticTypeQuery;
-import com.winit.svr.label.RequestMessage;
-import com.winit.svr.label.ResponseMessage;
 
 public interface LabelService
 {

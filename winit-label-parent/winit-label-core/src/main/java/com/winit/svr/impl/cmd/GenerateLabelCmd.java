@@ -13,6 +13,11 @@ package com.winit.svr.impl.cmd;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import com.winit.label.model.RequestMessage;
+import com.winit.label.model.ResponseMessage;
+import com.winit.label.model.RequestMessage.Logistics;
 import com.winit.svr.LabelBusinessException;
 import com.winit.svr.LabelSystemException;
 import com.winit.svr.impl.db.PersistentObject;
@@ -22,9 +27,6 @@ import com.winit.svr.impl.persistence.entity.LabelEntity;
 import com.winit.svr.label.Label;
 import com.winit.svr.label.LabelHandler;
 import com.winit.svr.label.LabelHandler.Result;
-import com.winit.svr.label.RequestMessage;
-import com.winit.svr.label.RequestMessage.Logistics;
-import com.winit.svr.label.ResponseMessage;
 
 /**
  * @author longsheng.wang
@@ -114,7 +116,7 @@ public class GenerateLabelCmd implements Command<ResponseMessage>, Serializable
 		{
 			exception.printStackTrace();
 			responseBody.setStatusCode(300);
-			responseBody.setMessage(exception.getMessage());
+			responseBody.setMessage(ExceptionUtils.getStackTrace(exception));
 		}
 		
 		return response;

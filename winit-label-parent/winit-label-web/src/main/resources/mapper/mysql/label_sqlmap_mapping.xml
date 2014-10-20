@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.model.Label">
+	<sql id ="allColumn">
+		id,documentNo,trackNo,fileCode,url
+	</sql>
+ 	<sql id="labelColume">
+        <trim suffix="" suffixOverrides=",">
+            <if test="documentNo != null">
+                documentNo,
+            </if>
+            <if test="trackNo != null">
+                trackNo,
+            </if>
+            <if test="fileCode != null">
+                fileCode,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="created != null">
+                created,
+            </if>
+        </trim>
+    </sql>
+    <sql id="labelValue">
+        <trim suffix="" suffixOverrides=",">
+            <if test="documentNo != null">
+                #{documentNo},
+            </if>
+            <if test="trackNo != null">
+                #{trackNo},
+            </if>
+            <if test="fileCode != null">
+                #{fileCode},
+            </if>
+            <if test="url != null">
+                #{url},
+            </if>
+            <if test="created != null">
+                #{created},
+            </if>
+        </trim>
+    </sql>  	
+    
+    <!-- 新增轨迹 -->
+    <insert id="addLabel" parameterType="Label">
+    	insert into wt_label (
+    		<include refid="labelColume"/>
+    	) values (
+    		<include refid="labelValue"/> 	
+    	)
+   	</insert>
+    
+    <select id="queryLabelByMap" parameterType="map" resultType="Label">
+    	select <include refid="allColumn"/> from wt_label
+    	<where>
+    		<if test="documentNo!=null">
+    			and documentNo = #{documentNo}
+    		</if>
+    		<if test="trackNo!=null">
+    			and trackNo = #{trackNo}
+    		</if>
+    		<if test="url!=null">
+    			and url = #{url}
+    		</if>
+    	</where>
+    </select>
+    
+</mapper>

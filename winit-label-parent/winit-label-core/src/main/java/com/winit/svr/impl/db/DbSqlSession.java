@@ -865,7 +865,7 @@ public class DbSqlSession implements Session {
 
       String errorMessage = null;
       if (!isEngineTablePresent()) {
-        errorMessage = addMissingComponent(errorMessage, "engine");
+        errorMessage = addMissingComponent(errorMessage, "server");
       }
       if (dbSqlSessionFactory.isDbHistoryUsed() && !isHistoryTablePresent()) {
         errorMessage = addMissingComponent(errorMessage, "history");
@@ -927,19 +927,13 @@ public class DbSqlSession implements Session {
     executeMandatorySchemaResource("create", "identity");
   }
 
-  protected void dbSchemaCreateHistory() {
-    executeMandatorySchemaResource("create", "history");
-  }
 
   protected void dbSchemaCreateEngine() {
-    executeMandatorySchemaResource("create", "engine");
+    executeMandatorySchemaResource("create", "server");
   }
 
   public void dbSchemaDrop() {
-    executeMandatorySchemaResource("drop", "engine");
-    if (dbSqlSessionFactory.isDbHistoryUsed()) {
-      executeMandatorySchemaResource("drop", "history");
-    }
+    executeMandatorySchemaResource("drop", "server");
     if (dbSqlSessionFactory.isDbIdentityUsed()) {
       executeMandatorySchemaResource("drop", "identity");
     }
@@ -1006,20 +1000,14 @@ public class DbSqlSession implements Session {
 				dbHistoryProperty.setValue(dbHistoryValue);
 
 				// Engine upgrade
-				dbSchemaUpgrade("engine", matchingVersionIndex);
+				dbSchemaUpgrade("server", matchingVersionIndex);
 				feedback = "upgraded Activiti from " + dbVersion + " to "+ LabelServer.VERSION;
 			}
 
 		} else {
 			dbSchemaCreateEngine();
 		}
-		if (isHistoryTablePresent()) {
-			if (isUpgradeNeeded) {
-				dbSchemaUpgrade("history", matchingVersionIndex);
-			}
-		} else if (dbSqlSessionFactory.isDbHistoryUsed()) {
-			dbSchemaCreateHistory();
-		}
+		
     
     if (isIdentityTablePresent()) {
       if (isUpgradeNeeded) {
@@ -1156,7 +1144,7 @@ public class DbSqlSession implements Session {
   
   public String getResourceForDbOperation(String directory, String operation, String component) {
     String databaseType = dbSqlSessionFactory.getDatabaseType();
-    return "org/activiti/db/" + directory + "/activiti." + databaseType + "." + operation + "."+component+".sql";
+    return "com/winit/db/" + directory + "/label." + databaseType + "." + operation + "."+component+".sql";
   }
 
   public void executeSchemaResource(String operation, String component, String resourceName, boolean isOptional) {
@@ -1346,7 +1334,7 @@ public class DbSqlSession implements Session {
       dbSchemaCreate();
       
     } else if (com.winit.svr.LabelServerConfiguration.DB_SCHEMA_UPDATE_FALSE.equals(databaseSchemaUpdate)) {
-      dbSchemaCheckVersion();
+//      dbSchemaCheckVersion();
       
     } else if (LabelServerConfiguration.DB_SCHEMA_UPDATE_TRUE.equals(databaseSchemaUpdate)) {
       dbSchemaUpdate();

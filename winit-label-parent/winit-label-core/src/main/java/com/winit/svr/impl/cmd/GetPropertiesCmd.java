@@ -23,9 +23,7 @@ import com.winit.svr.impl.interceptor.CommandContext;
 import com.winit.svr.impl.persistence.entity.PropertyEntity;
 
 
-/**
- * @author Tom Baeyens
- */
+
 public class GetPropertiesCmd implements Command<Map<String, String>>, Serializable {
 
   private static final long serialVersionUID = 1L;

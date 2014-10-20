@@ -13,8 +13,8 @@
 	  <constructor-arg>
 	   <list>
 	    	<bean class="com.winit.svr.label.handler.impl.DefaultLableHanler"></bean>
-	    	<bean class="com.winit.svr.label.handler.impl.usa.usps.USPSIntlShipLabelImpl"></bean>
-	    	<bean class="com.winit.svr.label.handler.impl.en.ups.UPSLable"></bean>
+	    	<bean class="com.winit.svr.label.handler.impl.usa.usps.USPSIntlLabelHandler"></bean>
+	    	<bean class="com.winit.svr.label.handler.impl.en.ups.UPSLabelHandler"></bean>
 	   </list>
 	  </constructor-arg>
  </bean>
@@ -22,7 +22,7 @@
   <bean id="labelServerConfiguration"
     class="com.winit.svr.impl.cfg.StandaloneLabelServerConfiguration">
 
-    <property name="jdbcUrl" value="jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000" />
+    <property name="jdbcUrl" value="jdbc:h2:E:/tmp/h2/label;AUTO_SERVER=TRUE" />
     <property name="jdbcDriver" value="org.h2.Driver" />
     <property name="jdbcUsername" value="sa" />
     <property name="jdbcPassword" value="" />
@@ -30,7 +30,7 @@
 	<property name="idGenerator" ref="idGenerator"/>
 
     <!-- Database configurations -->
-    <property name="databaseSchemaUpdate" value="drop-create" />
+    <property name="databaseSchemaUpdate" value="false" />
 
     <!-- label handler implement list -->
     <property name="labelHanlers" ref="labelHanlerList"/>
