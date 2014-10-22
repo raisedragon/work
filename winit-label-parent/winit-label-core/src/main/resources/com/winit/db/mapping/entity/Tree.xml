@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+  
+<mapper namespace="com.winit.svr.impl.persistence.entity.TreeEntity">
+
+	<sql id="columns">
+		ID_,
+		LABLE_,
+		REFERENCE_ID_,
+		REFERENCE_TYPE_,
+		PARENT_ID_,
+		IS_LEAF_,
+		REV_
+	</sql>
+
+  <!-- GROUP INSERT -->
+
+  <insert id="insertTree" parameterType="com.winit.svr.impl.persistence.entity.TreeEntity">
+    insert into ${prefix}ID_TREE (<include refid="columns"/>)
+    values (
+      #{id ,jdbcType=VARCHAR},
+      #{lable ,jdbcType=VARCHAR},
+      #{referenceId ,jdbcType=VARCHAR},
+      #{referenceType ,jdbcType=VARCHAR},
+      #{parentId ,jdbcType=VARCHAR},
+      #{isLeaf ,jdbcType=VARCHAR},
+      1
+    )
+  </insert>
+
+  <!-- GROUP UPDATE -->
+  
+  <update id="updateTree" parameterType="com.winit.svr.impl.persistence.entity.TreeEntity">
+    update ${prefix}ID_TREE set
+      REV_ = #{revisionNext ,jdbcType=INTEGER},
+      NAME_ = #{name ,jdbcType=VARCHAR},
+      TYPE_ = #{type ,jdbcType=VARCHAR}
+    where ID_ = #{id}
+       and REV_ = #{revision}
+  </update>
+  
+  <!-- GROUP DELETE -->
+
+  <delete id="deleteTree" parameterType="com.winit.svr.impl.persistence.entity.TreeEntity">
+    delete from ${prefix}ID_TREE where ID_ = #{id} and REV_ = #{revision} 
+  </delete>
+
+  <!-- GROUP RESULTMAP -->
+
+  <resultMap id="treeResultMap" type="com.winit.svr.impl.persistence.entity.TreeEntity">
+    <id property="id" column="ID_" jdbcType="VARCHAR" />
+    <result property="revision" column="REV_" jdbcType="INTEGER" />
+    <result property="referenceId" column="REFERENCE_ID_" jdbcType="VARCHAR" />
+    <result property="referenceType" column="REFERENCE_TYPE_"  jdbcType="VARCHAR" />
+  </resultMap>
+  
+  <!-- GROUP SELECT -->
+
+  <select id="selectTree" parameterType="string" resultMap="treeResultMap">
+    select * from ${prefix}ID_TREE where ID_ = #{id}
+  </select>
+    
+  
+</mapper>

@@ -581,6 +581,7 @@ protected void initCommandExecutors() {
       addSessionFactory(new MembershipEntityManagerFactory());
       addSessionFactory(new LogisticTypeEntityManagerFactory());
       addSessionFactory(new LabelEntityManagerFactory());
+      
     }
     
     if (customSessionFactories!=null) {

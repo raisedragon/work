@@ -29,6 +29,7 @@ import com.winit.svr.impl.cfg.LabelServerConfigurationImpl;
 import com.winit.svr.impl.cfg.TransactionContext;
 import com.winit.svr.impl.context.Context;
 import com.winit.svr.impl.db.DbSqlSession;
+import com.winit.svr.impl.persistence.GenericManagerFactory;
 import com.winit.svr.impl.persistence.entity.ByteArrayEntityManager;
 import com.winit.svr.impl.persistence.entity.EventLogEntryEntityManager;
 import com.winit.svr.impl.persistence.entity.GroupIdentityManager;
@@ -41,6 +42,7 @@ import com.winit.svr.impl.persistence.entity.ResourceEntityManager;
 import com.winit.svr.impl.persistence.entity.TableDataManager;
 import com.winit.svr.impl.persistence.entity.UserIdentityManager;
 import com.winit.svr.impl.persistence.entity.VariableInstanceEntityManager;
+import com.winit.svr.impl.persistence.manager.TreeEntityManager;
 import com.winit.svr.logging.LogMDC;
 
 /**
@@ -209,7 +211,12 @@ public class CommandContext {
     if (session == null) {
       SessionFactory sessionFactory = sessionFactories.get(sessionClass);
       if (sessionFactory==null) {
-        throw new LabelException("no session factory configured for "+sessionClass.getName());
+    	  if(Session.class.isAssignableFrom(sessionClass)){
+    		  sessionFactory = new GenericManagerFactory(TreeEntityManager.class);
+    		  sessionFactories.put(sessionFactory.getSessionType(), sessionFactory);
+    	  }else{
+    		  throw new LabelException("no session factory configured for "+sessionClass.getName());
+    	  }
       }
       session = sessionFactory.openSession();
       sessions.put(sessionClass, session);

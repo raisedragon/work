@@ -1,5 +1,7 @@
 package com.winit.svr.persistence.model;
 
+import com.winit.svr.impl.db.PersistentObject;
+
 public interface Tree
 {
 
@@ -7,9 +9,9 @@ public interface Tree
 
 	public abstract void setId(String id);
 
-	public abstract String getReference();
+	public abstract String getReferenceId();
 
-	public abstract void setReference(String reference);
+	public abstract void setReferenceId(String referenceId);
 
 	public abstract String getLable();
 

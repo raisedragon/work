@@ -27,5 +27,6 @@
 		<mapper resource="com/winit/db/mapping/entity/VariableInstance.xml" />
 		<mapper resource="com/winit/db/mapping/entity/LogisticType.xml" />
 		<mapper resource="com/winit/db/mapping/entity/Label.xml" />
+		<mapper resource="com/winit/db/mapping/entity/tree.xml" />
 	</mappers>
 </configuration>

@@ -41,6 +41,10 @@ public abstract class AbstractManager implements Session {
     getDbSqlSession().delete(persistentObject);
   }
 
+  public <T extends PersistentObject> T select(Class<T> clazz,String id){
+	  return getDbSqlSession().selectById(clazz, id);
+  }
+  
   protected DbSqlSession getDbSqlSession() {
     return getSession(DbSqlSession.class);
   }

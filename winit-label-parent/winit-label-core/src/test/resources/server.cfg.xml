@@ -20,10 +20,10 @@
   <bean id="labelServerConfiguration"
     class="com.winit.svr.impl.cfg.StandaloneLabelServerConfiguration">
 
-    <property name="jdbcUrl" value="jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000" />
+    <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/myframe" />
     <property name="jdbcDriver" value="org.h2.Driver" />
-    <property name="jdbcUsername" value="sa" />
-    <property name="jdbcPassword" value="" />
+    <property name="jdbcUsername" value="root" />
+    <property name="jdbcPassword" value="root" />
 
 	<property name="idGenerator" ref="idGenerator"/>
 

@@ -1,13 +1,26 @@
 package com.winit.svr.impl.persistence.entity;
 
+import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.winit.svr.impl.context.Context;
+import com.winit.svr.impl.db.HasRevision;
+import com.winit.svr.impl.db.PersistentObject;
+import com.winit.svr.impl.persistence.manager.TreeEntityManager;
 import com.winit.svr.persistence.model.Tree;
 
-public class TreeEntity<T> implements Tree
+public class TreeEntity<T> implements Tree , Serializable, PersistentObject, HasRevision
 {
+	static enum ReferenceType{
+		GROUP,
+		MENU
+	}
+	
 	private String	id;
-	private String	reference;
+	private String	referenceId;
+	private ReferenceType 	referenceType;
 	private String	lable;
 	private String	parentId;
 	private String	path;
@@ -15,23 +28,23 @@ public class TreeEntity<T> implements Tree
 	private List<TreeEntity<T>> children;
 	private T referenceEntity;
 	
-	public void save(TreeEntity<T> tree){
-		//TODO
+	public void save(){
+		TreeEntityManager entityManager = Context.getCommandContext().getSession(TreeEntityManager.class);
+		if(StringUtils.isNotEmpty(this.getId())){
+			entityManager.insert(this);
+		}else{
+			entityManager.updateTree(this);
+		}
 	}
 	
-	public boolean delete(String id){
-		//TODO
-		return false;
+	public void delete(){
+		TreeEntityManager entityManager = Context.getCommandContext().getSession(TreeEntityManager.class);
+		entityManager.delete(this);
 	}
 	
-	public TreeEntity<T> update(TreeEntity<T> tree){
-		//TODO
-		return tree;
-	}
-	
-	public TreeEntity<T> get(String id){
-		//TODO
-		return null;
+	public static <E extends PersistentObject> TreeEntity<E> get(String id,Class<E> clazz){
+		TreeEntityManager entityManager = Context.getCommandContext().getSession(TreeEntityManager.class);
+		return entityManager.select(TreeEntity.class, id);
 	}
 	
 	///Getter and Setter
@@ -55,21 +68,21 @@ public class TreeEntity<T> implements Tree
 	}
 
 	/* (non-Javadoc)
-	 * @see com.winit.svr.impl.persistence.entity.Tree#getReference()
+	 * @see com.winit.svr.impl.persistence.entity.Tree#getReferenceId()
 	 */
 	@Override
-	public String getReference()
+	public String getReferenceId()
 	{
-		return reference;
+		return referenceId;
 	}
 
 	/* (non-Javadoc)
 	 * @see com.winit.svr.impl.persistence.entity.Tree#setReference(java.lang.String)
 	 */
 	@Override
-	public void setReference(String reference)
+	public void setReferenceId(String referenceId)
 	{
-		this.reference = reference;
+		this.referenceId = referenceId;
 	}
 
 	/* (non-Javadoc)
@@ -162,6 +175,44 @@ public class TreeEntity<T> implements Tree
 	public void setReferenceEntity(T referenceEntity)
 	{
 		this.referenceEntity = referenceEntity;
+	}
+
+	@Override
+	public void setRevision(int revision)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getRevision()
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getRevisionNext()
+	{
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Object getPersistentState()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public ReferenceType getReferenceType()
+	{
+		return referenceType;
+	}
+
+	public void setReferenceType(ReferenceType referenceType)
+	{
+		this.referenceType = referenceType;
 	}
 	
 	
