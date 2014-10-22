@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="mailerdataformatf06.xsd" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="mailerdataformatf06.xsd">
+
+    <element name="Manifest" type="tns:Manifest"></element>
+
+    <element name="Dispatch_Confirmation" type="tns:DispatchConfirmation"></element>
+
+    <complexType name="Manifest">
+    	<sequence>
+    		<element ref="tns:Dispatch_Confirmation"></element>
+    		<any maxOccurs="unbounded"></any>
+    	</sequence>
+    	<attribute name="PackageID" type="string"></attribute>
+    </complexType>
+
+    <complexType name="DispatchConfirmation">
+    	<sequence>
+    		<element name="DispatchID" type="string"></element>
+    		<element name="Reject_Package_Count" type="int"></element>
+    		<element name="Version_Number" type="string"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="Package">
+    	<sequence>
+    		<element ref="tns:Package_Identifier" maxOccurs="unbounded"></element>
+    	</sequence>
+    	<attribute name="PackageID" type="string"></attribute>
+    </complexType>
+
+    <element name="Package" type="tns:Package"></element>
+
+    <complexType name="PackageIdentifier">
+    	<sequence>
+    		<element name="PackageID" type="string"></element>
+    		<element name="PackageID_Type" type="string"></element>
+    		<element name="AgentName" type="string"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="PackageHold">
+    	<sequence>
+    		<element name="PackageID" type="string"></element>
+    		<element name="Line_Number" type="string"></element>
+    		<element name="Reason_Code" type="string"></element>
+    		<element name="Reason_Description" type="string"></element>
+    	</sequence>
+    	<attribute name="PackageID" type="string"></attribute>
+    </complexType>
+
+    <complexType name="PackageError">
+    	<sequence>
+    		<element name="Error_Description" type="string" maxOccurs="unbounded"></element>
+    	</sequence>
+    	<attribute name="PackageID" type="string"></attribute>
+    </complexType>
+
+    <complexType name="PackageWarning">
+    	<sequence>
+    		<element name="Warning_Description" type="string" maxOccurs="unbounded"></element>
+    	</sequence>
+    	<attribute name="PackageID" type="string"></attribute>
+    </complexType>
+
+    <complexType name="PackageMessage">
+    	<sequence>
+    		<element name="Message_Description" type="string" maxOccurs="unbounded"></element>
+    	</sequence>
+    	<attribute name="PackageID" type="string"></attribute>
+    </complexType>
+
+    <element name="Package_Error" type="tns:PackageError"></element>
+
+    <element name="Package_Hold" type="tns:PackageHold"></element>
+
+    <element name="Package_Identifier" type="tns:PackageIdentifier"></element>
+
+    <element name="Package_Message" type="tns:PackageMessage"></element>
+
+    <element name="Package_Warning" type="tns:PackageWarning"></element>
+</schema>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report name" pageWidth="288" pageHeight="432" columnWidth="288" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="930a21f9-7773-4a34-bab7-c6bf1c29dfa8">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="documentNo" class="java.lang.String"/>
+	<parameter name="skus" class="java.lang.String"/>
+	<parameter name="consigneeName" class="java.lang.String"/>
+	<parameter name="consigneeAddress" class="java.lang.String"/>
+	<parameter name="consigneeCity" class="java.lang.String"/>
+	<parameter name="consigneePostal" class="java.lang.String"/>
+	<parameter name="consigneeCountry" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select name,
+address1,
+address2,
+address3,
+city,
+postal,
+countryname,
+documentno
+from wt_owms_exwarehouse
+where documentno=$P{documentNo}]]>
+	</queryString>
+	<field name="NAME" class="java.lang.String"/>
+	<field name="ADDRESS1" class="java.lang.String"/>
+	<field name="ADDRESS2" class="java.lang.String"/>
+	<field name="ADDRESS3" class="java.lang.String"/>
+	<field name="CITY" class="java.lang.String"/>
+	<field name="POSTAL" class="java.lang.String"/>
+	<field name="COUNTRYNAME" class="java.lang.String"/>
+	<field name="DOCUMENTNO" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band splitType="Stretch"/>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="432" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="288" height="114" uuid="eb9ad322-de7b-46bf-aa23-45ab577f9a5d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="30" isBold="true"/>
+				</textElement>
+				<text><![CDATA[UPS  UK]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="113" width="288" height="22" uuid="5003ee99-0cfc-4046-af4d-acf3cee3569a"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="16" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Received Address:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="131" width="288" height="160" uuid="9f631a4f-1c53-40e9-a8eb-df6b8e3ec8c1"/>
+				<box leftPadding="5"/>
+				<textElement>
+					<font size="14" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{consigneeName} + "\n" +
+$P{consigneeAddress} + "\n" +
+$P{consigneeCity} + "\n" +
+$P{consigneePostal}.toUpperCase() + "\n" +
+($P{consigneeCountry}.toUpperCase().equals("UK") ? "GB" : $P{consigneeCountry}.toUpperCase())]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="291" width="75" height="25" uuid="dfe2daea-5cc0-42e1-ba79-d15416c45537"/>
+				<box leftPadding="5"/>
+				<textElement markup="none">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Shipment:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="75" y="291" width="213" height="25" uuid="c881006a-37ff-4c98-afd0-50e124bcbbbc"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{documentNo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement mode="Transparent" x="0" y="326" width="35" height="106" forecolor="#000000" backcolor="#FFFFFF" uuid="e38f6d49-6c6b-4150-9a9f-26f165bd36ba"/>
+				<box leftPadding="5"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" rotation="None" markup="none">
+					<font fontName="SansSerif" size="12" isBold="true" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
+				</textElement>
+				<text><![CDATA[SKU:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="35" y="326" width="253" height="106" uuid="a988ca4f-3bad-41a3-8991-68b743572c17"/>
+				<box topPadding="0" leftPadding="0" bottomPadding="0" rightPadding="0"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{skus}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

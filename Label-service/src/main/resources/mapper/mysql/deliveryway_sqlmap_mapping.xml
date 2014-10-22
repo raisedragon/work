@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.model.DeliveryWay">
+	<resultMap type="com.winit.label.model.DeliveryWay" id="deliveryWaryResultMap">
+		<id column="id" property="id"/>
+		<result column="created" property="created"/>
+		<result column="createdBy" property="createdBy"/>
+		<result column="updated" property="updated"/>
+		<result column="updatedBy" property="updatedBy"/>
+		<result column="name" property="name"/>
+		<result column="code" property="code"/>
+		<result column="serviceCode" property="serviceCode"/>
+		<result column="extension" property="extension"/>
+		<result column="implClass" property="implClass"/>
+	</resultMap>
+	<sql id ="allColumn">
+		id,created,createdBy,updated,updatedBy,name,
+		code,serviceCode,extension,implClass
+	</sql>
+ 	<sql id="deliveryWayColume">
+        <trim suffix="" suffixOverrides=",">
+            <if test="created != null">
+                created,
+            </if>
+            <if test="createdBy != null">
+                createdBy,
+            </if>
+            <if test="updated != null">
+                updated,
+            </if>
+            <if test="updatedBy != null">
+                updatedBy,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="serviceCode!= null">
+                serviceCode,
+            </if>
+             <if test="extension!= null">
+                extension,
+            </if>
+            <if test="implClass!= null">
+                implClass,
+            </if>
+        </trim>
+    </sql>
+    <sql id="deliveryWayValue">
+        <trim suffix="" suffixOverrides=",">
+            <if test="created != null">
+                #{created},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy},
+            </if>
+            <if test="updated != null">
+                #{updated},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+
+            <if test="code != null">
+                #{code},
+            </if>
+     
+            <if test="serviceCode!= null">
+                #{serviceCode},
+            </if>
+            <if test="extension!= null">
+                #{extension},
+            </if>
+
+            <if test="implClass!= null">
+                #{implClass},
+            </if>
+        </trim>
+    </sql>  	
+    
+    <!-- 新增轨迹 -->
+    <insert id="addDeliveryWay" parameterType="DeliveryWay">
+    	insert into wt_deliveryway (
+    		<include refid="deliveryWayColume"/>
+    	) values (
+    		<include refid="deliveryWayValue"/> 	
+    	)
+   	</insert>
+    
+    <insert id="addDeliveryWayList" parameterType="java.util.List" >
+    	insert into wt_deliveryway (
+			created,createdBy,updated,updatedBy,name,
+			code,serviceCode,extension,implClass
+		) 
+    	values
+    	<foreach collection="list" index="index" item="item" separator=","> 
+    	<![CDATA[ 
+        (#{item.created},#{item.createdBy},
+        #{item.updated},#{item.updatedBy},#{item.name},#{item.code},
+        #{item.serviceCode},#{item.extension},#{item.implClass})  
+        ]]> 
+        </foreach> 
+    </insert>
+    
+    <select id="queryDeliveryWayByMap" parameterType="map" resultType="DeliveryWay">
+    	select <include refid="allColumn"/> from wt_deliveryway
+    	<where>
+    		<if test="name!=null">
+    			and name like CONCAT('%','${name}','%' )  
+    		</if>
+    		<if test="code!=null">
+    			and code like CONCAT('%','${code}','%' )  
+    		</if>
+    	</where>
+    </select>
+    
+    <select id="queryCountByMap" parameterType="map" resultMap="deliveryWaryResultMap">
+    	select count(id) from wt_deliveryway
+    </select>
+    
+</mapper>
