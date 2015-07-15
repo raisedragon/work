@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.manager.impl.gb.yodel.YodelReamusId">
+
+	<resultMap id="resultMap" type="com.winit.label.manager.impl.gb.yodel.YodelReamusId">
+		<result column="id" property="id"/>
+		<result column="created" property="created"/>
+		<result column="createdBy" property="createdBy"/>
+		<result column="updated" property="updated"/>
+		<result column="updatedBy" property="updatedBy"/>
+		<result column="reamusId" property="reamusId"/>
+		<result column="locationName" property="locationName"/>
+		<result column="opunit" property="opunit"/>
+		<result column="countryCode" property="countryCode"/>
+		<result column="locationId" property="locationId"/>
+		<result column="version" property="version"/>
+	</resultMap>
+	
+	<sql id="columns">
+		id,
+		created,
+		createdBy,
+		updated,
+		updatedBy,
+		reamusId,
+		locationName,
+		opunit,
+		countryCode,
+		locationId,
+		version
+	</sql>
+	
+	<insert id="insert" parameterType="com.winit.label.manager.impl.gb.yodel.YodelReamusId">
+		insert into 
+		dli_Yodel_ReamusId
+			(
+			<include refid="columns"/>
+			)
+		values
+			(
+			#{id},
+			#{created},
+			#{createdBy},
+			#{updated},
+			#{updatedBy},
+			#{reamusId},
+			#{locationName},
+			#{opunit},
+			#{countryCode},
+			#{locationId},
+			#{version}
+			)
+		
+	</insert>
+	
+	<update id="update" parameterType="com.winit.label.manager.impl.gb.yodel.YodelReamusId">
+		update 
+			dli_Yodel_ReamusId
+		set
+			updated=#{updated},
+			updatedBy=#{updatedBy},
+			reamusId=#{reamusId},
+			locationName=#{locationName},
+			opunit=#{opunit},
+			countryCode=#{countryCode},
+			locationId=#{locationId},
+			version=#{version}
+		where 
+			id=#{id}
+	</update>
+
+
+	<select id="getByReamusIdAndVersion" parameterType="Map" resultType="String">
+		select 
+			*
+		from 
+			dli_Yodel_ReamusId
+		where 
+			ReamusID=#{ReamusID} and Version=#{Version}
+		limit 0,1
+	</select>
+	
+	
+</mapper>

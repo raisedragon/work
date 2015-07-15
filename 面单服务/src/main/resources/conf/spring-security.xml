@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.2.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+    http://www.springframework.org/schema/security 
+    http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+
+	<security:http pattern="/getLabel.do" security="none"/>
+
+	<security:http auto-config="true" use-expressions="true">
+		<security:intercept-url pattern="/**" access="authenticated"/>
+		<security:form-login />
+	    <security:http-basic />
+		<security:custom-filter ref="securityFilter" before="FILTER_SECURITY_INTERCEPTOR"/>   
+	</security:http>
+	<!-- 配置过滤器 -->
+	<bean id="securityFilter" class="com.winit.commons.spring.WtSecurityFilter">
+		<!-- 用户拥有的权限 -->
+		<property name="authenticationManager" ref="authenticationManager" />
+		<!-- 用户是否拥有所请求资源的权限 -->
+		<property name="accessDecisionManager" ref="accessDecisionManager" />
+		<!-- 资源与权限对应关系 -->
+		<property name="securityMetadataSource" ref="securityMetadataSource" />
+	</bean>
+
+	<!-- 实现了UserDetailsService的Bean -->
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			user-service-ref="wtUserDetailServiceImpl" />
+	</security:authentication-manager>
+
+	<bean id="accessDecisionManager" class="com.winit.commons.spring.WtAccessDecisionManager"></bean>
+
+	<bean id="securityMetadataSource" class="com.winit.commons.spring.WtSecurityMetadataSource">
+	</bean>
+
+	<bean id="wtUserDetailServiceImpl" class="com.winit.commons.spring.WtUserDetailServiceImpl">
+	</bean>
+
+</beans>

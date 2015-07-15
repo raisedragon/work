@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.manager.impl.gb.yodel.YodelDestStation">
+
+	<resultMap id="resultMap" type="com.winit.label.manager.impl.gb.yodel.YodelDestStation">
+		<result column="id" property="id"/>
+		<result column="created" property="created"/>
+		<result column="createdBy" property="createdBy"/>
+		<result column="updated" property="updated"/>
+		<result column="updatedBy" property="updatedBy"/>
+		<result column="countryCode" property="countryCode"/>
+		<result column="city" property="city"/>
+		<result column="state" property="state"/>
+		<result column="fromPostcode" property="fromPostcode"/>
+		<result column="toPostcode" property="toPostcode"/>
+		<result column="productCode" property="productCode"/>
+		<result column="fromWeight" property="fromWeight"/>
+		<result column="toWeight" property="toWeight"/>
+		<result column="serviceCtrReamusId" property="serviceCtrReamusId"/>
+		<result column="hubReamusId" property="hubReamusId"/>
+		<result column="version" property="version"/>
+		<result column="" property=""/>
+		<result column="" property=""/>
+		<result column="" property=""/>
+		<result column="" property=""/>
+		<result column="YodelDestStation" property="YodelDestStation"/>
+	</resultMap>
+	
+	<sql id="columns">
+		id,
+		created,
+		createdBy,
+		updated,
+		updatedBy,
+		countryCode,
+		city,
+		state,
+		fromPostcode,
+		toPostcode,
+		productCode,
+		fromWeight,
+		toWeight,
+		serviceCtrReamusId,
+		hubReamusId,
+		version
+	</sql>
+	
+	<insert id="insert" parameterType="com.winit.label.manager.impl.gb.yodel.YodelDestStation">
+		insert into 
+		dli_Yodel_DestStation
+			(
+			<include refid="columns"/>
+			)
+		values
+			(
+			#{id},
+			#{created},
+			#{createdBy},
+			#{updated},
+			#{updatedBy},
+			#{countryCode},
+			#{city},
+			#{state},
+			#{fromPostcode},
+			#{toPostcode},
+			#{productCode},
+			#{fromWeight},
+			#{toWeight},
+			#{serviceCtrReamusId},
+			#{hubReamusId},
+			#{version}
+			)
+		
+	</insert>
+	
+	<update id="update" parameterType="com.winit.label.manager.impl.gb.yodel.YodelDestStation">
+		update 
+			dli_Yodel_DestStation
+		set
+			updated=#{updated},
+			updatedBy=#{updatedBy},
+			countryCode=#{countryCode},
+			city=#{city},
+			state=#{state},
+			fromPostcode=#{fromPostcode},
+			toPostcode=#{toPostcode},
+			productCode=#{productCode},
+			fromWeight=#{fromWeight},
+			toWeight=#{toWeight},
+			serviceCtrReamusId=#{serviceCtrReamusId},
+			hubReamusId=#{hubReamusId},
+			version=#{version}
+		where 
+			id=#{id}
+	</update>
+
+
+	<select id="getByProductCodeAndVersion" resultMap="resultMap" parameterType="Map">
+		select
+			 * 
+		from 
+			dli_Yodel_DestStation
+		where
+			ProductCode=?  
+			 and   Version=#{version}
+			 and   CountryCode=#{countryCode}
+			 and #{postcode} between FromPostCode  and  ToPostCode
+			 and length(#{postcode}) between length(FromPostCode ) and length( ToPostCode )
+			 and #{weight} between to_number(FromWeight) and to_number(ToWeight)
+		limit 0,1
+	
+	</select>
+
+	<select id="getByPostCode" resultMap="resultMap" parameterType="Map">
+		select
+			 * 
+		from 
+			dli_Yodel_DestStation
+		where
+			Version=#{version}
+			and   CountryCode=#{countryCode}
+			and #{postcode} between FromPostCode  and  ToPostCode
+			and length(#{postcode}) between length(FromPostCode ) and length( ToPostCode )
+	
+	</select>
+	
+	
+</mapper>

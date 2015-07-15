@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.manager.impl.gb.royalmail.RoyalMailSoftCode">
+
+	<resultMap id="resultMap" type="com.winit.label.manager.impl.gb.royalmail.RoyalMailSoftCode">
+		<result column="id" property="id"/>
+		<result column="created" property="created"/>
+		<result column="createdby" property="createdby"/>
+		<result column="updated" property="updated"/>
+		<result column="updatedby" property="updatedby"/>
+		<result column="name" property="name"/>
+		<result column="value" property="value"/>
+	</resultMap>
+	
+	<sql id="columns">
+		id,
+		created,
+		createdby,
+		updated,
+		updatedby,
+		name,
+		value
+	</sql>
+	
+	<insert id="insert" parameterType="com.winit.label.manager.impl.gb.royalmail.RoyalMailSoftCode">
+		insert into 
+		dli_rm_softcode
+			(
+			<include refid="columns"/>
+			)
+		values
+			(
+			#{id},
+			#{created},
+			#{createdby},
+			#{updated},
+			#{updatedby},
+			#{name},
+			#{value}
+			)
+		
+	</insert>
+	
+	<update id="update" parameterType="com.winit.label.manager.impl.gb.royalmail.RoyalMailSoftCode">
+		update 
+			dli_rm_softcode
+		set
+			updated = #{updated},
+			updatedby = #{updatedby},
+			name = #{name},
+			value = #{value}
+		where 
+			id=#{id}
+	</update>
+
+	<select id="getSoftCode" parameterType="java.lang.String" resultType="java.lang.String">
+		select *
+		  from dli_rm_softcode t
+		 where #{postcode} like CONCAT(name, '%')
+		 order by name desc limit 0,1
+	</select>
+	
+</mapper>

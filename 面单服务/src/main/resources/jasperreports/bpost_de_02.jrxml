@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="bpost_de" language="groovy" pageWidth="432" pageHeight="288" orientation="Landscape" columnWidth="392" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="5a9c7a15-567b-4cb7-aa62-f38a3ee0fbd3">
+	<property name="ireport.zoom" value="1.771561000000001"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="33"/>
+	<import value="org.apache.commons.codec.binary.Base64"/>
+	<parameter name="documentNo" class="java.lang.String">
+		<parameterDescription><![CDATA[出库单号]]></parameterDescription>
+	</parameter>
+	<parameter name="senderName" class="java.lang.String"/>
+	<parameter name="senderAddressLine1" class="java.lang.String"/>
+	<parameter name="senderTown" class="java.lang.String"/>
+	<parameter name="senderPostcode" class="java.lang.String"/>
+	<parameter name="NAME" class="java.lang.String"/>
+	<parameter name="ADDRESS" class="java.lang.String"/>
+	<parameter name="POSTAL" class="java.lang.String"/>
+	<parameter name="CITY" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<detail>
+		<band height="248" splitType="Stretch">
+			<textField>
+				<reportElement uuid="db8006b4-e9ac-4731-ad1e-3eec188c3b65" x="13" y="15" width="162" height="20"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{senderName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="41c483da-f05d-45fc-b710-9c4b6ee9ee07" x="13" y="34" width="162" height="20"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{senderAddressLine1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="d8b26e7d-0178-45bd-bd97-aa6c5a29dd47" x="13" y="53" width="162" height="19"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{senderPostcode} + " "+$P{senderTown}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="8e23359a-4d77-46b6-adcd-e6567f74988a" x="13" y="71" width="162" height="20"/>
+				<textElement>
+					<font size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{documentNo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="300857be-646e-4b87-8904-8b663c90fd7b" x="237" y="146" width="140" height="20"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{NAME}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement uuid="25b5674e-eeb0-4aef-9b1a-6786172e27c0" x="237" y="165" width="140" height="71"/>
+				<textElement>
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ADDRESS} + '\n' + $P{POSTAL} + ' ' +$P{CITY}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

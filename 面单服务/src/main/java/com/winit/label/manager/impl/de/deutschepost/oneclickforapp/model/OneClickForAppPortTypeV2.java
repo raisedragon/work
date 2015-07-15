@@ -1,0 +1,21 @@
+/**
+ * OneClickForAppPortTypeV2.java
+ *
+ * This file was auto-generated from WSDL
+ * by the Apache Axis 1.4 Apr 22, 2006 (06:55:48 PDT) WSDL2Java emitter.
+ */
+
+package com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model;
+
+public interface OneClickForAppPortTypeV2 extends java.rmi.Remote {
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.GalleryItem[] retrievePublicGallery(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrievePublicGalleryRequestType parameter) throws java.rmi.RemoteException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.ShoppingCartResponseType checkoutShoppingCartPDF(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.ShoppingCartPDFRequestType parameter) throws java.rmi.RemoteException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.ShoppingCartValidationException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.IdentifyException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.ShoppingCartResponseType checkoutShoppingCartPNG(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.ShoppingCartPNGRequestType parameter) throws java.rmi.RemoteException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.ShoppingCartValidationException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.IdentifyException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.AuthenticateUserResponseType authenticateUser(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.AuthenticateUserRequestType parameter) throws java.rmi.RemoteException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.AuthenticateUserException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrievePreviewVoucherResponseType retrievePreviewVoucherPDF(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrievePreviewVoucherPDFRequestType parameter) throws java.rmi.RemoteException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.InvalidProductException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.InvalidPageFormatException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.InvalidMotiveException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrievePreviewVoucherResponseType retrievePreviewVoucherPNG(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrievePreviewVoucherPNGRequestType parameter) throws java.rmi.RemoteException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.InvalidProductException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.InvalidMotiveException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.MotiveLink[] retrievePrivateGallery(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrievePrivateGalleryRequestType parameter) throws java.rmi.RemoteException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.IdentifyException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrieveOrderResponseType retrieveOrder(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrieveOrderRequestType parameter) throws java.rmi.RemoteException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.IdentifyException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrieveOrderException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.CreateShopOrderIdResponse createShopOrderId(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.CreateShopOrderIdRequest createShopOrderIdRequest) throws java.rmi.RemoteException, com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.IdentifyException;
+    public com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.PageFormat[] retrievePageFormats(com.winit.label.manager.impl.de.deutschepost.oneclickforapp.model.RetrievePageFormatsRequestType parameter) throws java.rmi.RemoteException;
+}

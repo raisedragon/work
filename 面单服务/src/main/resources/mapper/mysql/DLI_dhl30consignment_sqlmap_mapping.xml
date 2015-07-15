@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.manager.impl.de.dhl30.Dhl30Consignment">
+
+	<resultMap id="resultMap"
+		type="com.winit.label.manager.impl.de.dhl30.Dhl30Consignment">
+		<result column="id" property="id" />
+		<result column="created" property="created" />
+		<result column="createdby" property="createdby" />
+		<result column="updated" property="updated" />
+		<result column="updatedby" property="updatedby" />
+		<result column="country" property="country" />
+		<result column="postal" property="postal" />
+		<result column="shuttlesonder" property="shuttlesonder" />
+		<result column="leitgebiet" property="leitgebiet" />
+		<result column="terminal" property="terminal" />
+		<result column="tour" property="tour" />
+		<result column="branchcode" property="branchcode" />
+	</resultMap>
+
+	<sql id="columns">
+		id,
+		created,
+		createdby,
+		updated,
+		updatedby,
+		country,
+		postal,
+		shuttlesonder,
+		leitgebiet,
+		terminal,
+		tour,
+		branchcode
+	</sql>
+
+	<insert id="insert"
+		parameterType="com.winit.label.manager.impl.de.dhl30.Dhl30Consignment">
+		insert into
+		DLI_DHL_CONSIGNMENT
+		(
+		<include refid="columns" />
+		)
+		values
+		(
+		#{id},
+		#{created},
+		#{createdby},
+		#{updated},
+		#{updatedby},
+		#{country},
+		#{postal},
+		#{shuttlesonder},
+		#{leitgebiet},
+		#{terminal},
+		#{tour},
+		#{branchcode}
+		)
+
+	</insert>
+
+	<update id="update"
+		parameterType="com.winit.label.manager.impl.de.dhl30.Dhl30Consignment">
+		update
+		DLI_DHL_CONSIGNMENT
+		set
+		updated = #{updated},
+		updatedby = #{updatedby},
+		country = #{country},
+		postal = #{postal},
+		shuttlesonder = #{shuttlesonder},
+		leitgebiet = #{leitgebiet},
+		terminal = #{terminal},
+		tour = #{tour},
+		branchcode = #{branchcode}
+		where
+		id=#{id}
+	</update>
+
+
+	<select id="getConsignmentByCountryAndPostcode" parameterType="java.util.Map"
+		resultMap="resultMap">
+		<![CDATA[
+		select
+		*
+		from
+		DLI_DHL_CONSIGNMENT
+		where
+		country=#{country}
+		and postal=#{postal}
+		and length(postal) <= length(#{postal})
+		and BranchCode in (#{winitBranchCode},#{defaultBranchCode})
+		order by
+		postal desc, BranchCode desc
+		limit 0,1
+		]]>
+	</select>
+
+	<select id="getConsignmentByCountry" parameterType="java.util.Map"
+		resultMap="resultMap">
+		select
+		*
+		from
+		DLI_DHL_CONSIGNMENT
+		where
+		country=#{country}
+		and BranchCode in (#{winitBranchCode},#{defaultBranchCode})
+		order by
+		BranchCode desc
+		limit 0,1
+	</select>
+
+	<select id="getStartPostcode" parameterType="java.util.Map"
+		resultType="java.lang.String">
+		<![CDATA[
+		select
+		max(postal)
+		from
+		wt_consignment
+		where
+		country=#{country}
+		and postal<=#{postal}
+		and length(postal)<=#{postal}
+		]]>
+	</select>
+
+</mapper>

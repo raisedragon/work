@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.manager.impl.gb.yodel.YodelService">
+
+	<resultMap id="resultMap" type="com.winit.label.manager.impl.gb.yodel.YodelService">
+		<result column="id" property="id"/>
+		<result column="created" property="created"/>
+		<result column="createdBy" property="createdBy"/>
+		<result column="updated" property="updated"/>
+		<result column="updatedBy" property="updatedBy"/>
+		<result column="serviceId" property="serviceId"/>
+		<result column="serviceDescription" property="serviceDescription"/>
+		<result column="productLine1" property="productLine1"/>
+		<result column="productLine2" property="productLine2"/>
+		<result column="productCode" property="productCode"/>
+		<result column="dateCode" property="dateCode"/>
+		<result column="dayText" property="dayText"/>
+		<result column="timeCode" property="timeCode"/>
+		<result column="timeText" property="timeText"/>
+		<result column="serviceCode" property="serviceCode"/>
+		<result column="featureId" property="featureId"/>
+		<result column="featureCode" property="featureCode"/>
+		<result column="fileType" property="fileType"/>
+		<result column="consignmentFlag" property="consignmentFlag"/>
+		<result column="dsFlag" property="dsFlag"/>
+		<result column="filler" property="filler"/>
+		<result column="version" property="version"/>
+	</resultMap>
+	
+	<sql id="columns">
+		id,
+		created,
+		createdBy,
+		updated,
+		updatedBy,
+		serviceId,
+		serviceDescription,
+		productLine1,
+		productLine2,
+		productCode,
+		dateCode,
+		dayText,
+		timeCode,
+		timeText,
+		serviceCode,
+		featureId,
+		featureCode,
+		fileType,
+		consignmentFlag,
+		dsFlag,
+		filler,
+		version
+	</sql>
+	
+	<insert id="insert" parameterType="com.winit.label.manager.impl.gb.yodel.YodelService">
+		insert into 
+		dli_yodel_YodelService
+			(
+				<include refid="columns"/>
+			)
+		values
+			(
+				#{id},
+				#{created},
+				#{createdBy},
+				#{updated},
+				#{updatedBy},
+				#{serviceId},
+				#{serviceDescription},
+				#{productLine1},
+				#{productLine2},
+				#{productCode},
+				#{dateCode},
+				#{dayText},
+				#{timeCode},
+				#{timeText},
+				#{serviceCode},
+				#{featureId},
+				#{featureCode},
+				#{fileType},
+				#{consignmentFlag},
+				#{dsFlag},
+				#{filler},
+				#{version}
+			)
+		
+	</insert>
+	
+	<update id="update" parameterType="com.winit.label.manager.impl.gb.yodel.YodelService">
+		update 
+			dli_yodel_YodelService
+		set
+			updated=#{updated},
+			updatedBy=#{updatedBy},
+			serviceId=#{serviceId},
+			serviceDescription=#{serviceDescription},
+			productLine1=#{productLine1},
+			productLine2=#{productLine2},
+			productCode=#{productCode},
+			dateCode=#{dateCode},
+			dayText=#{dayText},
+			timeCode=#{timeCode},
+			timeText=#{timeText},
+			serviceCode=#{serviceCode},
+			featureId=#{featureId},
+			featureCode=#{featureCode},
+			fileType=#{fileType},
+			consignmentFlag=#{consignmentFlag},
+			dsFlag=#{dsFlag},
+			filler=#{filler},
+			version=#{version}
+		where 
+			id=#{id}
+	</update>
+
+	<select id="getByServiceIdAndVersion" parameterType="Map" resultMap="resultMap">
+		select 
+			* 
+		from 
+			dli_yodel_YodelService
+		where 
+			serviceId = #{serviceId}
+			and	version = #{version}
+	</select>
+	
+	
+	
+	<select id="getByServiceCodeAndVersion" parameterType="Map" resultMap="resultMap">
+		select 
+			* 
+		from 
+			dli_yodel_YodelService
+		where 
+			serviceCode = #{serviceCode}
+			and	version = #{version}
+	</select>
+
+	<select id="getByProductCodeAndFeatureCode" parameterType="Map" resultMap="resultMap">
+		select 
+			* 
+		from 
+			dli_yodel_YodelService
+		where 
+			ProductCode = #{productCode}
+			and featureCode = #{featureCode}
+			and	version = #{version}
+	</select>
+	
+</mapper>

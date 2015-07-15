@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.model.SysConfig">
+
+	<resultMap id="sysConfigMap" type="com.winit.label.model.SysConfig">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="value" property="value"/>
+	</resultMap>
+	
+	<sql id="columns">
+		id,
+		name,
+		value
+	</sql>
+	
+	<insert id="insert" parameterType="com.winit.label.model.SysConfig">
+		insert into 
+		wt_sysconfig
+			(
+			name,
+			value
+			)
+		values
+			(
+			#{name},
+			#{value}
+			)
+		
+	</insert>
+	
+	<update id="update" parameterType="com.winit.label.model.SysConfig">
+		update 
+			wt_sysconfig
+		set
+			name=#{name},
+			value=#{value}
+		where 
+			id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="String">
+		delete from 
+			wt_sysconfig
+		where 
+			id=#{id}
+	</delete>
+	
+	 <select id="selectById" parameterType="String" resultMap="sysConfigMap">
+    	select 
+    		id,name,value 
+    	from 
+    		wt_sysconfig 
+    	where 
+    		id=#{id}
+    </select>
+    
+    <select id="selectByName" parameterType="String" resultMap="sysConfigMap">
+    	select 
+    		id,name,value 
+    	from 
+    		wt_sysconfig 
+    	where 
+    		name=#{name}
+    </select>
+    
+    
+     
+    <select id="selectAll" resultMap="sysConfigMap">
+    	select 
+    		id,name,value 
+    	from 
+    		wt_sysconfig 
+    </select>
+    
+    <select id="selectByQueryCriteria"  resultMap="sysConfigMap" parameterType="com.winit.label.query.SysConfigQuery">
+    	select <include refid="columns"/>
+    	<include refid="selectByQueryCriteriaSql"/>
+    </select>
+    
+   	<sql id="selectByQueryCriteriaSql">
+	    from wt_sysconfig RES 
+	    <where>
+	      <if test="idEqual != null">
+	        RES.ID = #{id}
+	      </if>
+	      <if test="nameEqual != null">
+	        and RES.name = #{nameEqual}
+	      </if>
+	      <if test="nameLike != null">
+	        and RES.name like #{nameLike}
+	      </if>
+	      <if test="valueEqual != null">
+	        and RES.value = #{valueEqual}
+	      </if>
+	      <if test="valueLike != null">
+	        and RES.value like #{valueLike}
+	      </if>
+	    </where>
+	</sql>
+</mapper>

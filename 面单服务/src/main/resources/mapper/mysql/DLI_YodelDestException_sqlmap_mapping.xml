@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.manager.impl.gb.yodel.YodelDestException">
+
+	<resultMap id="resultMap" type="com.winit.label.manager.impl.gb.yodel.YodelDestException">
+		<result column="id" property="id"/>
+		<result column="created" property="created"/>
+		<result column="createdBy" property="createdBy"/>
+		<result column="updated" property="updated"/>
+		<result column="updatedBy" property="updatedBy"/>
+		<result column="countryCode" property="countryCode"/>
+		<result column="city" property="city"/>
+		<result column="state" property="state"/>
+		<result column="fromPostcode" property="fromPostcode"/>
+		<result column="toPostcode" property="toPostcode"/>
+		<result column="productCode" property="productCode"/>
+		<result column="featureCode" property="featureCode"/>
+		<result column="version" property="version"/>
+	</resultMap>
+	
+	<sql id="columns">
+		id,
+		created,
+		createdBy,
+		updated,
+		updatedBy,
+		countryCode,
+		city,
+		state,
+		fromPostcode,
+		toPostcode,
+		productCode,
+		featureCode,
+		version
+	</sql>
+	
+	<insert id="insert" parameterType="com.winit.label.manager.impl.gb.yodel.YodelDestException">
+		insert into 
+		dli_Yodel_DestException
+			(
+			<include refid="columns"/>
+			)
+		values
+			(
+			#{id},
+			#{created},
+			#{createdBy},
+			#{updated},
+			#{updatedBy},
+			#{countryCode},
+			#{city},
+			#{state},
+			#{fromPostcode},
+			#{toPostcode},
+			#{productCode},
+			#{featureCode},
+			#{version}
+			)
+		
+	</insert>
+	
+	<update id="update" parameterType="com.winit.label.manager.impl.gb.yodel.YodelDestException">
+		update 
+			dli_Yodel_DestException
+		set
+			updated=#{updated},
+			updatedBy=#{updatedBy},
+			countryCode=#{countryCode},
+			city=#{city},
+			state=#{state},
+			fromPostcode=#{fromPostcode},
+			toPostcode=#{toPostcode},
+			productCode=#{productCode},
+			featureCode=#{featureCode},
+			version=#{version}
+		where 
+			id=#{id}
+	</update>
+
+	<select id="getByProductCodeAndVersion" resultMap="resultMap" parameterType="Map">
+				select
+					 * 
+				from 
+					DLI_Yodel_DestException
+				where
+				 ProductCode= #{productCode}
+				 and FeatureCode=#{featureCode}
+				 and  CountryCode=#{countryCode}
+				 and #{postcode} between FromPostcode  and  ToPostCode+
+				 and length(#{postcode}) between length(FromPostcode ) and length( ToPostCode )
+				 and Version=#{version}
+				limit 0,1
+	</select>
+	
+
+</mapper>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.manager.impl.gb.yodel.YodelDestPrdServices">
+
+	<resultMap id="resultMap" type="com.winit.label.manager.impl.gb.yodel.YodelDestPrdServices">
+		<result column="id" property="id"/>
+		<result column="created" property="created"/>
+		<result column="createdBy" property="createdBy"/>
+		<result column="updated" property="updated"/>
+		<result column="updatedBy" property="updatedBy"/>
+		<result column="serviceCtrReamusId" property="serviceCtrReamusId"/>
+		<result column="productCode" property="productCode"/>
+		<result column="featureCode" property="featureCode"/>
+		<result column="allowed" property="allowed"/>
+		<result column="version" property="version"/>
+	</resultMap>
+	
+	<sql id="columns">
+		id,
+		created,
+		createdBy,
+		updated,
+		updatedBy,
+		serviceCtrReamusId,
+		productCode,
+		featureCode,
+		allowed,
+		version
+	</sql>
+	
+	<insert id="insert" parameterType="com.winit.label.manager.impl.gb.yodel.YodelDestPrdServices">
+		insert into 
+		dli_Yodel_DestPrdServices
+			(
+			<include refid="columns"/>
+			)
+		values
+			(
+			#{id},
+			#{created},
+			#{createdBy},
+			#{updated},
+			#{updatedBy},
+			#{serviceCtrReamusId},
+			#{productCode},
+			#{featureCode},
+			#{allowed},
+			#{version}
+			)
+		
+	</insert>
+	
+	<update id="update" parameterType="com.winit.label.manager.impl.gb.yodel.YodelDestPrdServices">
+		update 
+			dli_Yodel_DestPrdServices
+		set
+			updated=#{updated},
+			updatedBy=#{updatedBy},
+			serviceCtrReamusId=#{serviceCtrReamusId},
+			productCode=#{productCode},
+			featureCode=#{featureCode},
+			allowed=#{allowed},
+			version=#{version}
+		where 
+			id=#{id}
+	</update>
+
+	<select id="getByServiceCtrReamusID" resultMap="resultMap" parameterType="Map">
+		select 
+			* 
+		from		
+			dli_Yodel_DestPrdServices
+		where 
+			ServiceCtrReamusID=#{serviceCtrReamusID}
+			 and ProductCode=#{productCode}
+			 and Version=#{version}
+	
+	</select>
+	
+</mapper>

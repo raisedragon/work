@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.db.mysql.MySQLSequenceGenerator">
+
+	<select id="nextVal" resultType="long" parameterType="String">
+		select nextval(#{seqKey}) as val;
+	</select>
+	
+	<select id="currVal" resultType="long" parameterType="String">
+		select currval(#{seqKey}) as val;
+	</select>
+	
+	<select id="setVal" resultType="long" parameterType="Map">
+		select setval(#{seqKey},#{value}) as val;
+	</select>
+</mapper>

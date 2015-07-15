@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.winit.label.model.Label">
+	<resultMap type="com.winit.label.model.Label" id="LabelResult">
+		<id column="id" property="id" jdbcType="NUMERIC"/>
+		<result column="created"  property="created"  jdbcType="TIMESTAMP"/>
+		<result column="documentNo" property="documentNo" jdbcType="VARCHAR"/>
+		<result column="trackingNo"  property="trackingNo"  jdbcType="VARCHAR"/>
+		<result column="fileCode"  property="fileCode"  jdbcType="CLOB"/>
+		<result column="status"  property="status"  jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<sql id ="allColumn">
+		id,created,documentNo,trackingNo,fileCode,status
+	</sql>
+	
+ 	<sql id="labelColume">
+        <trim suffix="" suffixOverrides=",">
+            <if test="documentNo != null">
+                documentNo,
+            </if>
+            <if test="trackingNo != null">
+                trackingNo,
+            </if>
+            <if test="fileCode != null">
+                fileCode,
+            </if>
+             <if test="status != null">
+                status,
+            </if>
+            <if test="created != null">
+                created,
+            </if>
+        </trim>
+    </sql>
+    <sql id="labelValue">
+        <trim suffix="" suffixOverrides=",">
+            <if test="documentNo != null">
+                #{documentNo},
+            </if>
+            <if test="trackingNo != null">
+                #{trackingNo},
+            </if>
+            <if test="fileCode != null">
+                #{fileCode},
+            </if>
+             <if test="status != null">
+                #{status},
+            </if>
+            <if test="created != null">
+                #{created},
+            </if>
+        </trim>
+    </sql>  	
+    
+    <!-- 新增轨迹 -->
+    <insert id="addLabel" parameterType="Label">
+    	insert into wt_label (
+    		<include refid="labelColume"/>
+    	) values (
+    		<include refid="labelValue"/> 	
+    	)
+   	</insert>
+   	
+   <insert id="updateLabel" parameterType="Label">
+    	update 
+    		wt_label 
+    	set 
+    		trackingNo=#{trackingNo},
+    		fileCode=#{fileCode},
+    		status=#{status}
+   	</insert>
+    
+    <select id="queryLabelByMap" parameterType="map" resultMap="LabelResult">
+    	select <include refid="allColumn"/> from wt_label
+    	<where>
+    		<if test="documentNo!=null">
+    			and documentNo = #{documentNo}
+    		</if>
+    		<if test="trackingNo!=null">
+    			and trackingNo = #{trackingNo}
+    		</if>
+    		<if test="status!=null">
+    			and status = #{status}
+    		</if>
+    	</where>
+    </select>
+    
+</mapper>
